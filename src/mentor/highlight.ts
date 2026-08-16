@@ -16,15 +16,17 @@ const NUMBER =
 const PREPROC =
   /^(\s*#\s*(?:include|define|ifdef|ifndef|endif|else|pragma|undef|if)\b[^\n]*)/;
 
-/** 한 줄 하이라이트 (주석/문자열은 플레이스홀더로 보호 후 복원) */
+/** 한 줄 하이라이트 (주석/문자열/지시문은 플레이스홀더로 보호 후 복원) */
 export function highlightLine(line: string): string {
   let s = escapeHtml(line);
   const holders: string[] = [];
 
+  // 플레이스홀더는 `\u0000x{index}y\u0000` 형식: 숫자 양옆의 `x`/`y`(워드 문자) 덕분에
+  // NUMBER의 `\b\d+\b`가 인덱스 숫자에 매치하지 않는다(워드 경계 없음). KEYWORDS/PREPROC도 매치 불가.
   const stash = (re: RegExp, cls: string) => {
     s = s.replace(re, (m) => {
       holders.push(`<span class="${cls}">${m}</span>`);
-      return `\u0000${holders.length - 1}\u0000`;
+      return `\u0000x${holders.length - 1}y\u0000`;
     });
   };
 
@@ -32,11 +34,14 @@ export function highlightLine(line: string): string {
   stash(/\/\/.*$/g, 'text-slate-500 italic');
   stash(/("(?:\\.|[^"\\])*")/g, 'text-amber-300');
   stash(/('(?:\\.|[^'\\])*')/g, 'text-amber-300');
-  s = s.replace(PREPROC, '<span class="text-fuchsia-400">$1</span>');
+  // 지시문도 스태시: NUMBER/KEYWORDS가 생성된 클래스명(예: text-fuchsia-400의 "400")을 훼손하지 못하게 한다.
+  stash(PREPROC, 'text-fuchsia-400');
   s = s.replace(NUMBER, '<span class="text-sky-300">$1</span>');
   s = s.replace(KEYWORDS, '<span class="text-violet-300">$1</span>');
-  s = s.replace(/\u0000(\d+)\u0000/g, (_, i: string) => holders[Number(i)]);
-  return s;
+  // 지시문 안의 문자열/주석(중첩 플레이스홀더)까지 재귀적으로 복원
+  const resolve = (t: string): string =>
+    t.replace(/\u0000x(\d+)y\u0000/g, (_, i: string) => resolve(holders[Number(i)] ?? ''));
+  return resolve(s);
 }
 
 /** 에디터 전체 HTML: 컴파일 오류/경고 라인 배경 표시 포함 */

@@ -193,6 +193,58 @@ const ADVICE: Record<string, AdviceSet> = {
   },
 };
 
+/* ---------- 경쟁력 등급 컷오프 ---------- */
+export interface GradeStep {
+  label: string;
+  min: number;
+  color: string;
+  gradeNote: string;
+  summary: string;
+}
+
+/** 등급 컷오프 상수 — 점수 내림차순, total >= min 인 첫 단계가 해당 등급 */
+export const GRADE_STEPS: GradeStep[] = [
+  {
+    label: 'A — 상위 경쟁력',
+    min: 85,
+    color: 'text-emerald-300',
+    gradeNote: '경쟁력이 우수합니다. 지원 대학의 상위권(동일계열 최상위 NC 충족)까지 노려볼 수 있는 프로파일입니다.',
+    summary: '남은 작업은 "정밀화"입니다: 자기소개서를 대학별로 커스터마이즈하고, 프로젝트 문서의 완성도를 100%로 끌어올린 뒤 면접 발표 연습에 집중하세요.',
+  },
+  {
+    label: 'B — 경쟁력 있음',
+    min: 70,
+    color: 'text-sky-300',
+    gradeNote: '경쟁력이 있습니다. 목표 대학 2~3곳은 안정 지원권입니다.',
+    summary: '약점 지표를 하나씩 끌어올리면 상위권 도전이 가능합니다. 특히 독일어와 산업 경력은 국내 지원자의 공통 약점이므로 보완 시 차별화 효과가 큽니다.',
+  },
+  {
+    label: 'C — 보완 필요',
+    min: 55,
+    color: 'text-amber-300',
+    gradeNote: '기본기는 있으나 서류 통과를 위해서는 약점 보완이 필요합니다.',
+    summary: '프로젝트 포트폴리오를 3개 이상으로 확충하고, 언어 성적을 확보하는 것이 최우선입니다. 로드맵 탭의 D-15개월 계획대로 진행하세요.',
+  },
+  {
+    label: 'D — 집중 보완 필요',
+    min: 40,
+    color: 'text-orange-300',
+    gradeNote: '지원 전까지 준비 기간을 충분히 확보해야 합니다.',
+    summary: '최소 12~18개월의 준비 기간을 두고, 프로젝트 → 언어 → 서류 순서로 단계적으로 진행하세요. 목표 대학을 영어 프로그램 위주로 낮춰 잡는 것도 전략입니다.',
+  },
+  {
+    label: 'E — 전략 재설계 필요',
+    min: 0,
+    color: 'text-rose-300',
+    gradeNote: '현재 상태로는 합격 가능성이 낮습니다. 아래 약점부터 집중 보완하세요.',
+    summary: '1년 반 이상의 준비 기간을 두고 진단 항목을 하나씩 개선하세요. 이 앱의 생성기·로드맵·코드 랩을 매주 활용하면 충분히 역전 가능합니다.',
+  },
+];
+
+export function gradeStepForTotal(total: number): GradeStep {
+  return GRADE_STEPS.find((s) => total >= s.min) ?? GRADE_STEPS[GRADE_STEPS.length - 1];
+}
+
 export function computeDiagnosis(
   savedProjects: Project[],
   picks: Partial<Record<DiagKey, number | null>>
@@ -212,30 +264,10 @@ export function computeDiagnosis(
   const wSum = answered.reduce((a, d) => a + d.weight, 0);
   const total = wSum > 0 ? Math.round(answered.reduce((a, d) => a + d.pts * d.weight * 20, 0) / wSum) : 0;
 
-  let grade = 'E — 전략 재설계 필요';
-  let gradeNote = '현재 상태로는 합격 가능성이 낮습니다. 아래 약점부터 집중 보완하세요.';
-  let summary = '';
-  if (total >= 85) {
-    grade = 'A — 상위 경쟁력';
-    gradeNote = '경쟁력이 우수합니다. 지원 대학의 상위권(동일계열 최상위 NC 충족)까지 노려볼 수 있는 프로파일입니다.';
-    summary = '남은 작업은 "정밀화"입니다: 자기소개서를 대학별로 커스터마이즈하고, 프로젝트 문서의 완성도를 100%로 끌어올린 뒤 면접 발표 연습에 집중하세요.';
-  } else if (total >= 70) {
-    grade = 'B — 경쟁력 있음';
-    gradeNote = '경쟁력이 있습니다. 목표 대학 2~3곳은 안정 지원권입니다.';
-    summary = '약점 지표를 하나씩 끌어올리면 상위권 도전이 가능합니다. 특히 독일어와 산업 경력은 국내 지원자의 공통 약점이므로 보완 시 차별화 효과가 큽니다.';
-  } else if (total >= 55) {
-    grade = 'C — 보완 필요';
-    gradeNote = '기본기는 있으나 서류 통과를 위해서는 약점 보완이 필요합니다.';
-    summary = '프로젝트 포트폴리오를 3개 이상으로 확충하고, 언어 성적을 확보하는 것이 최우선입니다. 로드맵 탭의 D-15개월 계획대로 진행하세요.';
-  } else if (total >= 40) {
-    grade = 'D — 집중 보완 필요';
-    gradeNote = '지원 전까지 준비 기간을 충분히 확보해야 합니다.';
-    summary = '최소 12~18개월의 준비 기간을 두고, 프로젝트 → 언어 → 서류 순서로 단계적으로 진행하세요. 목표 대학을 영어 프로그램 위주로 낮춰 잡는 것도 전략입니다.';
-  } else {
-    grade = 'E — 전략 재설계 필요';
-    gradeNote = '현재 상태로는 합격 가능성이 낮습니다. 아래 약점부터 집중 보완하세요.';
-    summary = '1년 반 이상의 준비 기간을 두고 진단 항목을 하나씩 개선하세요. 이 앱의 생성기·로드맵·코드 랩을 매주 활용하면 충분히 역전 가능합니다.';
-  }
+  const step = gradeStepForTotal(total);
+  const grade = step.label;
+  const gradeNote = step.gradeNote;
+  const summary = step.summary;
 
   const weaknesses: Weakness[] = dims
     .filter((d) => d.pts <= 3)

@@ -397,7 +397,7 @@ export default function SerialLab({ project }: SerialLabProps) {
                   <>
                     <line x1="30" y1={plot.thY} x2={PLOT_W - 10} y2={plot.thY} stroke="#f87171" strokeWidth="1" strokeDasharray="5 5" />
                     <text x={PLOT_W - 90} y={plot.thY - 4} fill="#f87171" fontSize="10" fontFamily="monospace">
-                      threshold {threshold}
+                      임계값 {threshold}
                     </text>
                   </>
                 )}

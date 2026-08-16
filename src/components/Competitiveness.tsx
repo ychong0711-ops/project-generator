@@ -3,6 +3,7 @@ import type { Project } from '../types';
 import {
   DIAG_META,
   DIAG_OPTIONS,
+  GRADE_STEPS,
   computeDiagnosis,
   projectPts,
   type DiagKey,
@@ -109,10 +110,8 @@ function Diagnosis({ savedProjects }: { savedProjects: Project[] }) {
   const select = (key: DiagKey, pts: number) => setPicks((prev) => ({ ...prev, [key]: pts }));
 
   const gradeColor =
-    result.total >= 85 ? 'text-emerald-300' :
-    result.total >= 70 ? 'text-sky-300' :
-    result.total >= 55 ? 'text-amber-300' :
-    result.total >= 40 ? 'text-orange-300' : 'text-rose-300';
+    GRADE_STEPS.find((s) => result.total >= s.min)?.color ??
+    GRADE_STEPS[GRADE_STEPS.length - 1].color;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_1fr]">

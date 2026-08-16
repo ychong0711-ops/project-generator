@@ -1205,7 +1205,7 @@ class CInterpreter {
     if (op === '++' || op === '--') {
       const lv = this.evalLVal(e.e);
       const cur = this.readLValNum(lv);
-      this.writeLValNum(lv, cur + (op === '++' ? 1 : -1));
+      this.writeLValNum(lv, cur + (op === '++' ? 1 : -1), e.line);
       return cur + (op === '++' ? 1 : -1);
     }
     const v = this.evalNum(e.e);
@@ -1218,7 +1218,7 @@ class CInterpreter {
   evalPost(e: Extract<ExprNode, { k: 'post' }>): number {
     const lv = this.evalLVal(e.e);
     const cur = this.readLValNum(lv);
-    this.writeLValNum(lv, cur + (e.op === '++' ? 1 : -1));
+    this.writeLValNum(lv, cur + (e.op === '++' ? 1 : -1), e.line);
     return cur;
   }
   evalIdx(e: Extract<ExprNode, { k: 'idx' }>): Val {
@@ -1268,24 +1268,27 @@ class CInterpreter {
     if (!c || c.kind !== 'num') return 0;
     return c.ptr ? 0 : c.n;
   }
-  writeLValNum(lv: { cell: Cell; idx?: number }, v: number) {
+  writeLValNum(lv: { cell: Cell; idx?: number }, v: number, line: number) {
     if (lv.idx === undefined) {
       lv.cell.n = v;
       lv.cell.ptr = null;
       return;
     }
-    const c = lv.cell.arr?.[lv.idx];
-    if (c) {
-      c.n = v;
-      c.ptr = null;
-    }
+    const arr = lv.cell.arr;
+    if (!arr)
+      throw new CError(line, '배열이 아닌 값에 인덱스 쓰기');
+    if (lv.idx < 0 || lv.idx >= arr.length)
+      throw new CError(line, `배열 인덱스 범위 초과: ${lv.idx} (배열 크기 ${arr.length})`);
+    const c = arr[lv.idx];
+    c.n = v;
+    c.ptr = null;
   }
   evalAssign(e: Extract<ExprNode, { k: 'assign' }>): Val {
     const lv = this.evalLVal(e.l);
     const rv = this.evalExpr(e.r);
     if (e.op === '=') {
       if (typeof rv === 'number') {
-        this.writeLValNum(lv, rv);
+        this.writeLValNum(lv, rv, e.line);
         return rv;
       }
       if (lv.idx === undefined && lv.cell.kind === 'num') {
@@ -1307,7 +1310,7 @@ class CInterpreter {
       case '%=': out = Math.trunc(cur) % Math.trunc(n); break;
       case '^=': out = Math.trunc(cur) ^ Math.trunc(n); break;
     }
-    this.writeLValNum(lv, out);
+    this.writeLValNum(lv, out, e.line);
     return out;
   }
 

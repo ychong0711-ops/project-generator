@@ -430,6 +430,55 @@ int main(void) {
     expect(r.error!.message).toContain("2차원 배열");
   });
 
+  it("배열 인덱스 범위 초과 대입: ok=false, error.line 포함", () => {
+    const r = runC(`
+int main(void) {
+    int a[3];
+    a[5] = 1;
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.error).toBeDefined();
+    expect(r.error!.line).toBeGreaterThan(0);
+    expect(r.error!.message).toContain("배열 인덱스 범위 초과");
+  });
+
+  it("배열 음수 인덱스 대입: 오류 발생", () => {
+    const r = runC(`
+int main(void) {
+    int a[3];
+    a[-1] = 1;
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.error!.line).toBeGreaterThan(0);
+    expect(r.error!.message).toContain("배열 인덱스 범위 초과");
+  });
+
+  it("복합 대입(+=-)의 범위 초과: 오류 발생", () => {
+    const r = runC(`
+int main(void) {
+    int a[3];
+    a[10] += 5;
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.error!.line).toBeGreaterThan(0);
+    expect(r.error!.message).toContain("배열 인덱스 범위 초과");
+  });
+
+  it("증감(++)의 범위 초과: 오류 발생", () => {
+    const r = runC(`
+int main(void) {
+    int a[3];
+    a[10]++;
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.error!.line).toBeGreaterThan(0);
+    expect(r.error!.message).toContain("배열 인덱스 범위 초과");
+  });
+
   it("goto 거부", () => {
     const r = runC(`
 int main(void) { return 0; }

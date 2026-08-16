@@ -141,15 +141,27 @@ const CHECKLISTS: Record<string, CheckDef[]> = {
 
 const INCLUDES = ['#include <stdio.h>', '#include <stdint.h>', '#include <math.h>', '#include <string.h>'];
 
+/* 문자열/주석을 제거해 "코드만의 텍스트"를 만든다.
+ * - 문자열("...", '...') → 주석 순서로 제거해, 문자열 안의 "//" 나 "/*" 가 주석으로 오인되지 않게 한다.
+ * - 각 매치는 줄바꿈을 제외한 문자만 공백으로 치환하므로 코드 줄 번호(lineOf) 계산이 어긋나지 않는다. */
+function stripCommentsAndStrings(code: string): string {
+  const blank = (m: string) => m.replace(/[^\n]/g, ' ');
+  return code
+    .replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, blank)
+    .replace(/\/\/[^\n]*/g, blank)
+    .replace(/\/\*[\s\S]*?\*\//g, blank);
+}
+
 export function analyzeCode(code: string, projectId: string): CodeAnalysis {
   const issues: CodeIssue[] = [];
   const lines = code.split('\n');
   const text = code;
-  const hasInclude = (re: RegExp) => re.test(text);
+  const codeOnly = stripCommentsAndStrings(code);
+  const hasInclude = (re: RegExp) => re.test(codeOnly);
   const lineOf = (re: RegExp): number => {
-    const m = text.match(re);
+    const m = codeOnly.match(re);
     if (!m || m.index === undefined) return 1;
-    return text.slice(0, m.index).split('\n').length;
+    return codeOnly.slice(0, m.index).split('\n').length;
   };
 
   const push = (
@@ -161,25 +173,25 @@ export function analyzeCode(code: string, projectId: string): CodeAnalysis {
   ) => issues.push({ id: `is${issues.length}`, line, severity, title, detail, fixId });
 
   /* 1) 누락 헤더 */
-  if (/\b(printf|scanf|puts|sprintf|snprintf|fprintf)\s*\(/.test(text) && !hasInclude(/<stdio\.h>/))
+  if (/\b(printf|scanf|puts|sprintf|snprintf|fprintf)\s*\(/.test(codeOnly) && !hasInclude(/<stdio\.h>/))
     push(lineOf(/\b(printf|scanf|puts|sprintf|snprintf|fprintf)\s*\(/), 'error', 'stdio.h 누락', 'printf 계열 함수를 사용하려면 <stdio.h>가 필요합니다.', 'add-stdio');
-  if (/\b(u?int(8|16|32|64)_t)\b/.test(text) && !hasInclude(/<stdint\.h>/))
+  if (/\b(u?int(8|16|32|64)_t)\b/.test(codeOnly) && !hasInclude(/<stdint\.h>/))
     push(lineOf(/\bu?int(8|16|32|64)_t\b/), 'error', 'stdint.h 누락', '고정폭 정수형(uint8_t 등)은 <stdint.h>에서 제공됩니다.', 'add-stdint');
-  if (/\b(sin|cos|tan|sqrt|atan2|fabs|pow|exp|log|fmod)\s*\(/.test(text) && !hasInclude(/<math\.h>/))
+  if (/\b(sin|cos|tan|sqrt|atan2|fabs|pow|exp|log|fmod)\s*\(/.test(codeOnly) && !hasInclude(/<math\.h>/))
     push(lineOf(/\b(sin|cos|tan|sqrt|atan2|fabs|pow|exp|log|fmod)\s*\(/), 'warning', 'math.h 누락', '수학 함수는 <math.h>가 필요하며, gcc로 링크할 때 -lm 플래그를 추가하세요.', 'add-math');
-  if (/\b(memset|memcpy|strlen|strcpy|strcat|strcmp|memcmp|strncpy|strncmp)\s*\(/.test(text) && !hasInclude(/<string\.h>/))
+  if (/\b(memset|memcpy|strlen|strcpy|strcat|strcmp|memcmp|strncpy|strncmp)\s*\(/.test(codeOnly) && !hasInclude(/<string\.h>/))
     push(lineOf(/\b(memset|memcpy|strlen|strcpy|strcat|strcmp|memcmp|strncpy|strncmp)\s*\(/), 'warning', 'string.h 누락', '메모리/문자열 함수는 <string.h>에 선언되어 있습니다.', 'add-string');
 
   /* 2) 안전하지 않은 함수 */
-  if (/\bgets\s*\(/.test(text))
+  if (/\bgets\s*\(/.test(codeOnly))
     push(lineOf(/\bgets\s*\(/), 'error', '금지 함수 gets()', 'gets()는 버퍼 오버플로가 불가피해 C11에서 제거되었습니다. fgets(buf, size, stdin)를 사용하세요.');
-  if (/\b(strcpy|strcat)\s*\(/.test(text))
+  if (/\b(strcpy|strcat)\s*\(/.test(codeOnly))
     push(lineOf(/\b(strcpy|strcat)\s*\(/), 'warning', '버퍼 크기 미검증 복사', 'strcpy/strcat는 오버플로 위험이 있습니다. snprintf 또는 strncpy + 널 종료 처리를 사용하세요.');
 
   /* 3) main / 반환값 */
-  if (!/int\s+main\s*\(/.test(text))
+  if (!/int\s+main\s*\(/.test(codeOnly))
     push(1, 'error', 'main() 함수 없음', '독립 실행 파일(테스트 코드)이라면 int main(void) 진입점이 필요합니다.');
-  else if (!/return\s+/.test(text))
+  else if (!/return\s+/.test(codeOnly))
     push(lines.length, 'info', 'main의 반환문 없음', 'return 0;으로 정상 종료를 명시하면 빌드 도구와 CI가 결과를 검증하기 쉽습니다.');
 
   /* 4) 중괄호 균형 */
@@ -194,7 +206,7 @@ export function analyzeCode(code: string, projectId: string): CodeAnalysis {
   }
 
   /* 5) 0 나눗셈 리터럴 */
-  if (/\/\s*0(?![xX\d.])/.test(text))
+  if (/\/\s*0(?![xX\d.])/.test(codeOnly))
     push(lineOf(/\/\s*0(?![xX\d.])/), 'error', '0으로 나누는 식', '상수 0으로 나누는 코드는 런타임 오류/UB(미정의 동작)입니다. 분모 검사를 추가하세요.');
 
   /* 6) 초기화되지 않은 선언 */
@@ -208,13 +220,13 @@ export function analyzeCode(code: string, projectId: string): CodeAnalysis {
 
   /* 7) 매직 넘버 */
   {
-    const nums = text.match(/\b\d{2,}\b/g) ?? [];
+    const nums = codeOnly.match(/\b\d{2,}\b/g) ?? [];
     if (nums.length > 5)
       push(lines.length, 'info', `매직 넘버 ${nums.length}개 사용`, '의미 있는 상수는 #define 또는 enum으로 이름을 붙이면 가독성과 유지보수가 좋아집니다.');
   }
 
   /* 8) 무한 루프 */
-  if (/while\s*\(\s*1\s*\)|for\s*\(\s*;\s*;\s*\)/.test(text))
+  if (/while\s*\(\s*1\s*\)|for\s*\(\s*;\s*;\s*\)/.test(codeOnly))
     push(lineOf(/while\s*\(\s*1\s*\)|for\s*\(\s*;\s*;\s*\)/), 'info', '무한 루프 사용', 'MCU 메인 루프로 의도된 경우 주석으로 명시하고, 테스트 코드에서는 종료 조건이 있는지 확인하세요.');
 
   /* 9) 문서화 비율 */
@@ -268,7 +280,8 @@ export function analyzeQuality(code: string): { qualityScore: number; qualityIss
   const qualityIssues: QualityIssue[] = [];
   let q = 100;
   const lines = code.split('\n');
-  const text = code;
+  /* 문자열/주석에 들어있는 숫자·키워드(goto 등)가 진단에 잡히지 않도록 "코드만의 텍스트"를 사용한다. */
+  const codeOnly = stripCommentsAndStrings(code);
 
   const deduct = (rule: string, pts: number, message: string, severity: QualityIssue['severity'] = 'warning') => {
     q -= pts;
@@ -276,7 +289,7 @@ export function analyzeQuality(code: string): { qualityScore: number; qualityIss
   };
 
   /* 1) 매직 넘버 — 0/1/-1을 제외한 2자리 이상 숫자 리터럴 */
-  const magicNums = (text.match(/\b\d{2,}\b/g) ?? []).filter((n) => n !== '0' && n !== '1' && n !== '-1');
+  const magicNums = (codeOnly.match(/\b\d{2,}\b/g) ?? []).filter((n) => n !== '0' && n !== '1' && n !== '-1');
   if (magicNums.length > 3) {
     const uniq = [...new Set(magicNums)];
     deduct('magic-number', 2, `매직 넘버 ${magicNums.length}개 (${uniq.slice(0, 6).join(', ')}${uniq.length > 6 ? '…' : ''}) — 의미 있는 상수는 #define/const로 추출하세요.`);
@@ -325,7 +338,7 @@ export function analyzeQuality(code: string): { qualityScore: number; qualityIss
   }
 
   /* 4) goto 사용 */
-  if (/\bgoto\s+\w+/.test(text)) {
+  if (/\bgoto\s+\w+/.test(codeOnly)) {
     deduct('goto', 10, 'goto 문은 제어 흐름을 이해하기 어렵게 만듭니다. 구조적 흐름 제어로 대체하세요.');
   }
 
