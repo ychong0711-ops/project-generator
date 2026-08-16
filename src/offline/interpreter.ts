@@ -99,7 +99,8 @@ interface Tok {
 }
 
 const TYPE_WORDS = new Set([
-  'int', 'double', 'char', 'void', 'long', 'short', 'unsigned', 'signed', 'static', 'const',
+  'int', 'double', 'float', 'char', 'void', 'long', 'short', 'unsigned', 'signed',
+  'static', 'const', 'volatile', 'extern', 'register', 'inline',
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
   'int8_t', 'int16_t', 'int32_t', 'int64_t', 'size_t', 'bool',
 ]);
@@ -434,7 +435,7 @@ class CInterpreter {
       words.add(this.next().v);
     }
     if (words.size === 0) throw new CError(this.cur().line, '타입 키워드 필요');
-    if (words.has('double')) return 'double';
+    if (words.has('double') || words.has('float')) return 'double';
     if (words.has('void')) return 'void';
     if (words.has('char')) return 'char';
     return 'int';

@@ -497,6 +497,18 @@ int main(void) {
     expect(out).toBe("65 65\n");
   });
 
+  it("float / volatile 타입 키워드 지원", () => {
+    const out = okOutput(`
+float half(float v) { return v / 2; }
+int main(void) {
+    volatile int t = 3;
+    float x = 2.5;
+    printf("%.2f %.2f %d\\n", x, half(5.0), t);
+    return 0;
+}`);
+    expect(out).toBe("2.50 2.50 3\n");
+  });
+
   it("|= 와 &= 복합 대입", () => {
     const out = okOutput(`
 int main(void) {
