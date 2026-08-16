@@ -9,15 +9,15 @@ interface NavbarProps {
   savedCount: number;
 }
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'home', label: '홈' },
-  { id: 'generator', label: '프로젝트 생성기' },
-  { id: 'universities', label: '대학 정보' },
-  { id: 'roadmap', label: '입학 로드맵' },
-  { id: 'portfolio', label: '내 포트폴리오' },
-  { id: 'compete', label: '경쟁력 센터' },
-  { id: 'labs', label: '실습 예제' },
-  { id: 'guide', label: '사용 가이드' },
+const TABS: { id: TabId; labelKey: string }[] = [
+  { id: 'home', labelKey: 'navHome' },
+  { id: 'generator', labelKey: 'navGenerator' },
+  { id: 'universities', labelKey: 'navUniversities' },
+  { id: 'roadmap', labelKey: 'navRoadmap' },
+  { id: 'portfolio', labelKey: 'navPortfolio' },
+  { id: 'compete', labelKey: 'navCompete' },
+  { id: 'labs', labelKey: 'navLabs' },
+  { id: 'guide', labelKey: 'navGuide' },
 ];
 
 export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
@@ -36,25 +36,26 @@ export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
                 AutoEmbed <span className="text-amber-400">LAB</span>
               </span>
               <span className="block text-[10px] text-slate-500 font-medium tracking-wide">
-                {t('DE_Embedded_Systems_Master_Prep')}
+                {t('appSubtitle')}
               </span>
             </span>
           </button>
 
           <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-            {TABS.map((t) => (
+            {TABS.map((tab) => (
               <button
-                key={t.id}
-                onClick={() => onChange(t.id)}
+                key={tab.id}
+                onClick={() => onChange(tab.id)}
+                aria-current={active === tab.id ? 'page' : undefined}
                 className={cn(
                   'relative whitespace-nowrap rounded-lg px-3 sm:px-4 py-2 text-sm font-semibold transition-colors',
-                  active === t.id
+                  active === tab.id
                     ? 'text-white bg-white/10'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
                 )}
               >
-                {t.label}
-                {t.id === 'portfolio' && savedCount > 0 && (
+                {t(tab.labelKey)}
+                {tab.id === 'portfolio' && savedCount > 0 && (
                   <span className="ml-1.5 rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-black">
                     {savedCount}
                   </span>

@@ -14,12 +14,12 @@ interface LanguageSwitcherProps {
 }
 
 export const LanguageSwitcher = ({ className }: LanguageSwitcherProps = {}) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   /* i18n 인스턴스를 단일 진실 공급원으로 사용 (로컬 state 중복 제거) */
   const current = (i18n.resolvedLanguage ?? i18n.language ?? 'ko').split('-')[0] as Lang;
 
   return (
-    <div className={cn('flex items-center gap-2', className)} role="group" aria-label="Language">
+    <div className={cn('flex items-center gap-2', className)} role="group" aria-label={t('languageLabel')}>
       {LANGS.map(({ id, label, title }) => (
         <button
           key={id}
