@@ -13,20 +13,21 @@ export interface DeadlineInfo {
   winter: string;
   summer?: string;
   winterISO?: string; // D-day 계산용 ISO
+  semester?: string; // 지원 대상 학기 (예: "2026/27 겨울")
   note?: string;
 }
 
 export const DEADLINES: Record<string, DeadlineInfo> = {
-  rwth: { winter: '3월 1일 (수시)', winterISO: '2026-03-01', note: 'RWTHonline 자체 지원' },
-  tum: { winter: '5월 31일', winterISO: '2026-05-31', note: '자체 지원 포털' },
-  tub: { winter: '5월 15일', winterISO: '2026-05-15', note: 'uni-assist' },
-  kit: { winter: '7월 15일', winterISO: '2026-07-15', note: '자체 지원' },
-  stuttgart: { winter: '7월 15일', winterISO: '2026-07-15', note: '프로그램별 상이' },
-  fau: { winter: '7월 15일', winterISO: '2026-07-15', note: '자체 지원' },
-  darmstadt: { winter: '7월 15일', winterISO: '2026-07-15', note: '자체 지원' },
-  chemnitz: { winter: '7월 15일 (비제한 9월)', winterISO: '2026-07-15', note: 'uni-assist' },
-  freiburg: { winter: '7월 15일', winterISO: '2026-07-15', note: '자체 지원' },
-  braunschweig: { winter: '7월 15일', winterISO: '2026-07-15', note: 'uni-assist' },
+  rwth: { winter: '10월 15일 (수시)', winterISO: '2026-10-15', semester: '2026/27 겨울', note: 'RWTHonline 자체 지원' },
+  tum: { winter: '11월 30일', winterISO: '2026-11-30', semester: '2026/27 겨울', note: '자체 지원 포털' },
+  tub: { winter: '11월 15일', winterISO: '2026-11-15', semester: '2026/27 겨울', note: 'uni-assist' },
+  kit: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: '자체 지원' },
+  stuttgart: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: '프로그램별 상이' },
+  fau: { winter: '12월 15일', winterISO: '2026-12-15', semester: '2026/27 겨울', note: '자체 지원' },
+  darmstadt: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: '자체 지원' },
+  chemnitz: { winter: '1월 15일 (비제한 2월)', winterISO: '2027-01-15', semester: '2026/27 겨울', note: 'uni-assist' },
+  freiburg: { winter: '12월 31일', winterISO: '2026-12-31', semester: '2026/27 겨울', note: '자체 지원' },
+  braunschweig: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: 'uni-assist' },
 };
 
 export function daysUntil(iso?: string): number | null {

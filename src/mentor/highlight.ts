@@ -3,8 +3,16 @@
  *  — HTML 이스케이프 + 정규식 토큰 컬러링
  * ============================================================ */
 
-function escapeHtml(s: string): string {
+// &<>만 이스케이프 — highlightLine의 스태시 단계에서 사용한다.
+// 문자열/주석/지시문의 따옴표를 리터럴로 남겨 스태시 정규식이 매치되게 한다.
+function escapeHtmlTag(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escapeHtml(s: string): string {
+  return escapeHtmlTag(s)
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 const KEYWORDS =
@@ -18,14 +26,14 @@ const PREPROC =
 
 /** 한 줄 하이라이트 (주석/문자열/지시문은 플레이스홀더로 보호 후 복원) */
 export function highlightLine(line: string): string {
-  let s = escapeHtml(line);
   const holders: string[] = [];
 
   // 플레이스홀더는 `\u0000x{index}y\u0000` 형식: 숫자 양옆의 `x`/`y`(워드 문자) 덕분에
   // NUMBER의 `\b\d+\b`가 인덱스 숫자에 매치하지 않는다(워드 경계 없음). KEYWORDS/PREPROC도 매치 불가.
   const stash = (re: RegExp, cls: string) => {
-    s = s.replace(re, (m) => {
-      holders.push(`<span class="${cls}">${m}</span>`);
+    line = line.replace(re, (m) => {
+      // 스태시된 내용은 &<>만 이스케이프한다 — 따옴표를 리터럴로 남겨 문자열/주석 원문을 보존한다.
+      holders.push(`<span class="${cls}">${escapeHtmlTag(m)}</span>`);
       return `\u0000x${holders.length - 1}y\u0000`;
     });
   };
@@ -36,6 +44,8 @@ export function highlightLine(line: string): string {
   stash(/('(?:\\.|[^'\\])*')/g, 'text-amber-300');
   // 지시문도 스태시: NUMBER/KEYWORDS가 생성된 클래스명(예: text-fuchsia-400의 "400")을 훼손하지 못하게 한다.
   stash(PREPROC, 'text-fuchsia-400');
+  // 남은 코드(및 플레이스홀더)에 전체 이스케이프(&<>"') 적용 — 플레이스홀더는 \u0000xN y\u0000라 안전.
+  let s = escapeHtml(line);
   s = s.replace(NUMBER, '<span class="text-sky-300">$1</span>');
   s = s.replace(KEYWORDS, '<span class="text-violet-300">$1</span>');
   // 지시문 안의 문자열/주석(중첩 플레이스홀더)까지 재귀적으로 복원

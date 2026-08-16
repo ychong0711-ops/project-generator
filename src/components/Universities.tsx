@@ -156,7 +156,7 @@ export default function Universities({ savedProjects }: { savedProjects: Project
 
                 {/* 마감일 */}
                 <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-2.5 text-xs">
-                  <span className="font-bold text-slate-300">⏰ 겨울학기</span>
+                  <span className="font-bold text-slate-300">⏰ {dl?.semester ?? '겨울학기'}</span>
                   <span className="text-slate-400">{dl?.winter ?? '확인 필요'}</span>
                   {dLeft !== null && (
                     <span

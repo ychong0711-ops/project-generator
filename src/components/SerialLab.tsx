@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Project } from '../types';
 import { genFirmware, BAUD_OPTIONS, LABEL_PRESETS } from '../serial/firmware';
 import { useProjectProgress } from '../store/progress';
@@ -174,6 +174,18 @@ export default function SerialLab({ project }: SerialLabProps) {
     setConnected(false);
     pushLog('연결 종료됨.');
   };
+
+  /* 언마운트 시 리소스 정리: 열린 포트/리더를 닫고 참조를 해제한다.
+   * setState(setConnected/pushLog)를 호출하지 않아 React 18+ 언마운트 후
+   * setState 경고를 피한다. 연결되어 있지 않으면(참조가 null) 무해하게 종료된다. */
+  useEffect(() => {
+    return () => {
+      readerRef.current?.cancel().catch(() => {});
+      portRef.current?.close().catch(() => {});
+      readerRef.current = null;
+      portRef.current = null;
+    };
+  }, []);
 
   /* ---------- 2점 캘리브레이션 계수 ---------- */
   const twoPoint = useMemo(() => {

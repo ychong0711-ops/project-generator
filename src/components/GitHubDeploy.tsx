@@ -133,6 +133,7 @@ export default function GitHubDeploy({ savedProjects }: GitHubDeployProps) {
       pushLog(`네트워크 오류: ${(e as Error).message}`);
     } finally {
       setBusy(false);
+      setToken('');
     }
   };
 
@@ -183,6 +184,7 @@ export default function GitHubDeploy({ savedProjects }: GitHubDeployProps) {
             <label className="text-[10px] font-bold text-slate-400">Personal Access Token (repo 권한)</label>
             <input
               type="password"
+              autoComplete="off"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="github_pat_..."
