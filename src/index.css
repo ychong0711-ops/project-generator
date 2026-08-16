@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade-in: fade-in 0.6s ease both;
+  --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #07090d;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(251, 191, 36, 0.3);
+  color: #fff;
+}
+
+/* 스크롤바 */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0a0d12; }
+::-webkit-scrollbar-thumb { background: #26303d; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #38444f; }
+
+/* 체크리스트 애니메이션 */
+.check-pop { animation: check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes check-pop {
+  from { transform: scale(0.85); }
+  to { transform: scale(1); }
+}
+
+/* 그리드 배경 */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+/* 회로 라인 장식 */
+.circuit-line {
+  stroke-dasharray: 6 10;
+  animation: circuit-dash 18s linear infinite;
+}
+@keyframes circuit-dash {
+  to { stroke-dashoffset: -320; }
+}
