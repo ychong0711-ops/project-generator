@@ -29,9 +29,17 @@ export interface CheckResult {
   found: boolean;
 }
 
+export interface QualityIssue {
+  rule: string;
+  message: string;
+  severity: 'warning' | 'info';
+}
+
 export interface CodeAnalysis {
   score: number;
+  qualityScore: number;
   issues: CodeIssue[];
+  qualityIssues: QualityIssue[];
   coverage: number;
   checkResults: CheckResult[];
   stats: { lines: number; functions: number; todos: number; commentPct: number };
@@ -235,15 +243,109 @@ export function analyzeCode(code: string, projectId: string): CodeAnalysis {
   const infos = Math.min(issues.filter((i) => i.severity === 'info').length, 8);
   const score = Math.max(0, Math.min(100, 100 - errs * 18 - warns * 6 - infos * 2));
 
+  /* MISRA-C 기반 코드 품질 (독립 평가) */
+  const { qualityScore, qualityIssues } = analyzeQuality(code);
+
   return {
     score,
+    qualityScore,
     issues: issues.sort((a, b) => {
       const w = { error: 0, warning: 1, info: 2 } as const;
       return w[a.severity] - w[b.severity] || a.line - b.line;
     }),
+    qualityIssues,
     coverage,
     checkResults,
     stats: { lines: lines.length, functions, todos, commentPct },
+  };
+}
+
+/* ============================================================
+ * MISRA-C 기반 코드 품질 분석
+ * — 핵심 정적 검사(score)와 별개로 유지보수성/안전성 규칙을 평가
+ * ============================================================ */
+export function analyzeQuality(code: string): { qualityScore: number; qualityIssues: QualityIssue[] } {
+  const qualityIssues: QualityIssue[] = [];
+  let q = 100;
+  const lines = code.split('\n');
+  const text = code;
+
+  const deduct = (rule: string, pts: number, message: string, severity: QualityIssue['severity'] = 'warning') => {
+    q -= pts;
+    qualityIssues.push({ rule, message, severity });
+  };
+
+  /* 1) 매직 넘버 — 0/1/-1을 제외한 2자리 이상 숫자 리터럴 */
+  const magicNums = (text.match(/\b\d{2,}\b/g) ?? []).filter((n) => n !== '0' && n !== '1' && n !== '-1');
+  if (magicNums.length > 3) {
+    const uniq = [...new Set(magicNums)];
+    deduct('magic-number', 2, `매직 넘버 ${magicNums.length}개 (${uniq.slice(0, 6).join(', ')}${uniq.length > 6 ? '…' : ''}) — 의미 있는 상수는 #define/const로 추출하세요.`);
+  }
+
+  /* 2) 함수 길이 — 40줄 초과 함수 탐지 (중괄호 균형 기반) */
+  {
+    let depth = 0;
+    let fnStart = -1;
+    let fnName = '';
+    let fnStartLine = 0;
+    const longFns: string[] = [];
+    lines.forEach((ln, i) => {
+      const dOpen = (ln.match(/{/g) ?? []).length;
+      const dClose = (ln.match(/}/g) ?? []).length;
+      if (fnStart === -1 && dOpen > 0) {
+        const m = ln.match(/^\s*(?:static\s+|inline\s+)?(?:void|int|double|float|char|unsigned|long|short|u?int\d*_t|bool)\s+\*?\s*([A-Za-z_]\w*)\s*\(/);
+        fnName = m?.[1] ?? '?';
+        fnStart = i;
+        fnStartLine = i;
+      }
+      depth += dOpen - dClose;
+      if (fnStart !== -1 && depth <= 0 && i > fnStart) {
+        if (i - fnStartLine > 40) longFns.push(fnName);
+        fnStart = -1;
+      }
+    });
+    if (longFns.length > 0) {
+      deduct('function-length', 3, `함수 ${longFns.join(', ')}이(가) 40줄을 초과합니다. 작은 함수로 분리하세요.`);
+    }
+  }
+
+  /* 3) 중첩 깊이 — 3단 이상의 블록 중첩 */
+  {
+    let depth = 0;
+    let maxDepth = 0;
+    for (const ln of lines) {
+      const dOpen = (ln.match(/{/g) ?? []).length;
+      const dClose = (ln.match(/}/g) ?? []).length;
+      depth += dOpen - dClose;
+      maxDepth = Math.max(maxDepth, depth);
+    }
+    if (maxDepth >= 3) {
+      deduct('nesting-depth', 5, `블록 중첩 깊이가 ${maxDepth}단계입니다. 3단계 이하로 유지하세요.`);
+    }
+  }
+
+  /* 4) goto 사용 */
+  if (/\bgoto\s+\w+/.test(text)) {
+    deduct('goto', 10, 'goto 문은 제어 흐름을 이해하기 어렵게 만듭니다. 구조적 흐름 제어로 대체하세요.');
+  }
+
+  /* 5) 반복 블록 — 3줄 이상 동일한 연속 라인 블록 2회 이상 */
+  {
+    const seen = new Map<string, number>();
+    for (let i = 0; i + 2 < lines.length; i++) {
+      const block = lines.slice(i, i + 3).map((l) => l.trim()).join('\n');
+      if (!block || block.startsWith('//')) continue;
+      seen.set(block, (seen.get(block) ?? 0) + 1);
+    }
+    const dupCount = [...seen.values()].filter((c) => c >= 2).length;
+    if (dupCount > 0) {
+      deduct('duplication', 3, `동일한 3줄 블록이 ${dupCount}곳에서 반복됩니다. 헬퍼 함수로 추출하세요.`);
+    }
+  }
+
+  return {
+    qualityScore: Math.max(0, Math.min(100, q)),
+    qualityIssues: qualityIssues.sort((a, b) => a.message.localeCompare(b.message)),
   };
 }
 

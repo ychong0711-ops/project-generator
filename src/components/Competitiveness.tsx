@@ -11,6 +11,7 @@ import Documents from './Documents';
 import InterviewSim from './InterviewSim';
 import Benchmark from './Benchmark';
 import GermanVocab from './GermanVocab';
+import StrategyTab from './StrategyTab';
 import { cn } from '../utils/cn';
 
 /* ============================================================
@@ -21,12 +22,13 @@ interface CompetitivenessProps {
   savedProjects: Project[];
 }
 
-type SubTab = 'diag' | 'docs' | 'interview' | 'benchmark' | 'german';
+type SubTab = 'diag' | 'strategy' | 'docs' | 'interview' | 'benchmark' | 'german';
 
 const DIAG_KEY = 'autoembed-diagnosis';
 
 const SUB_TABS: { id: SubTab; label: string; icon: string }[] = [
   { id: 'diag', label: '경쟁력 진단', icon: '📊' },
+  { id: 'strategy', label: '지원 전략', icon: '🧭' },
   { id: 'docs', label: '지원 서류 생성', icon: '📄' },
   { id: 'interview', label: '모의 면접', icon: '🎤' },
   { id: 'benchmark', label: '벤치마크 리그', icon: '🏆' },
@@ -69,6 +71,7 @@ export default function Competitiveness({ savedProjects }: CompetitivenessProps)
 
         <div className="mt-8">
           {sub === 'diag' && <Diagnosis savedProjects={savedProjects} />}
+          {sub === 'strategy' && <StrategyTab savedProjects={savedProjects} />}
           {sub === 'docs' && <Documents savedProjects={savedProjects} />}
           {sub === 'interview' && <InterviewSim savedProjects={savedProjects} />}
           {sub === 'benchmark' && <Benchmark savedProjects={savedProjects} />}

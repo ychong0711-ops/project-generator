@@ -101,6 +101,22 @@ export default function MentorPanel({ project, code, diagnostics, onJump, onAppl
           />
         </div>
 
+        {/* 코드 품질 점수 (MISRA-C) */}
+        <div>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">코드 품질 (MISRA-C)</p>
+            <span className={cn('font-mono text-xs font-extrabold', scoreColor(analysis.qualityScore))}>
+              {analysis.qualityScore}
+            </span>
+          </div>
+          <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+            <div
+              className={cn('h-full rounded-full transition-all duration-500', scoreBar(analysis.qualityScore))}
+              style={{ width: `${analysis.qualityScore}%` }}
+            />
+          </div>
+        </div>
+
         {/* 분석 요약 */}
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
           <pre className="whitespace-pre-wrap font-sans text-[12px] leading-relaxed text-slate-300">{summary}</pre>
@@ -153,6 +169,41 @@ export default function MentorPanel({ project, code, diagnostics, onJump, onAppl
             </ul>
           )}
         </div>
+
+        {/* 코드 품질 이슈 (MISRA-C) */}
+        {analysis.qualityIssues.length > 0 && (
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              📏 품질 이슈 <span className="text-slate-600">({analysis.qualityIssues.length})</span>
+            </p>
+            <ul className="mt-2.5 space-y-2">
+              {analysis.qualityIssues.map((q, i) => (
+                <li
+                  key={`${q.rule}-${i}`}
+                  className="rounded-lg border border-white/5 bg-white/[0.02] p-3 transition-colors hover:border-white/15"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs">{q.severity === 'warning' ? '⚠️' : '💡'}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span
+                          className={cn(
+                            'rounded border px-1.5 py-0.5 text-[9px] font-bold',
+                            q.severity === 'warning' ? SEV_STYLE.warning.chip : SEV_STYLE.info.chip
+                          )}
+                        >
+                          {q.severity === 'warning' ? '경고' : '팁'}
+                        </span>
+                        <p className="text-xs font-bold text-slate-200">{q.rule}</p>
+                      </div>
+                      <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{q.message}</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* 핵심 요소 체크리스트 */}
         <div>

@@ -6,6 +6,8 @@ import {
   genInterview,
   genReadme,
   genAlgoReadme,
+  genGermanDoc,
+  genMeasurementTemplate,
 } from "./codegen";
 import { projectById, PROJECTS } from "../data/projects";
 import { samplesFor } from "../data/samples";
@@ -108,6 +110,33 @@ describe("codegen — genAlgoReadme", () => {
       expect(md).toContain(s.desc);
     }
     expect(md).toContain(`# 알고리즘 검증용 C 코드`);
+  });
+});
+
+describe("codegen — genGermanDoc", () => {
+  it.each(["can-uds-scanner"])("%s: 모든 필수 섹션 포함", (id) => {
+    const p = projectById(id);
+    const doc = genGermanDoc(p!);
+
+    expect(doc).toContain("Zusammenfassung");
+    expect(doc).toContain("Technische Anforderungen");
+    expect(doc).toContain("Systemarchitektur");
+    expect(doc).toContain("Implementierungsplan");
+    expect(doc).toContain("Messergebnisse");
+    expect(doc).toContain("Fazit");
+  });
+});
+
+describe("codegen — genMeasurementTemplate", () => {
+  it.each(["can-uds-scanner"])("%s: 모든 필수 섹션 포함", (id) => {
+    const p = projectById(id);
+    const doc = genMeasurementTemplate(p!);
+
+    expect(doc).toContain("Testumgebung");
+    expect(doc).toContain("Messprotokoll");
+    expect(doc).toContain("Ergebnisse");
+    expect(doc).toContain("Vergleich");
+    expect(doc).toContain("Qualitätskontrolle");
   });
 });
 

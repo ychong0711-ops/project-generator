@@ -5,6 +5,20 @@ import { samplesFor } from '../data/samples';
 import { genArchitectureSvg } from './diagram';
 import { projectToMarkdown } from './markdown';
 
+/** 독일어 기술 문서에 사용하는 핵심 용어 (Glossar 테이블로 출력됨) */
+const DE_TERMS: Record<string, string> = {
+  '임베디드 시스템': 'Eingebettetes System',
+  '마이크로컨트롤러': 'Mikrocontroller',
+  '실시간 OS': 'Echtzeitbetriebssystem',
+  'CAN': 'CAN-Bus',
+  '센서': 'Sensor',
+  '진단': 'Diagnose',
+  '전력 관리': 'Energiemanagement',
+  '모터 제어': 'Motorsteuerung',
+  '부트로더': 'Bootloader',
+  '통신': 'Kommunikation',
+};
+
 /** ============================================================
  *  스타터 코드 생성기
  *  — 프로젝트별로 실제 빌드 가능한 스타터팩(.zip)을 생성합니다.
@@ -242,6 +256,111 @@ arm-none-eabi-gcc -O1 -Wall -mcpu=cortex-m4 -mthumb -S algo/<file>.c -o algo/<fi
 `;
 }
 
+/** 독일어 기술 문서(Technische Dokumentation) 생성 */
+export function genGermanDoc(p: Project): string {
+  const glossary = Object.entries(DE_TERMS)
+    .map(([ko, de]) => `| ${ko} | ${de} |`)
+    .join('\n');
+
+  const goals = p.goals.map((g, i) => `${i + 1}. ${g}`).join('\n');
+
+  const archRows = [
+    ...p.mcu.map((m) => `| Hardware (MCU) | ${m} |`),
+    ...p.sw.map((s) => `| Software | ${s} |`),
+  ].join('\n');
+
+  const plan = p.milestones
+    .map((m, i) => `### Phase ${i + 1} — ${m.phase}\n\n${m.tasks.map((t) => `- [ ] ${t}`).join('\n')}`)
+    .join('\n\n');
+
+  const mess = p.deliverables.map((d) => `- ${d}`).join('\n');
+
+  const fazit = p.skills.join(', ');
+
+  return `# Technische Dokumentation — ${p.titleEn}
+
+> ${p.tagline}
+
+## Zusammenfassung
+
+${p.description}
+
+## Technische Anforderungen
+
+${goals}
+
+## Systemarchitektur
+
+| Bereich | Technologie |
+| ------- | ----------- |
+${archRows}
+
+## Implementierungsplan
+
+${plan}
+
+## Messergebnisse
+
+${mess}
+
+> Messdaten hier einfügen (Oszilloskop, Logging)
+
+## Fazit
+
+${fazit}
+
+## Glossar
+
+| Koreanisch | Deutsch |
+| ---------- | ------- |
+${glossary}
+`;
+}
+
+/** 독일어 실측 측정 템플릿(Messvorlage) 생성 */
+export function genMeasurementTemplate(p: Project): string {
+  const protocol = p.milestones
+    .map((m, i) => `| Phase ${i + 1} — ${m.phase} | | | | |`)
+    .join('\n');
+
+  const results = p.milestones
+    .map((m, i) => `### Phase ${i + 1} — ${m.phase}\n\n- Messung 1: \n- Messung 2: \n- Messung 3: `)
+    .join('\n\n');
+
+  return `# Messvorlage — ${p.titleEn}
+
+## 1. Testumgebung
+
+| Gerät (장비) | Modell | Bemerkung |
+| ------------ | ------ | --------- |
+| | | |
+| | | |
+
+## 2. Messprotokoll
+
+| Phase | Parameter | Erwartet | Gemessen | Abweichung |
+| ----- | --------- | -------- | -------- | ---------- |
+${protocol}
+
+## 3. Ergebnisse
+
+${results}
+
+## 4. Vergleich
+
+| Messpunkt | Simulation | Messung | Differenz | Bewertung |
+| --------- | ---------- | ------- | --------- | --------- |
+| | | | | |
+
+## 5. Qualitätskontrolle
+
+- [ ] Testabdeckung (테스트 커버리지) überprüfen
+- [ ] MISRA-C Konformität prüfen
+- [ ] Code-Review durchgeführt
+- [ ] Dokumentation aktualisiert
+`;
+}
+
 /** 스타터팩 zip 생성 및 다운로드 */
 export async function downloadStarterZip(p: Project): Promise<void> {
   const zip = new JSZip();
@@ -252,6 +371,8 @@ export async function downloadStarterZip(p: Project): Promise<void> {
   zip.file('docs/interview-prep.md', genInterview(p));
   zip.file('algo/README.md', genAlgoReadme(p));
   zip.file('docs/architecture.svg', genArchitectureSvg(p));
+  zip.file('docs/technische-dokumentation.md', genGermanDoc(p));
+  zip.file('docs/messvorlage.md', genMeasurementTemplate(p));
   samplesFor(p.id).forEach((s) => zip.file(`algo/${s.id}.c`, s.code));
 
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
