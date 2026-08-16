@@ -1,0 +1,17 @@
+# 기본: 텍스트 파일은 저장소에 LF로 보관
+* text=auto eol=lf
+
+# Windows 배치 파일은 반드시 CRLF 여야 한다.
+# LF 만 있으면 cmd.exe 가 여러 줄 괄호 블록 ( ... ) 을 잘못 해석한다.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# 바이너리 (줄바꿈 변환 금지)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
