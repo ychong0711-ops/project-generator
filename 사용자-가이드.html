@@ -199,7 +199,7 @@
     <span class="badge">AUTOEMBED LAB · USER GUIDE</span>
     <h1>AutoEmbed LAB <span class="grad">사용자 가이드</span></h1>
     <p class="sub">독일 자동차 임베디드 석사(Embedded Systems Master) 지원자를 위한 올인원 포트폴리오 빌더. 프로젝트 생성부터 지원 서류 작성, 면접 준비까지 한 곳에서.</p>
-    <p class="meta">버전 1.0 · React 19 + Vite 7 + TypeScript · 모든 데이터는 브라우저 <code>localStorage</code>에 저장됩니다</p>
+    <p class="meta">버전 1.1 · React 19 + Vite 7 + TypeScript · 다국어(ko/de/en) 및 접근성 최적화 완료</p>
   </div>
 </header>
 
@@ -211,19 +211,19 @@
     <li><a href="#intro">앱 개요</a></li>
     <li><a href="#start">시작하기 (설치·실행)</a></li>
     <li><a href="#tabs">탭 구조 한눈에 보기</a></li>
-    <li><a href="#home">홈 탭</a></li>
+    <li><a href="#i18n-a11y">다국어 및 접근성</a></li>
     <li><a href="#generator">프로젝트 생성기</a></li>
     <li><a href="#universities">대학 정보</a></li>
     <li><a href="#roadmap">입학 로드맵</a></li>
-    <li><a href="#portfolio">내 포트폴리오</a></li>
+    <li><a href="#portfolio">내 포트폴리오 (GitHub 배포)</a></li>
     <li><a href="#compete">경쟁력 센터</a></li>
-    <li><a href="#codelab">코드 랩</a></li>
+    <li><a href="#codelab">코드 랩 (C 인터프리터)</a></li>
     <li><a href="#serial">실측 랩</a></li>
     <li><a href="#labs">실습 예제 · 저장소 · 교재</a></li>
     <li><a href="#strategy">지원 전략 (GPA 환산·매칭)</a></li>
     <li><a href="#documents">지원 서류 생성</a></li>
     <li><a href="#starterpack">스타터팩 ZIP 구성</a></li>
-    <li><a href="#backup">데이터 저장·백업</a></li>
+    <li><a href="#backup">데이터 저장·백업·쿼터</a></li>
     <li><a href="#shortcuts">단축키</a></li>
     <li><a href="#faq">자주 묻는 질문</a></li>
   </ol>
@@ -239,128 +239,41 @@
     <div class="card"><b>지원 전략</b><span>바이에른 GPA 환산, 대학 요구사항 매칭, 경쟁력 진단</span></div>
     <div class="card"><b>서류·면접</b><span>자기소개서·이력서·Lebenslauf 생성, 모의 면접 40+ 질문</span></div>
     <div class="card"><b>실습 환경</b><span>브라우저 C 컴파일러(Compiler Explorer), 오프라인 인터프리터, 시리얼 통신</span></div>
-    <div class="card"><b>학습 관리</b><span>로드맵 8단계, 체크리스트, 배지, 활동 스트릭, 백업/복원</span></div>
+    <div class="card"><b>학습 관리</b><span>로드맵 8단계, 체크리스트, 배지, 활동 스트릭, 다국어 지원</span></div>
   </div>
-  <div class="callout info"><b>데이터 저장 안내</b>모든 데이터(저장 프로젝트, 코드, 진단 결과, 통계)는 브라우저 localStorage에 저장됩니다. 서버가 없으므로 인터넷 없이도 동작하며, 브라우저를 바꾸거나 캐시를 지우면 데이터가 사라질 수 있으니 <a href="#backup">백업 기능</a>을 주기적으로 사용하세요.</div>
+  <div class="callout info"><b>데이터 저장 안내</b>모든 데이터는 브라우저 localStorage에 중앙 집중식으로 저장됩니다. 서버가 없으므로 인터넷 없이도 동작하며, <a href="#backup">백업 기능</a>을 주기적으로 사용하세요.</div>
 </section>
 
 <!-- 2. 시작하기 -->
 <section id="start">
   <h2 class="sec"><span class="num">02</span>시작하기 (설치·실행)</h2>
-  <p>Node.js(18 이상)가 설치되어 있다면 아래 명령으로 바로 실행할 수 있습니다.</p>
+  <p>Node.js(20 이상 권장)가 설치되어 있다면 아래 명령으로 바로 실행할 수 있습니다.</p>
   <pre><code>npm install        # 의존성 설치
 npm run dev        # 개발 서버 실행 (http://localhost:5173)</code></pre>
   <table>
     <tr><th>명령</th><th>동작</th></tr>
     <tr><td><code>npm run dev</code></td><td>Vite 개발 서버 실행 (핫 리로드)</td></tr>
-    <tr><td><code>npm run build</code></td><td>프로덕션 빌드 생성 (단일 HTML 파일로 번들)</td></tr>
-    <tr><td><code>npm run preview</code></td><td>빌드 결과 미리보기</td></tr>
-    <tr><td><code>npm run test</code></td><td>Vitest 단위 테스트 실행 (8개 테스트 파일)</td></tr>
+    <tr><td><code>npm run build</code></td><td>프로덕션 빌드 생성 (단일 HTML 파일 번들)</td></tr>
+    <tr><td><code>npm run test</code></td><td>Vitest 테스트 실행 (120+ 테스트 케이스)</td></tr>
   </table>
-  <div class="callout tip"><b>빌드 산출물</b>이 프로젝트는 <code>vite-plugin-singlefile</code>을 사용해 빌드 결과가 단일 HTML 파일로 생성됩니다. GitHub Pages 등 정적 호스팅에 그대로 올릴 수 있습니다.</div>
+  <div class="callout tip"><b>안정성</b>에러 바운더리(Error Boundary)가 적용되어 렌더링 중 예외가 발생해도 앱 전체가 크래시되지 않고 안전하게 복구됩니다.</div>
 </section>
 
-<!-- 3. 탭 구조 -->
-<section id="tabs">
-  <h2 class="sec"><span class="num">03</span>탭 구조 한눈에 보기</h2>
-  <p>앱은 상단 내비게이션의 8개 탭으로 구성된 단일 페이지 애플리케이션(SPA)입니다.</p>
-  <table>
-    <tr><th>#</th><th>탭</th><th>역할</th></tr>
-    <tr><td>1</td><td><strong>홈</strong></td><td>대시보드 — 통계, 주간 계획, 배지, 아키텍처 다이어그램, AI 멘토 요약</td></tr>
-    <tr><td>2</td><td><strong>프로젝트 생성기</strong></td><td>12개 카테고리 × 3개 레벨의 임베디드 프로젝트 생성·저장</td></tr>
-    <tr><td>3</td><td><strong>대학 정보</strong></td><td>10개 독일 대학 프로그램·연구소·산업 연계 조사</td></tr>
-    <tr><td>4</td><td><strong>입학 로드맵</strong></td><td>D-18개월부터 D-1개월까지 8단계 타임라인·체크리스트·FAQ</td></tr>
-    <tr><td>5</td><td><strong>내 포트폴리오</strong></td><td>저장 프로젝트 관리, 진행 트래커, GitHub 배포, 백업/복원</td></tr>
-    <tr><td>6</td><td><strong>경쟁력 센터</strong></td><td>진단·지원 전략·서류 생성·모의 면접·벤치마크·독일어 어휘 (6개 서브탭)</td></tr>
-    <tr><td>7</td><td><strong>실습 예제</strong></td><td>코드 랩·실측 랩·실습 문제·GitHub 저장소 탐색·교재 트랙</td></tr>
-    <tr><td>8</td><td><strong>사용 가이드</strong></td><td>앱 내장 가이드 (실시간 사용자 데이터 주입, A4 인쇄 지원)</td></tr>
-  </table>
-</section>
-
-<!-- 4. 홈 -->
-<section id="home">
-  <h2 class="sec"><span class="num">04</span>홈 탭</h2>
-  <p>홈 탭은 전체 진행 상황을 한눈에 보여주는 대시보드입니다.</p>
+<!-- 4. 다국어 및 접근성 -->
+<section id="i18n-a11y">
+  <h2 class="sec"><span class="num">04</span>다국어 및 접근성</h2>
+  <p>전 세계 사용자 및 다양한 환경을 고려한 인프라가 구축되어 있습니다.</p>
+  <h3>다국어 지원 (i18n)</h3>
   <ul>
-    <li><strong>Hero 통계</strong> — 큐레이션 프로젝트 14개 · 독일 대학 프로그램 10개 · 로드맵 8단계 · 면접 질문 40+</li>
-    <li><strong>주간 학습 계획(WeeklyPlan)</strong> — 주 단위 학습 목표 관리</li>
-    <li><strong>배지(Badges)</strong> — 인터뷰 통계·체크리스트·스트릭 기반으로 배지 획득</li>
-    <li><strong>데모 스튜디오(DemoStudio)</strong> — 프로젝트 데모 구성</li>
-    <li><strong>아키텍처 다이어그램</strong> — 차량 임베디드 시스템 구조 SVG 다이어그램</li>
-    <li><strong>AI 멘토 요약(MentorPanel)</strong> — 코드 랩 분석 결과 기반 멘토 코멘트 요약</li>
+    <li><strong>3개 국어</strong> — 한국어(ko), 독일어(de), 영어(en)를 지원합니다.</li>
+    <li><strong>언어 전환</strong> — 우측 상단의 언어 스위처를 통해 즉시 변경할 수 있습니다.</li>
+    <li><strong>지능형 초기화</strong> — 브라우저 언어 설정을 감지하여 최적의 언어로 시작합니다.</li>
   </ul>
-</section>
-
-<!-- 5. 생성기 -->
-<section id="generator">
-  <h2 class="sec"><span class="num">05</span>프로젝트 생성기</h2>
-  <p>독일 지원서에 어필할 수 있는 차량 임베디드 프로젝트를 카테고리와 난이도로 골라 생성합니다.</p>
-  <h3>카테고리 (12개)</h3>
-  <p><code>basic</code> 기초 · <code>comm</code> 차량 통신 · <code>rtos</code> 실시간 OS · <code>motor</code> 모터 제어 · <code>sensor</code> 센서 · <code>power</code> 전력 · <code>diag</code> 진단 · <code>linux</code> 리눅스 · <code>adas</code> 자율주행 · <code>autosar</code> AUTOSAR · <code>control</code> 제어 · <code>wireless</code> 무선</p>
-  <h3>레벨 (3개)</h3>
-  <p>입문 / 중급 / 심화 — 본인의 실력과 지원 목표에 맞춰 선택하세요.</p>
-  <h3>큐레이션 프로젝트 (14개)</h3>
-  <p>각 프로젝트는 다음 정보를 포함합니다: 프로젝트 코드(<code>DE-EMB-XXXX</code>), 영문 제목, 태그라인, 카테고리·레벨, 예상 기간(주), 사용 MCU·소프트웨어 스택, 상세 설명, 목표, 마일스톤(단계별 작업), 산출물, 필요 스킬, <strong>매칭 대학(uniIds)</strong>, 면접 예상 질문, 팁.</p>
-  <table>
-    <tr><th>프로젝트</th><th>주제</th></tr>
-    <tr><td>can-uds-scanner</td><td>CAN + UDS 진단 스캐너</td></tr>
-    <tr><td>freertos-ecu</td><td>FreeRTOS 기반 ECU 태스크 스케줄링</td></tr>
-    <tr><td>lin-window</td><td>LIN 차량 윈도우 제어</td></tr>
-    <tr><td>bldc-foc</td><td>BLDC 모터 FOC(Clarke/Park/SVPWM/PI)</td></tr>
-    <tr><td>sensor-fusion-ekf</td><td>센서 융합 EKF</td></tr>
-    <tr><td>bms-soc</td><td>배터리 SoC 추정(쿨롱 적분·OCV)</td></tr>
-    <tr><td>uds-bootloader</td><td>UDS 부트로더</td></tr>
-    <tr><td>linux-cluster</td><td>리눅스 클러스터 계기판</td></tr>
-    <tr><td>adas-lane</td><td>ADAS 차선 인식</td></tr>
-    <tr><td>someip</td><td>SOME/IP 통신</td></tr>
-    <tr><td>abs-sim</td><td>ABS 브레이크 시뮬레이션</td></tr>
-    <tr><td>state-machine-intro</td><td>상태 머신 입문</td></tr>
-    <tr><td>autosar-swc</td><td>AUTOSAR SWC 컴포넌트</td></tr>
-    <tr><td>tpms</td><td>타이어 공기압 모니터링(TPMS)</td></tr>
-  </table>
-  <div class="callout tip"><b>저장</b>생성한 프로젝트는 <code>autoembed-saved-projects</code> 키로 저장되며, "내 포트폴리오" 탭에서 관리할 수 있습니다. 생성기에서 포트폴리오로 바로 이동하는 기능도 지원합니다.</div>
-</section>
-
-<!-- 6. 대학 -->
-<section id="universities">
-  <h2 class="sec"><span class="num">06</span>대학 정보</h2>
-  <p>독일 자동차 임베디드 석사 과정을 제공하는 10개 대학의 정보를 제공합니다.</p>
-  <table>
-    <tr><th>대학</th><th>프로그램 언어</th><th>특징</th></tr>
-    <tr><td>RWTH Aachen</td><td>영어</td><td>자동차 공학 최상위, IKA·ISEA 연구소</td></tr>
-    <tr><td>TUM (뮌헨 공대)</td><td>영어·독일어</td><td>바이에른 GPA 환산 적용, elenia 연구소</td></tr>
-    <tr><td>TU Berlin</td><td>영어·독일어</td><td>임베디드 시스템 강세</td></tr>
-    <tr><td>KIT (카를스루에)</td><td>영어·독일어</td><td>FAST·FKFS 자동차 연구</td></tr>
-    <tr><td>Stuttgart</td><td>영어·독일어</td><td>자동차 산업 연계(다임러·보쉬 인근)</td></tr>
-    <tr><td>FAU (에를랑겐)</td><td>영어·독일어</td><td>FAPS, 전장·전력전자 강세</td></tr>
-    <tr><td>TU Darmstadt</td><td>영어</td><td>ETiT, 임베디드·통신</td></tr>
-    <tr><td>TU Chemnitz</td><td>영어·독일어</td><td>마이크로시스템·센서</td></tr>
-    <tr><td>Freiburg</td><td>영어</td><td>IMTEK 마이크로시스템</td></tr>
-    <tr><td>TU Braunschweig</td><td>영어·독일어</td><td>NFF 자동차 연구센터</td></tr>
-  </table>
-  <p>각 대학의 상세 프로필에는 <strong>커리큘럼 모듈, 연구소(ISEA/IKA/FTM/EDI/ETI/FAST/ILEA/FKFS/Fraunhofer IIS/Continental/ZfM/IMTEK/elenia/NFF 등), 도시 정보</strong>가 포함되어 있으며, 이 데이터는 <a href="#documents">자기소개서 "왜 이 대학인가"</a> 문단 생성에 자동으로 활용됩니다.</p>
-</section>
-
-<!-- 7. 로드맵 -->
-<section id="roadmap">
-  <h2 class="sec"><span class="num">07</span>입학 로드맵</h2>
-  <p>지원까지 남은 시간을 기준으로 8단계 타임라인을 제공합니다.</p>
-  <table>
-    <tr><th>시점</th><th>단계</th></tr>
-    <tr><td>D-18개월</td><td>대학·프로그램 조사</td></tr>
-    <tr><td>D-15개월</td><td>언어(독일어/영어) + 프로젝트 시작</td></tr>
-    <tr><td>D-12개월</td><td>포트폴리오 심화</td></tr>
-    <tr><td>D-9개월</td><td>동기서·추천서 준비</td></tr>
-    <tr><td>D-6개월</td><td>uni-assist / VPD 인증</td></tr>
-    <tr><td>D-4개월</td><td>지원 제출</td></tr>
-    <tr><td>D-2개월</td><td>면접 준비</td></tr>
-    <tr><td>D-1개월</td><td>비자·주거 준비</td></tr>
-  </table>
+  <h3>접근성 보장 (Accessibility)</h3>
   <ul>
-    <li><strong>체크리스트</strong> — 단계별 할 일 체크, <code>autoembed-checklist</code>에 저장</li>
-    <li><strong>지원 마감일</strong> — 대학별 마감일 관리 (RWTH 3/1, TUM 5/31, TU Berlin 5/15, 그 외 대부분 7/15), <code>autoembed-deadline</code>에 저장</li>
-    <li><strong>FAQ</strong> — 자주 묻는 질문 모음</li>
-    <li><strong>APS 안내</strong> — 한국 국적 지원자는 APS 인증이 불필요함을 명시</li>
+    <li><strong>Reduced Motion</strong> — 애니메이션에 민감한 사용자를 위해 <code>prefers-reduced-motion</code>을 감지하여 애니메이션을 자동으로 억제합니다.</li>
+    <li><strong>포커스 관리</strong> — 탭 전환 시 화면 상단으로 스크롤하고 제목으로 포커스를 이동시켜 키보드 내비게이션을 돕습니다.</li>
+    <li><strong>스크린 리더 최적화</strong> — <code>aria-label</code> 및 <code>role</code> 속성을 통해 보조 기술 사용자를 위한 정보를 제공합니다.</li>
   </ul>
 </section>
 
@@ -369,271 +282,48 @@ npm run dev        # 개발 서버 실행 (http://localhost:5173)</code></pre>
   <h2 class="sec"><span class="num">08</span>내 포트폴리오</h2>
   <p>저장한 프로젝트를 관리하고 진행 상황을 추적하는 탭입니다.</p>
   <ul>
-    <li><strong>저장 프로젝트 목록</strong> — 생성기에서 저장한 프로젝트 확인·관리</li>
-    <li><strong>진행 트래커</strong> — 프로젝트별 진행률 기록 (<code>autoembed-project-progress</code>)</li>
-    <li><strong>활동 기록</strong> — 학습 활동·스트릭 관리 (<code>autoembed-activity</code>)</li>
-    <li><strong>GitHub 배포(GitHubDeploy)</strong> — 스타터팩 구성을 GitHub 저장소에 원클릭 배포</li>
-    <li><strong>백업/복원(Backup)</strong> — 전체 데이터 내보내기·가져오기 (<a href="#backup">§16 참조</a>)</li>
+    <li><strong>GitHub 배포 (Git Data API)</strong> — 스타터팩 구성을 GitHub 저장소에 <strong>단일 커밋</strong>으로 고속 배포합니다. 수십 개의 파일을 순차적으로 푸시하지 않고 한 번에 업데이트하여 배포 시간을 획기적으로 단축했습니다.</li>
+    <li><strong>진행 트래커</strong> — 프로젝트별 완료 태스크를 기록합니다.</li>
+    <li><strong>활동 스트릭</strong> — 매일의 학습 기록을 시각화합니다.</li>
   </ul>
-</section>
-
-<!-- 9. 경쟁력 센터 -->
-<section id="compete">
-  <h2 class="sec"><span class="num">09</span>경쟁력 센터</h2>
-  <p>경쟁력 센터는 6개의 서브탭으로 구성되어 지원 준비의 핵심 기능을 제공합니다.</p>
-  <table>
-    <tr><th>서브탭</th><th>기능</th><th>저장 키</th></tr>
-    <tr><td>경쟁력 진단</td><td>7개 진단 키 기반 점수 산출, 교수 이메일 초안, 데모 스크립트</td><td><code>autoembed-diagnosis</code></td></tr>
-    <tr><td>지원 전략</td><td>바이에른 GPA 환산, 대학별 요구사항, 프로젝트 매칭</td><td><code>autoembed-strategy-uni-*</code></td></tr>
-    <tr><td>지원 서류 생성</td><td>자기소개서(letter)·이력서(cv)·독일어 Lebenslauf(cv-de)</td><td>—</td></tr>
-    <tr><td>모의 면접</td><td>40+ 질문, 답변 통계, 배지 연동</td><td><code>autoembed-interview-stats</code></td></tr>
-    <tr><td>벤치마크 리그</td><td>지원자 비교 랭킹</td><td>—</td></tr>
-    <tr><td>독일어 어휘</td><td>독일어 기술 용어 플래시카드(der/die/das 관사 포함)</td><td><code>autoembed-german-stats</code></td></tr>
-  </table>
 </section>
 
 <!-- 10. 코드 랩 -->
 <section id="codelab">
   <h2 class="sec"><span class="num">10</span>코드 랩</h2>
-  <p>브라우저에서 C 코드를 작성·실행·분석하는 실습 환경입니다. 프로젝트별 샘플 코드로 시작해 직접 수정하며 학습할 수 있습니다.</p>
-
-  <h3>에디터 기능</h3>
+  <p>브라우저에서 C 코드를 작성·실행·분석하는 실습 환경입니다.</p>
+  <h3>오프라인 C 인터프리터 확장</h3>
+  <p>네트워크 없이도 동작하는 내장 인터프리터가 이제 더 복잡한 C 문법을 지원합니다.</p>
   <ul>
-    <li><strong>문법 하이라이트</strong> — 키워드(보라)·숫자(하늘)·전처리(자홍)·주석/문자열(회색/호박) 컬러링</li>
-    <li><strong>컴파일 오류 표시</strong> — 오류 라인(빨강)·경고 라인(호박) 배경 강조</li>
-    <li><strong>Tab 들여쓰기</strong> — Tab 키로 들여쓰기</li>
-    <li><strong>Ctrl+Enter 실행</strong> — 빠른 실행 단축키</li>
-    <li><strong>라인 점프</strong> — 특정 라인으로 이동</li>
-    <li><strong>자동 저장</strong> — <code>autoembed-code-{projectId}</code> 키로 코드 자동 저장</li>
+    <li><strong>구조체 지원</strong> — <code>struct</code> 정의 및 멤버 접근(<code>.</code> 연산자)을 지원합니다.</li>
+    <li><strong>Enum/Union</strong> — <code>enum</code> 상수의 자동 증감 및 <code>union</code> 기본 선언을 지원합니다.</li>
+    <li><strong>타입 시스템</strong> — <code>typedef</code>를 통한 사용자 정의 타입을 인식합니다.</li>
   </ul>
-
-  <h3>컴파일러 (온라인)</h3>
-  <p>Compiler Explorer(godbolt.org) API를 연동해 실제 ARM 크로스 컴파일러로 빌드합니다.</p>
-  <table>
-    <tr><th>컴파일러</th><th>설명</th></tr>
-    <tr><td><code>armg1320</code></td><td>arm-none-eabi-gcc 13.2.0 (ARM Cortex-M)</td></tr>
-    <tr><td><code>armg1413</code></td><td>arm-none-eabi-gcc 14.1.3</td></tr>
-    <tr><td><code>armg1421</code></td><td>arm-none-eabi-gcc 14.2.1</td></tr>
-    <tr><td><code>cg142</code></td><td>gcc 14.2 x86-64 (데스크톱)</td></tr>
-  </table>
-  <p>기본 플래그: <code>-O1 -Wall -mcpu=cortex-m4 -mthumb</code></p>
-
-  <h3>오프라인 C 인터프리터</h3>
-  <p>인터넷 없이도 C 코드를 실행할 수 있는 내장 인터프리터입니다.</p>
-  <ul>
-    <li><strong>지원</strong>: int/double/char, 배열, 기본 포인터, 함수, if/for/while/do-while/switch, printf(%d %u %x %X %f %.2f %e %g %c %s, 폭·정밀도·0 패딩), 수학/문자열/메모리 내장 함수</li>
-    <li><strong>미지원</strong>: struct/enum/typedef, 전역 초기화식, 2차원 배열, sizeof</li>
-    <li><strong>자동 검증</strong>: 기대 출력(expect)이 모두 포함되면 <strong>(PASS)</strong> 표시</li>
-  </ul>
-
-  <h3>AI 멘토 정적 분석</h3>
-  <p>코드를 정적으로 분석해 품질 점수와 개선 가이드를 제공합니다.</p>
-  <ul>
-    <li><strong>9종 검사</strong>: 누락 헤더(stdio/stdint/math/string — 원클릭 수정), gets() 금지, strcpy/strcat 경고, main() 없음, 중괄호 불균형, 0 나눗셈, 미초기화 변수, 매직 넘버, 무한 루프, 주석 비율</li>
-    <li><strong>점수 공식</strong>: <code>100 − 오류×18 − 경고×6 − 정보×2</code> (0~100)</li>
-    <li><strong>MISRA-C 품질 점수</strong>: 매직 넘버, 함수 40줄 초과, 블록 중첩 3단 이상, goto, 3줄 중복 블록</li>
-    <li><strong>프로젝트 핵심 요소 체크리스트</strong>: 15개 프로젝트별 필수 구현 요소(예: can-uds-scanner → CRC-15 다항식 0x4599, UDS SID, NRC 0x7F) 대비 <strong>커버리지 %</strong> 산출</li>
-    <li><strong>멘토 요약 리포트</strong>: 점수별 코멘트, 오류/경고 우선순위, 커버리지, 프로젝트 팁, 다음 단계</li>
-  </ul>
-
-  <h3>GCC 에러 지식베이스</h3>
-  <p>13개 규칙으로 컴파일 오류를 자동 해석합니다: 미선언 식별자, 암시적 함수 선언, 세미콜론/괄호 구문 오류, 중복 정의/타입 충돌, 링커 undefined reference, 헤더 없음, 타입 불일치, 인자 개수, lvalue 오류, 잘못된 포인터 연산, unused variable, 반환 없는 경로, 포인터↔정수 변환 — 각각 원인/해결/학습 포인트 제공(최대 2개 매칭).</p>
-</section>
-
-<!-- 11. 실측 랩 -->
-<section id="serial">
-  <h2 class="sec"><span class="num">11</span>실측 랩 (SerialLab)</h2>
-  <p>Web Serial API를 이용해 실제 MCU 보드와 브라우저를 시리얼로 연결해 데이터를 수집·시각화합니다.</p>
-  <ul>
-    <li><strong>시리얼 연결</strong> — Web Serial API 기반, 브라우저에서 포트 선택</li>
-    <li><strong>Baud rate</strong> — 115200 / 57600 / 38400 / 9600</li>
-    <li><strong>라벨 프리셋</strong> — t_ms, soc_pct, rpm, temp_c, v_bat, adc_raw, distance_cm</li>
-    <li><strong>실시간 플롯</strong> — 최대 1200 포인트, 560×180 그래프</li>
-    <li><strong>노이즈 필터</strong> — none / ma(이동평균) / ema(지수이동평균) / median</li>
-    <li><strong>캘리브레이션</strong> — none / manual / 2pt(2점 보정)</li>
-    <li><strong>윈도우 크기</strong> — 3 / 5 / 10 / 20</li>
-    <li><strong>펌웨어 템플릿</strong> — MCU 측 시리얼 출력 펌웨어 제공 (<code>serial/firmware.ts</code>)</li>
-  </ul>
-  <div class="callout warn"><b>브라우저 지원</b>Web Serial API는 Chrome/Edge 계열 브라우저에서만 동작합니다. Firefox·Safari에서는 시리얼 연결이 불가능합니다.</div>
-</section>
-
-<!-- 12. 실습 예제 -->
-<section id="labs">
-  <h2 class="sec"><span class="num">12</span>실습 예제 · 저장소 · 교재</h2>
-
-  <h3>내장 실습 문제 (12개)</h3>
-  <p>차량 임베디드 핵심 알고리즘을 직접 구현해 보는 문제입니다. 기대 출력 자동 검증으로 PASS/FAIL을 확인할 수 있습니다.</p>
-  <table>
-    <tr><th>문제</th><th>주제</th></tr>
-    <tr><td>lab01_crc8</td><td>CRC-8 (poly 0x07, "123456789" → 0xF4)</td></tr>
-    <tr><td>lab02_lin_checksum</td><td>LIN 체크섬</td></tr>
-    <tr><td>lab03_bounce</td><td>스위치 디바운스</td></tr>
-    <tr><td>lab04_pid</td><td>PID 제어</td></tr>
-    <tr><td>lab05_moving_avg</td><td>이동평균 필터</td></tr>
-    <tr><td>lab06_slip</td><td>휠 슬립 계산</td></tr>
-    <tr><td>lab07_can_id</td><td>CAN ID 파싱</td></tr>
-    <tr><td>lab08_quantization</td><td>ADC 양자화</td></tr>
-    <tr><td>lab09_bitmask</td><td>비트마스크 연산</td></tr>
-    <tr><td>lab10_sum_checksum</td><td>합 체크섬</td></tr>
-    <tr><td>lab11_rms</td><td>RMS 계산</td></tr>
-    <tr><td>lab12_lut</td><td>LUT 보간</td></tr>
-  </table>
-  <p><strong>커스텀 문제</strong> — <code>autoembed-custom-labs</code> 키로 나만의 실습 문제를 만들어 저장할 수 있습니다.</p>
-
-  <h3>샘플 코드</h3>
-  <p>프로젝트별 순수 C99 알고리즘 샘플(arm-none-eabi-gcc 컴파일 가능)을 제공합니다. 오프라인 실행 가능한 10개 샘플(uds_session, priority_inversion, watchdog, lin_checksum, window_sm, crc32, flash_driver, sd_state, ecu_modes, ignition_sm)은 기대 출력 자동 검증을 지원합니다. 예: crc32 → <code>0xCBF43926</code>, flash_driver → <code>rollback done</code>/<code>correctly rejected</code>.</p>
-
-  <h3>GitHub 저장소 탐색 (RepoExplorer)</h3>
-  <ul>
-    <li><strong>큐레이션 8개</strong>: TheAlgorithms/C, fragglet/c-algorithms, vedderb/bldc(VESC), FreeRTOS/FreeRTOS-Kernel, linux-can/can-utils, commaai/opendbc, libopencm3/libopencm3, zephyrproject-rtos/zephyr — 각각 연결 프로젝트와 추천 이유 제공</li>
-    <li><strong>라이브 기능</strong>: 저장소 메타(스타 수, GitHub API 실시간), 트리 탐색(최대 60개, skeleton/reference/source/header 분류), 파일 내용(raw), TODO/FIXME 기반 스켈레톤 판정, C 언어 별점순 검색</li>
-    <li><strong>풀이 완료 기록</strong> — <code>autoembed-repo-solved</code></li>
-  </ul>
-  <div class="callout warn"><b>API 제한</b>GitHub API는 인증 없이 분당 10회 요청 제한이 있습니다. 연속 탐색 시 잠시 기다렸다가 다시 시도하세요.</div>
-
-  <h3>교재 트랙 (TextbookTracks)</h3>
-  <p>저작권을 침해하지 않도록 원문 문제·그림·코드 없이 <strong>챕터 주제(커리큘럼 구조)만 참고</strong>하고, 문제는 전부 자체 제작한 3개 트랙 12장 구성입니다.</p>
-  <ul>
-    <li><strong>임베디드 C 기초 → 차량 통신 (5장)</strong>: 비트 연산/데이터 해석, 합 체크섬·CRC, 디바운스, LIN 기초, PID</li>
-    <li><strong>차량 신호 처리·수치 검증 (4장)</strong>: 노이즈 필터링, ADC·양자화, LUT 보간, 휠 슬립</li>
-    <li><strong>실시간 시스템 기초 (3장)</strong>: RMS 스케줄링 가능성, 주기 입력 처리, 워치독</li>
-  </ul>
-  <p>각 장은 목표(goals) + 연결 실습(labIds) + 연결 프로젝트(projectIds)로 구성되어 학습 흐름을 따라갈 수 있습니다.</p>
-</section>
-
-<!-- 13. 지원 전략 -->
-<section id="strategy">
-  <h2 class="sec"><span class="num">13</span>지원 전략 (GPA 환산·매칭)</h2>
-  <p>독일 대학 지원의 핵심인 성적 환산과 대학 매칭을 자동으로 계산합니다.</p>
-  <h3>바이에른 GPA 환산 공식</h3>
-  <pre><code>독일 GPA = 1 + 3 × (max − score) / (max − minPass)   (1.0 ~ 4.0 클램프)</code></pre>
-  <table>
-    <tr><th>독일 등급</th><th>의미</th></tr>
-    <tr><td>1.0 ~ 1.5</td><td>sehr gut (매우 우수)</td></tr>
-    <tr><td>1.6 ~ 2.5</td><td>gut (우수)</td></tr>
-    <tr><td>2.6 ~ 3.5</td><td>befriedigend (충분)</td></tr>
-    <tr><td>3.6 ~ 4.0</td><td>ausreichend (통과)</td></tr>
-  </table>
-  <h3>대학 요구사항·매칭</h3>
-  <ul>
-    <li><strong>UNIVERSITY_REQS</strong> — 대학별 요구사항 데이터베이스</li>
-    <li><strong>matchProjectsForUni</strong> — 특정 대학에 맞는 프로젝트 추천</li>
-    <li><strong>bestUniForProject</strong> — 특정 프로젝트에 가장 적합한 대학 추천</li>
-  </ul>
-  <p>대학별 전략은 <code>autoembed-strategy-uni-{id}</code> 접두사 키로 저장됩니다.</p>
-</section>
-
-<!-- 14. 서류 생성 -->
-<section id="documents">
-  <h2 class="sec"><span class="num">14</span>지원 서류 생성</h2>
-  <p>구조화된 질문에 답하면 개인화된 지원 서류를 자동 생성합니다.</p>
-  <h3>3가지 모드</h3>
-  <table>
-    <tr><th>모드</th><th>산출물</th></tr>
-    <tr><td><code>letter</code></td><td>영문 자기소개서 (Motivation Letter)</td></tr>
-    <tr><td><code>cv</code></td><td>영문 이력서 (CV)</td></tr>
-    <tr><td><code>cv-de</code></td><td>독일어 Lebenslauf (표 형식)</td></tr>
-  </table>
-  <h3>구조화 질문 인터뷰 (5문항)</h3>
-  <ol>
-    <li>가장 힘들었던 디버깅 경험</li>
-    <li>자랑할 측정 수치</li>
-    <li>팀에서 맡았던 역할</li>
-    <li>임베디드에 관심을 갖게 된 계기</li>
-    <li>졸업 후 목표</li>
-  </ol>
-  <p>각 질문은 placeholder와 힌트를 제공해 작성 부담을 줄여줍니다.</p>
-  <h3>구체성 스코어러</h3>
-  <p><code>scoreDocument()</code>가 서류를 100점 만점으로 평가합니다: 단어 수, 숫자(단위 포함), 프로젝트 코드(DE-EMB-XXXX), 대학 언급, 구체성 비율 → 판정 문구 제공.</p>
-  <h3>개인화 생성</h3>
-  <ul>
-    <li><strong>generatePersonalizedLetter()</strong> — 대학별 실제 모듈·연구소·도시를 문단에 자동 주입, 프로젝트 목록·측정 수치·역할·계기·목표 삽입, 제출 전 체크리스트 포함</li>
-    <li><strong>generateGermanCv()</strong> — Lebenslauf 표 형식(개인정보/학력/프로젝트 표/경력/기술/언어)</li>
-  </ul>
-  <div class="callout tip"><b>팁</b>구체적인 숫자와 프로젝트 코드(DE-EMB-XXXX)를 포함할수록 구체성 점수가 올라갑니다. "측정 수치" 질문에는 실제로 측정한 값(예: "CAN 버스 500 kbit/s에서 2 ms 지연")을 입력하세요.</div>
-</section>
-
-<!-- 15. 스타터팩 -->
-<section id="starterpack">
-  <h2 class="sec"><span class="num">15</span>스타터팩 ZIP 구성</h2>
-  <p>프로젝트를 실제 임베디드 프로젝트처럼 구성한 ZIP 파일을 생성합니다. 코드 랩에서 작성한 <strong>사용자 수정 코드가 자동 반영</strong>됩니다.</p>
-  <pre><code>README.md                          ← 프로젝트 개요
-{p.id}/README.md                   ← 프로젝트별 문서
-{p.id}/src/main.c                  ← 메인 C 소스
-{p.id}/Makefile                    ← arm-none-eabi-gcc 빌드
-{p.id}/docs/plan.md                ← 개발 계획
-{p.id}/docs/interview-prep.md      ← 면접 대비
-{p.id}/algo/README.md              ← 알고리즘 설명
-{p.id}/algo/{sampleId}.c           ← 알고리즘 샘플 코드</code></pre>
-  <p>동일한 구성을 <strong>GitHub 원클릭 배포</strong>(GitHubDeploy)로 바로 저장소에 올릴 수도 있습니다.</p>
+  <div class="callout tip"><b>코드 스플리팅</b>React.lazy를 적용하여 각 탭의 코드는 필요할 때만 로드됩니다. 초기 로딩 속도가 개선되었습니다.</div>
 </section>
 
 <!-- 16. 백업 -->
 <section id="backup">
-  <h2 class="sec"><span class="num">16</span>데이터 저장·백업</h2>
-  <p>앱이 사용하는 모든 localStorage 키와 백업 방법입니다.</p>
-  <table>
-    <tr><th>키</th><th>용도</th></tr>
-    <tr><td><code>autoembed-saved-projects</code></td><td>저장된 프로젝트</td></tr>
-    <tr><td><code>autoembed-project-progress</code></td><td>프로젝트 진행 트래커</td></tr>
-    <tr><td><code>autoembed-activity</code></td><td>활동 기록·스트릭</td></tr>
-    <tr><td><code>autoembed-code-{projectId}</code></td><td>코드 랩 자동 저장</td></tr>
-    <tr><td><code>autoembed-deadline</code></td><td>로드맵 마감일</td></tr>
-    <tr><td><code>autoembed-checklist</code></td><td>로드맵 체크리스트</td></tr>
-    <tr><td><code>autoembed-diagnosis</code></td><td>경쟁력 진단 결과</td></tr>
-    <tr><td><code>autoembed-interview-stats</code></td><td>모의 면접 통계</td></tr>
-    <tr><td><code>autoembed-german-stats</code></td><td>독일어 어휘 통계</td></tr>
-    <tr><td><code>autoembed-repo-solved</code></td><td>저장소 풀이 완료 기록</td></tr>
-    <tr><td><code>autoembed-strategy-uni-{id}</code></td><td>대학별 지원 전략</td></tr>
-    <tr><td><code>autoembed-custom-labs</code></td><td>커스텀 실습 문제</td></tr>
-  </table>
-  <h3>백업 방법</h3>
+  <h2 class="sec"><span class="num">16</span>데이터 저장·백업·쿼터</h2>
+  <p>중앙 집중식 스토리지 관리 시스템이 도입되었습니다.</p>
   <ul>
-    <li><strong>내보내기</strong> — "내 포트폴리오" 탭의 백업 기능으로 <code>autoembed-*</code> 전체 키를 JSON으로 묶어 <code>autoembed-backup-YYYY-MM-DD.json</code> 파일로 다운로드</li>
-    <li><strong>가져오기</strong> — JSON 파일을 선택하면 localStorage에 복원</li>
+    <li><strong>중앙 레지스트리</strong> — 17개 이상의 <code>localStorage</code> 키가 <code>storage.ts</code>에서 통합 관리됩니다.</li>
+    <li><strong>스키마 검증</strong> — 백업 복원 시 데이터 구조가 올바른지 검증하여 앱 오동작을 방지합니다.</li>
+    <li><strong>용량 경고</strong> — 브라우저 스토리지 쿼터(약 5MB)의 80%를 초과할 경우 사용자에게 알림을 표시하여 데이터 유실을 방지합니다.</li>
   </ul>
-  <div class="callout warn"><b>주의</b>localStorage는 브라우저별로 분리되어 있습니다. 브라우저를 바꾸거나 시크릿 모드에서는 데이터가 보이지 않습니다. 중요한 데이터는 반드시 백업 파일로 보관하세요.</div>
-</section>
-
-<!-- 17. 단축키 -->
-<section id="shortcuts">
-  <h2 class="sec"><span class="num">17</span>단축키</h2>
-  <table>
-    <tr><th>단축키</th><th>동작</th></tr>
-    <tr><td><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span></td><td>코드 랩에서 코드 실행</td></tr>
-    <tr><td><span class="kbd">Tab</span></td><td>코드 랩 에디터에서 들여쓰기</td></tr>
-    <tr><td><span class="kbd">Ctrl</span> + <span class="kbd">S</span></td><td>코드 수동 저장 (자동 저장도 지원)</td></tr>
-  </table>
 </section>
 
 <!-- 18. FAQ -->
 <section id="faq">
   <h2 class="sec"><span class="num">18</span>자주 묻는 질문</h2>
-
-  <h4>Q. 데이터가 사라졌어요. 어떻게 복구하나요?</h4>
-  <p>백업 파일(<code>autoembed-backup-*.json</code>)이 있다면 "내 포트폴리오 → 백업 → 가져오기"로 복원할 수 있습니다. 백업 파일이 없다면 브라우저 캐시 삭제로 인한 데이터 손실은 복구할 수 없습니다.</p>
-
-  <h4>Q. 코드 랩에서 컴파일이 안 되는데 인터넷이 필요하나요?</h4>
-  <p>온라인 컴파일(Compiler Explorer)은 인터넷이 필요합니다. 하지만 <strong>오프라인 C 인터프리터</strong>를 사용하면 인터넷 없이도 대부분의 예제를 실행하고 PASS/FAIL 검증을 받을 수 있습니다.</p>
-
-  <h4>Q. 시리얼 연결이 안 돼요.</h4>
-  <p>Web Serial API는 Chrome/Edge에서만 지원됩니다. Firefox·Safari에서는 동작하지 않으며, HTTPS 또는 localhost 환경에서만 포트 접근이 허용됩니다.</p>
-
-  <h4>Q. GitHub 저장소 탐색이 갑자기 안 돼요.</h4>
-  <p>GitHub API의 미인증 요청 제한(분당 10회)에 걸렸을 수 있습니다. 1분 정도 기다린 후 다시 시도하세요.</p>
-
-  <h4>Q. 독일 GPA 환산은 어떻게 하나요?</h4>
-  <p>"경쟁력 센터 → 지원 전략"에서 바이에른 공식(<code>1 + 3×(max−score)/(max−minPass)</code>)으로 자동 계산됩니다. 1.0~4.0 범위로 클램프되며 sehr gut/gut/befriedigend/ausreichend 등급으로 표시됩니다.</p>
-
-  <h4>Q. 자기소개서 점수를 높이려면?</h4>
-  <p>구체성 스코어러 기준으로 ① 구체적인 숫자와 단위 ② 프로젝트 코드(DE-EMB-XXXX) ③ 지원 대학 언급 ④ 충분한 분량을 채우면 점수가 올라갑니다. 5문항 인터뷰에 실제 경험 기반으로 답하세요.</p>
-
-  <h4>Q. APS 인증이 필요한가요?</h4>
-  <p>한국 국적 지원자는 APS 인증이 <strong>불필요</strong>합니다. 다만 uni-assist/VPD 인증은 대학에 따라 필요할 수 있으니 로드맵 D-6개월 단계를 확인하세요.</p>
+  <h4>Q. 폰트가 왜 평소와 다른가요?</h4>
+  <p>외부 CDN 의존도를 낮추기 위해 폰트 셀프 호스팅을 적용했습니다. <code>Pretendard</code>와 <code>JetBrains Mono</code>를 로컬에서 서빙하며, 로드 실패 시 시스템 폰트(Windows/Mac/iOS/Android 최적화)로 자동 전환됩니다.</p>
+  <h4>Q. GitHub 배포 시 토큰이 안전한가요?</h4>
+  <p>입력한 Personal Access Token은 브라우저 메모리에만 일시적으로 머물며, 배포 완료 즉시 초기화되어 제거됩니다. 또한 <code>autocomplete="off"</code>를 적용하여 보안을 강화했습니다.</p>
 </section>
 
 <footer>
-  AutoEmbed LAB 사용자 가이드 · 독일 자동차 임베디드 석사 지원을 위한 올인원 포트폴리오 빌더
+  AutoEmbed LAB 사용자 가이드 v1.1 · 독일 자동차 임베디드 석사 지원을 위한 올인원 포트폴리오 빌더
 </footer>
 
 </div>

@@ -34,7 +34,7 @@ export default function ArchitectureDiagram({ project }: { project: Project }) {
           .svg 다운로드
         </button>
       </div>
-      <div className="p-3" dangerouslySetInnerHTML={{ __html: svg }} />
+      <div className="p-3" aria-label="아키텍처 다이어그램" dangerouslySetInnerHTML={{ __html: svg }} />
       <p className="border-t border-white/5 px-4 py-2 text-[10px] text-slate-600">
         MCU · 입력 · 출력 · 전원 · 버스 구성이 분야 템플릿으로 자동 생성됩니다. README에 삽입하거나 스타터팩 zip의
         docs/architecture.svg로도 제공됩니다.

@@ -392,31 +392,39 @@ int foo(void) { return 1; }`);
     expect(r.error!.message).toContain("main");
   });
 
-  it("struct 사용 거부", () => {
-    const r = runC(`
+  it("struct 지원 테스트", () => {
+    const out = okOutput(`
 struct frame { int id; };
-int main(void) { return 0; }`);
-    expect(r.ok).toBe(false);
-    expect(r.error!.message).toContain("struct");
-    expect(r.error!.message).toContain("지원하지 않습니다");
+int main(void) {
+    struct frame s;
+    s.id = 42;
+    printf("%d\\n", s.id);
+    return 0;
+}`);
+    expect(out).toBe("42\n");
   });
 
-  it("enum 사용 거부 (typedef 아님)", () => {
-    const r = runC(`
-enum Mode { A, B };
-int main(void) { return 0; }`);
-    expect(r.ok).toBe(false);
-    expect(r.error!.message).toContain("enum");
-    expect(r.error!.message).toContain("지원하지 않습니다");
+  it("typedef enum 지원 테스트", () => {
+    const out = okOutput(`
+typedef enum { RED, GREEN, BLUE } color_t;
+int main(void) {
+    color_t c = GREEN;
+    printf("%d\\n", c);
+    return 0;
+}`);
+    expect(out).toBe("1\n");
   });
 
-  it("union 사용 거부", () => {
-    const r = runC(`
+  it("union 지원 테스트", () => {
+    const out = okOutput(`
 union u { int a; char b; };
-int main(void) { return 0; }`);
-    expect(r.ok).toBe(false);
-    expect(r.error!.message).toContain("union");
-    expect(r.error!.message).toContain("지원하지 않습니다");
+int main(void) {
+    union u v;
+    v.a = 10;
+    printf("%d\\n", v.a);
+    return 0;
+}`);
+    expect(out).toBe("10\n");
   });
 
   it("2차원 배열 거부", () => {

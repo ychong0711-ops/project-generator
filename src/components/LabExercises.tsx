@@ -380,8 +380,8 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
                   </div>
                   <div className="relative h-72 font-mono" style={{ fontSize: '12.5px', lineHeight: '20px' }}>
                     <div
-                      aria-hidden
                       className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre px-4 py-3 text-slate-200"
+                      aria-label="코드 하이라이트"
                       dangerouslySetInnerHTML={{ __html: editorHtml(code, new Map()) }}
                     />
                     <textarea

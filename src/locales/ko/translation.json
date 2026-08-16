@@ -1,0 +1,12 @@
+{
+  "menu_dashboard": "대시보드",
+  "btn_generate": "생성",
+  "label_token": "토큰",
+  "home": "홈",
+  "generator": "프로젝트 생성기",
+  "error": "오류",
+  "success": "성공",
+  "loading": "로딩 중",
+  "language": "언어",
+  "back": "뒤로"
+}

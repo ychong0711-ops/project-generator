@@ -1,0 +1,15 @@
+
+> react-vite-tailwind@0.0.0 build
+> vite build
+
+[36mvite v7.3.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m??[39m 21 modules transformed.
+??[39m Build failed in 493ms
+error during build:
+Could not resolve "../public/locales/de/translation.json" from "src/providers/I18nProvider.tsx"
+file: C:/embedded/automotive-embedded-project-generator/src/providers/I18nProvider.tsx
+    at getRollupError (file:///C:/embedded/automotive-embedded-project-generator/node_modules/rollup/dist/es/shared/parseAst.js:317:41)
+    at error (file:///C:/embedded/automotive-embedded-project-generator/node_modules/rollup/dist/es/shared/parseAst.js:313:42)
+    at ModuleLoader.handleInvalidResolvedId (file:///C:/embedded/automotive-embedded-project-generator/node_modules/rollup/dist/es/shared/node-entry.js:21928:24)
+    at file:///C:/embedded/automotive-embedded-project-generator/node_modules/rollup/dist/es/shared/node-entry.js:21888:26

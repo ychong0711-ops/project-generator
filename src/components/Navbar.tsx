@@ -1,6 +1,7 @@
 import type { TabId } from '../types';
 import { ChipIcon } from './icons';
 import { cn } from '../utils/cn';
+import { useTranslation } from 'react-i18next';
 
 interface NavbarProps {
   active: TabId;
@@ -20,6 +21,8 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
+  const { t } = useTranslation();
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-[#07090d]/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -33,7 +36,7 @@ export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
                 AutoEmbed <span className="text-amber-400">LAB</span>
               </span>
               <span className="block text-[10px] text-slate-500 font-medium tracking-wide">
-                DE · Embedded Systems Master Prep
+                {t('DE_Embedded_Systems_Master_Prep')}
               </span>
             </span>
           </button>

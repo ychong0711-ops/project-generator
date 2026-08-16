@@ -1,0 +1,12 @@
+{
+  "menu_dashboard": "Dashboard",
+  "btn_generate": "Generate",
+  "label_token": "Token",
+  "home": "Home",
+  "generator": "Project Generator",
+  "error": "Error",
+  "success": "Success",
+  "loading": "Loading",
+  "language": "Language",
+  "back": "Back"
+}

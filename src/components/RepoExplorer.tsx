@@ -349,8 +349,8 @@ export default function RepoExplorer() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div className="relative h-72 font-mono" style={{ fontSize: '12px', lineHeight: '19px' }}>
                 <div
-                  aria-hidden
                   className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre px-3.5 py-3 text-slate-200"
+                  aria-label="코드 하이라이트"
                   dangerouslySetInnerHTML={{ __html: editorHtml(code, new Map()) }}
                 />
                 <textarea

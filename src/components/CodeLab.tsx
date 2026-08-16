@@ -293,8 +293,8 @@ export default function CodeLab({ project }: CodeLabProps) {
               {/* 하이라이트 레이어 */}
               <div
                 ref={hlRef}
-                aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre px-3 py-3 text-slate-200"
+                aria-label="코드 하이라이트"
                 dangerouslySetInnerHTML={{ __html: highlightedHtml }}
               />
               {/* 입력 레이어 (텍스트는 투명, 하이라이트가 비춰짐) */}

@@ -56,7 +56,7 @@ export default function GuideTab({ savedProjects }: GuideTabProps) {
 
         {/* 가이드 문서 */}
         <div className="mt-8 rounded-2xl border border-white/10 bg-[#07090d]">
-          <div className="overflow-hidden rounded-2xl" dangerouslySetInnerHTML={{ __html: html }} />
+          <div className="overflow-hidden rounded-2xl" aria-label="사용자 가이드" dangerouslySetInnerHTML={{ __html: html }} />
         </div>
       </div>
     </section>
