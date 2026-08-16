@@ -73,13 +73,21 @@ export default function InterviewSim({ savedProjects }: InterviewSimProps) {
     setRemaining(timeLimit);
   }, [idx, order, bank, timeLimit]);
 
-  /* 카운트다운 */
+  /* 카운트다운 — 인터벌은 한 번만 만들고 0에 도달하면 스스로 멈춘다.
+     (의존성 배열에 표현식을 넣으면 매 틱마다 인터벌이 재생성되어 드리프트가 생긴다) */
   useEffect(() => {
     if (timeLimit <= 0) return;
-    if (remaining <= 0) return;
-    const t = setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
+    const t = setInterval(() => {
+      setRemaining((r) => {
+        if (r <= 1) {
+          clearInterval(t);
+          return 0;
+        }
+        return r - 1;
+      });
+    }, 1000);
     return () => clearInterval(t);
-  }, [timeLimit, remaining > 0 ? 1 : 0, idx, order]);
+  }, [timeLimit, idx, order]);
 
   useEffect(() => {
     setOrder(Array.from({ length: bank.length }, (_, i) => i));

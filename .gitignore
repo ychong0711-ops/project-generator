@@ -2,3 +2,8 @@ node_modules/
 dist/
 .git/
 .vscode/
+
+# 빌드/테스트 출력 로그 (커밋 대상 아님)
+build_output.txt
+test_output*.txt
+*.bak

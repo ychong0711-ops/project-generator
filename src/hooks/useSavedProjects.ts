@@ -1,33 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { AUTOEMBED_SAVED_PROJECTS, safeGet, safeSet } from '../utils/storage';
 
-const KEY = 'autoembed-saved-projects';
+const KEY = AUTOEMBED_SAVED_PROJECTS;
+
+function loadIds(): string[] {
+  const v = safeGet<unknown>(KEY, []);
+  if (!Array.isArray(v)) return [];
+  // 손상된 백업 등으로 문자열이 아닌 값이 섞이면 걸러낸다.
+  return [...new Set(v.filter((x): x is string => typeof x === 'string'))];
+}
 
 export function useSavedProjects() {
-  const [savedIds, setSavedIds] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      return raw ? (JSON.parse(raw) as string[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [savedIds, setSavedIds] = useState<string[]>(loadIds);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(savedIds));
-    } catch {
-      /* ignore */
-    }
+    safeSet(KEY, savedIds);
   }, [savedIds]);
 
-  const toggle = (id: string) =>
-    setSavedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggle = useCallback(
+    (id: string) =>
+      setSavedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])),
+    []
+  );
 
-  const remove = (id: string) => setSavedIds((prev) => prev.filter((x) => x !== id));
+  const remove = useCallback(
+    (id: string) => setSavedIds((prev) => prev.filter((x) => x !== id)),
+    []
+  );
 
-  const clear = () => setSavedIds([]);
+  const clear = useCallback(() => setSavedIds([]), []);
 
-  const isSaved = (id: string) => savedIds.includes(id);
+  const isSaved = useCallback((id: string) => savedIds.includes(id), [savedIds]);
 
   return { savedIds, toggle, remove, clear, isSaved };
 }

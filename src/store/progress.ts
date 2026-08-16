@@ -1,18 +1,20 @@
 import { useSyncExternalStore } from 'react';
 import type { Project } from '../types';
 import { recordActivity } from './activity';
+import { AUTOEMBED_PROJECT_PROGRESS, safeGet, safeSet } from '../utils/storage';
 
-const KEY = 'autoembed-project-progress';
+const KEY = AUTOEMBED_PROJECT_PROGRESS;
 
 export type ProgressMap = Record<string, string[]>;
 
 function load(): ProgressMap {
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as ProgressMap) : {};
-  } catch {
-    return {};
+  const v = safeGet<unknown>(KEY, {});
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return {};
+  const out: ProgressMap = {};
+  for (const [k, arr] of Object.entries(v as Record<string, unknown>)) {
+    if (Array.isArray(arr)) out[k] = arr.filter((x): x is string => typeof x === 'string');
   }
+  return out;
 }
 
 let state: ProgressMap = load();
@@ -21,11 +23,7 @@ const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
 function persist() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* ignore */
-  }
+  safeSet(KEY, state);
 }
 
 function subscribe(fn: () => void) {

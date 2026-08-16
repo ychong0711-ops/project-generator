@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import JSZip from 'jszip';
 import type { Project } from '../types';
 import { portfolioToMarkdown, projectToMarkdown } from '../utils/markdown';
@@ -52,7 +52,15 @@ function buildFiles(projects: Project[]): DeployFile[] {
   return files;
 }
 
-const b64 = (s: string) => btoa(unescape(encodeURIComponent(s)));
+/* UTF-8 안전 base64 인코딩 (deprecated unescape 제거) */
+function b64(s: string): string {
+  const bytes = new TextEncoder().encode(s);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(bin);
+}
 
 export default function GitHubDeploy({ savedProjects }: GitHubDeployProps) {
   const [token, setToken] = useState('');
@@ -63,148 +71,172 @@ export default function GitHubDeploy({ savedProjects }: GitHubDeployProps) {
   const [repoUrl, setRepoUrl] = useState('');
   const [zipped, setZipped] = useState(false);
 
+  /* 렌더마다 전체 파일을 다시 생성하지 않도록 메모이즈 */
+  const files = useMemo(() => buildFiles(savedProjects), [savedProjects]);
+
   const pushLog = (msg: string) => setLog((prev) => [...prev.slice(-20), msg]);
 
   const deploy = async () => {
     if (busy) return;
-    if (!token.trim() || !username.trim() || !repo.trim()) {
+    const tk = token.trim();
+    const user = username.trim();
+    const rp = repo.trim();
+    if (!tk || !user || !rp) {
       pushLog('⚠ 토큰·GitHub 사용자명·저장소명을 모두 입력하세요.');
       return;
     }
     setBusy(true);
     setLog([]);
     setRepoUrl('');
-    try {
-      const headers = {
-        Authorization: `Bearer ${token.trim()}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/vnd.github+json',
-      };
 
-      /* 1) 저장소 생성 */
+    const headers = {
+      Authorization: `Bearer ${tk}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/vnd.github+json',
+    };
+    const api = `https://api.github.com/repos/${user}/${rp}`;
+    /* GitHub 오류 응답의 message 를 최대한 안전하게 추출 */
+    const errMessage = async (res: Response): Promise<string> => {
+      try {
+        const data = (await res.json()) as { message?: string };
+        return data.message ?? res.statusText;
+      } catch {
+        return res.statusText;
+      }
+    };
+
+    try {
+      /* 1) 저장소 생성 (이미 있으면 재사용) */
       pushLog('저장소 생성 중...');
       const createRes = await fetch('https://api.github.com/user/repos', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ name: repo.trim(), private: false, auto_init: false, description: 'German automotive embedded systems master application portfolio (AutoEmbed LAB)' }),
+        body: JSON.stringify({
+          name: rp,
+          private: false,
+          auto_init: false,
+          description:
+            'German automotive embedded systems master application portfolio (AutoEmbed LAB)',
+        }),
       });
       if (!createRes.ok) {
-        if (createRes.status === 422) pushLog('저장소가 이미 존재합니다 — 기존 저장소에 파일을 푸시합니다.');
-        else if (createRes.status === 401) {
-          pushLog('⛔ 토큰이 유효하지 않습니다. GitHub → Settings → Developer settings → Personal access tokens에서 발급하세요 (repo 권한).');
-          setBusy(false);
+        if (createRes.status === 422) {
+          pushLog('저장소가 이미 존재합니다 — 기존 저장소에 파일을 푸시합니다.');
+        } else if (createRes.status === 401) {
+          pushLog(
+            '⛔ 토큰이 유효하지 않습니다. GitHub → Settings → Developer settings → Personal access tokens에서 발급하세요 (repo 권한).'
+          );
           return;
         } else {
-          pushLog(`저장소 생성 실패 (HTTP ${createRes.status}) — 토큰 권한을 확인하세요.`);
-          setBusy(false);
+          pushLog(
+            `저장소 생성 실패 (HTTP ${createRes.status}) — ${await errMessage(createRes)}`
+          );
           return;
         }
       } else {
-        pushLog(`저장소 '${repo}' 생성 완료`);
+        pushLog(`저장소 '${rp}' 생성 완료`);
       }
 
-      /* 2) 단일 커밋으로 파일 일괄 푸시 (Git Data API) */
-      const files = buildFiles(savedProjects);
+      /* 2) 기본 브랜치와 현재 HEAD 확인 (기존 저장소면 부모 커밋이 필요하다) */
+      const repoRes = await fetch(api, { headers });
+      const defaultBranch: string = repoRes.ok
+        ? ((await repoRes.json()) as { default_branch?: string }).default_branch || 'main'
+        : 'main';
+
+      let parentSha: string | null = null;
+      let baseTree: string | null = null;
+      const refPath = `heads/${defaultBranch}`;
+      const refRes = await fetch(`${api}/git/ref/${refPath}`, { headers });
+      if (refRes.ok) {
+        const refData = (await refRes.json()) as { object: { sha: string } };
+        parentSha = refData.object.sha;
+        const commitRes0 = await fetch(`${api}/git/commits/${parentSha}`, { headers });
+        if (commitRes0.ok) {
+          baseTree = ((await commitRes0.json()) as { tree: { sha: string } }).tree.sha;
+        }
+      }
+
+      /* 3) 파일별 blob 생성 */
       pushLog(`파일 ${files.length}개 커밋 시작...`);
-      try {
-        // 2-1) 각 파일의 blob 생성
-        const blobShas: string[] = [];
-        let blobError = false;
-        for (const f of files) {
-          const blobRes = await fetch(
-            `https://api.github.com/repos/${username.trim()}/${repo.trim()}/git/blobs`,
-            {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({ content: b64(f.content), encoding: 'base64' }),
-            }
+      const blobShas: string[] = [];
+      for (const f of files) {
+        const blobRes = await fetch(`${api}/git/blobs`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ content: b64(f.content), encoding: 'base64' }),
+        });
+        if (!blobRes.ok) {
+          pushLog(
+            `블롭 생성 실패: ${f.path} (HTTP ${blobRes.status}) — ${await errMessage(blobRes)}`
           );
-          if (!blobRes.ok) {
-            const errData = await blobRes.json();
-            pushLog(`블롭 생성 실패: ${f.path} (HTTP ${blobRes.status}) — ${errData.message || ''}`);
-            blobError = true;
-            break;
-          }
-          const blobData = await blobRes.json();
-          blobShas.push(blobData.sha);
-        }
-
-        if (blobError) {
-          setBusy(false);
-          setToken('');
           return;
         }
+        blobShas.push(((await blobRes.json()) as { sha: string }).sha);
+      }
 
-        // 2-2) blob들을 트리로 묶기 (트리 생성)
-        const treeItems = files.map((f, i) => ({
-          path: f.path,
-          mode: '100644',
-          type: 'blob',
-          sha: blobShas[i],
-        }));
-        const treeRes = await fetch(
-          `https://api.github.com/repos/${username.trim()}/${repo.trim()}/git/trees`,
-          {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ tree: treeItems, base_tree: '' }),
-          }
-        );
-        if (!treeRes.ok) {
-          const errData = await treeRes.json();
-          pushLog(`트리 생성 실패 (HTTP ${treeRes.status}) — ${errData.message || ''}`);
-          setBusy(false);
-          setToken('');
-          return;
-        }
-        const treeData = await treeRes.json();
-        const treeSha = treeData.sha;
+      /* 4) 트리 생성 — base_tree 는 존재할 때만 보낸다 (빈 문자열은 400) */
+      const treeRes = await fetch(`${api}/git/trees`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          tree: files.map((f, i) => ({
+            path: f.path,
+            mode: '100644',
+            type: 'blob',
+            sha: blobShas[i],
+          })),
+          ...(baseTree ? { base_tree: baseTree } : {}),
+        }),
+      });
+      if (!treeRes.ok) {
+        pushLog(`트리 생성 실패 (HTTP ${treeRes.status}) — ${await errMessage(treeRes)}`);
+        return;
+      }
+      const treeSha = ((await treeRes.json()) as { sha: string }).sha;
 
-        // 2-3) 커밋 생성 (부모 커밋이 없으면 신규 커밋 생성)
-        const commitRes = await fetch(
-          `https://api.github.com/repos/${username.trim()}/${repo.trim()}/git/commits`,
-          {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              message: `docs: add ${files.length} files`,
-              tree: treeSha,
-              parents: [], // 신규 repo이므로 부모 없음
-            }),
-          }
-        );
-        if (!commitRes.ok) {
-          const errData = await commitRes.json();
-          pushLog(`커밋 생성 실패 (HTTP ${commitRes.status}) — ${errData.message || ''}`);
-          setBusy(false);
-          setToken('');
-          return;
-        }
-        const commitData = await commitRes.json();
-        const commitSha = commitData.sha;
+      /* 5) 커밋 생성 — 기존 HEAD가 있으면 부모로 연결해야 히스토리가 끊기지 않는다 */
+      const commitRes = await fetch(`${api}/git/commits`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          message: `docs: add ${files.length} files`,
+          tree: treeSha,
+          parents: parentSha ? [parentSha] : [],
+        }),
+      });
+      if (!commitRes.ok) {
+        pushLog(`커밋 생성 실패 (HTTP ${commitRes.status}) — ${await errMessage(commitRes)}`);
+        return;
+      }
+      const commitSha = ((await commitRes.json()) as { sha: string }).sha;
 
-        // 2-4) main 브랜치 ref를 새로운 커밋으로 업데이트
-        await fetch(
-          `https://api.github.com/repos/${username.trim()}/${repo.trim()}/git/refs`,
-          {
+      /* 6) ref 갱신 — 없으면 생성(POST), 있으면 갱신(PATCH) */
+      const refUpdate = parentSha
+        ? await fetch(`${api}/git/refs/${refPath}`, {
             method: 'PATCH',
             headers,
-            body: JSON.stringify({ sha: commitSha, ref: 'refs/heads/main' }),
-          }
+            body: JSON.stringify({ sha: commitSha, force: true }),
+          })
+        : await fetch(`${api}/git/refs`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ ref: `refs/${refPath}`, sha: commitSha }),
+          });
+      if (!refUpdate.ok) {
+        pushLog(
+          `브랜치 갱신 실패 (HTTP ${refUpdate.status}) — ${await errMessage(refUpdate)}`
         );
-
-        pushLog(`✅ ${files.length}개 파일 단일 커밋 완료`);
-        const url = `https://github.com/${username.trim()}/${repo.trim()}`;
-        setRepoUrl(url);
-        pushLog(`🌐 저장소: ${url}`);
-      } catch (e) {
-        pushLog(`네트워크 오류: ${(e as Error).message}`);
-        setBusy(false);
-        setToken('');
+        return;
       }
+
+      pushLog(`✅ ${files.length}개 파일 단일 커밋 완료`);
+      const url = `https://github.com/${user}/${rp}`;
+      setRepoUrl(url);
+      pushLog(`🌐 저장소: ${url}`);
     } catch (e) {
       pushLog(`네트워크 오류: ${(e as Error).message}`);
     } finally {
+      /* 성공/실패와 무관하게 busy 해제 + 토큰 폐기 (한 곳에서만 처리) */
       setBusy(false);
       setToken('');
     }
@@ -212,7 +244,7 @@ export default function GitHubDeploy({ savedProjects }: GitHubDeployProps) {
 
   const downloadZip = async () => {
     const zip = new JSZip();
-    for (const f of buildFiles(savedProjects)) zip.file(f.path, f.content);
+    for (const f of files) zip.file(f.path, f.content);
     const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -280,7 +312,7 @@ export default function GitHubDeploy({ savedProjects }: GitHubDeployProps) {
             {busy ? (
               <>
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-                배포 중... (파일 {buildFiles(savedProjects).length}개)
+                배포 중... (파일 {files.length}개)
               </>
             ) : (
               <>🐙 GitHub에 배포</>

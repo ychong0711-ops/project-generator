@@ -112,7 +112,6 @@ describe('editorHtml — 오류/경고 라인 배경', () => {
       [2, 'warning'],
     ]);
     const out = editorHtml('int x = 0;\nint y = 1;', map);
-    const lines = out.split('<div');
     expect(out).toContain('bg-red-500/15');
     expect(out).toContain('bg-amber-400/10');
     expect(out).toContain('<div class="bg-red-500/15">');

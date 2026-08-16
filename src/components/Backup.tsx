@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { DownloadIcon } from './icons';
+import { buildBackup, parseBackup, restoreBackup } from '../utils/storage';
 
 /* ============================================================
  *  데이터 백업/복원 — 18개월 준비의 생명줄
@@ -11,16 +12,7 @@ export default function Backup() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const exportAll = () => {
-    const keys = Object.keys(localStorage).filter((k) => k.startsWith('autoembed-'));
-    const data: Record<string, unknown> = {};
-    keys.forEach((k) => {
-      try {
-        data[k] = JSON.parse(localStorage.getItem(k) ?? 'null');
-      } catch {
-        data[k] = localStorage.getItem(k);
-      }
-    });
-    const payload = { app: 'autoembed-lab', exportedAt: new Date().toISOString(), data };
+    const payload = buildBackup();
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -30,32 +22,32 @@ export default function Backup() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    setMsg(`✅ ${keys.length}개 항목 백업 완료 — 파일을 안전한 곳에 보관하세요.`);
+    const n = Object.keys(payload.data).length;
+    setMsg(`✅ ${n}개 항목 백업 완료 — 파일을 안전한 곳에 보관하세요.`);
   };
 
   const importAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+    e.target.value = '';
     if (!f) return;
     const reader = new FileReader();
+    reader.onerror = () => setMsg('⛔ 파일을 읽지 못했습니다.');
     reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result)) as { data?: Record<string, unknown> };
-        if (!parsed.data) throw new Error('형식 오류');
-        let n = 0;
-        Object.entries(parsed.data).forEach(([k, v]) => {
-          if (k.startsWith('autoembed-')) {
-            localStorage.setItem(k, JSON.stringify(v));
-            n++;
-          }
-        });
-        setMsg(`✅ ${n}개 항목 복원 완료 — 새로고침합니다.`);
-        setTimeout(() => window.location.reload(), 1200);
-      } catch {
-        setMsg('⛔ 백업 파일을 읽을 수 없습니다. 올바른 JSON인지 확인하세요.');
+      /* 스키마 검증 후 원본 문자열 그대로 복원 (이중 JSON 인코딩 방지) */
+      const payload = parseBackup(String(reader.result));
+      if (!payload) {
+        setMsg('⛔ 백업 파일 형식이 올바르지 않습니다. 이 앱에서 내보낸 JSON인지 확인하세요.');
+        return;
       }
+      const { restored, failed } = restoreBackup(payload);
+      if (failed.length > 0) {
+        setMsg(`⚠ ${restored}개 복원, ${failed.length}개 실패 (저장 공간 부족일 수 있습니다).`);
+        return;
+      }
+      setMsg(`✅ ${restored}개 항목 복원 완료 — 새로고침합니다.`);
+      window.setTimeout(() => window.location.reload(), 1200);
     };
     reader.readAsText(f);
-    e.target.value = '';
   };
 
   return (

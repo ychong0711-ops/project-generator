@@ -525,13 +525,24 @@ export async function fetchRepoIndex(repo: string, branch = 'main'): Promise<Rep
   };
   if (!Array.isArray(data.examples)) throw new Error('index.json 형식 오류: examples 배열 필요');
 
-  const out: RepoExampleFile[] = [];
-  for (const ex of data.examples) {
-    const cUrl = `https://raw.githubusercontent.com/${repo}/${branch}/labs/${ex.id}.c`;
-    const cRes = await fetch(cUrl);
-    if (!cRes.ok) continue;
-    const skeleton = await cRes.text();
-    out.push({ id: ex.id, title: ex.title, desc: ex.desc, skeleton, expect: ex.expect ?? [] });
-  }
-  return out;
+  /* 예제 소스는 서로 독립적이므로 병렬로 받는다 (직렬 fetch는 N배 느리다) */
+  const settled = await Promise.all(
+    data.examples.map(async (ex): Promise<RepoExampleFile | null> => {
+      try {
+        const cUrl = `https://raw.githubusercontent.com/${repo}/${branch}/labs/${ex.id}.c`;
+        const cRes = await fetch(cUrl);
+        if (!cRes.ok) return null;
+        return {
+          id: ex.id,
+          title: ex.title,
+          desc: ex.desc,
+          skeleton: await cRes.text(),
+          expect: ex.expect ?? [],
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
+  return settled.filter((x): x is RepoExampleFile => x !== null);
 }

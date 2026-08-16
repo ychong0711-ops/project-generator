@@ -1,15 +1,14 @@
-import { I18nProvider as ReactI18nextProvider, useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import { I18nextProvider, initReactI18next, useTranslation } from 'react-i18next';
 
-// ✅ 수정: src/locales/ 에서 import
 import koTranslation from '../locales/ko/translation.json';
 import deTranslation from '../locales/de/translation.json';
 import enTranslation from '../locales/en/translation.json';
 
-i18n
-  .use(initReactI18next)
-  .init({
+/* HMR/테스트에서 중복 초기화되지 않도록 가드 */
+if (!i18n.isInitialized) {
+  void i18n.use(initReactI18next).init({
     resources: {
       ko: { translation: koTranslation },
       de: { translation: deTranslation },
@@ -17,16 +16,20 @@ i18n
     },
     lng: 'ko',
     fallbackLng: 'ko',
+    supportedLngs: ['ko', 'de', 'en'],
     interpolation: {
       escapeValue: false,
     },
   });
+}
 
-export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
-  return <ReactI18nextProvider i18n={i18n}>{children}</ReactI18nextProvider>;
+export { i18n };
+
+export const I18nProvider = ({ children }: { children: ReactNode }) => {
+  return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
 };
 
 export const useI18n = () => {
-  const { t, i18n } = useTranslation();
-  return { t, i18n };
+  const { t, i18n: instance } = useTranslation();
+  return { t, i18n: instance };
 };

@@ -427,6 +427,111 @@ int main(void) {
     expect(out).toBe("10\n");
   });
 
+  it("typedef struct 지원 테스트", () => {
+    const out = okOutput(`
+typedef struct { int id; int len; } Frame;
+int main(void) {
+    Frame f;
+    f.id = 3;
+    f.len = 8;
+    printf("%d %d\\n", f.id, f.len);
+    return 0;
+}`);
+    expect(out).toBe("3 8\n");
+  });
+
+  it("구조체 포인터(->) 접근", () => {
+    const out = okOutput(`
+struct P { int x; int y; };
+int main(void) {
+    struct P a;
+    a.x = 1; a.y = 2;
+    struct P *p = &a;
+    p->x = 10;
+    printf("%d %d\\n", a.x, p->y);
+    return 0;
+}`);
+    expect(out).toBe("10 2\n");
+  });
+
+  it("구조체 배열 멤버 / 구조체 배열", () => {
+    const out = okOutput(`
+struct S { int arr[3]; };
+struct Node { int v; };
+int main(void) {
+    struct S s;
+    for (int i = 0; i < 3; i++) s.arr[i] = i * i;
+    struct Node ns[3];
+    ns[0].v = 7;
+    ns[2].v = 9;
+    printf("%d %d %d %d %d\\n", s.arr[0], s.arr[1], s.arr[2], ns[0].v, ns[2].v);
+    return 0;
+}`);
+    expect(out).toBe("0 1 4 7 9\n");
+  });
+
+  it("구조체 값 대입은 깊은 복사", () => {
+    const out = okOutput(`
+struct P { int x; };
+int main(void) {
+    struct P a;
+    a.x = 5;
+    struct P b;
+    b = a;
+    b.x = 9;
+    printf("%d %d\\n", a.x, b.x);
+    return 0;
+}`);
+    expect(out).toBe("5 9\n");
+  });
+
+  it("union 멤버는 저장소를 공유한다", () => {
+    const out = okOutput(`
+union U { int a; char b; };
+int main(void) {
+    union U v;
+    v.a = 65;
+    printf("%d %d\\n", v.a, v.b);
+    return 0;
+}`);
+    expect(out).toBe("65 65\n");
+  });
+
+  it("|= 와 &= 복합 대입", () => {
+    const out = okOutput(`
+int main(void) {
+    int x = 0;
+    x |= 5;
+    x &= 6;
+    printf("%d\\n", x);
+    return 0;
+}`);
+    expect(out).toBe("4\n");
+  });
+
+  it("구조체가 아닌 값에 멤버 접근하면 오류", () => {
+    const r = runC(`
+int main(void) {
+    int x = 1;
+    printf("%d\\n", x.y);
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.error!.line).toBeGreaterThan(0);
+  });
+
+  it("정의되지 않은 멤버 접근하면 오류", () => {
+    const r = runC(`
+struct P { int x; };
+int main(void) {
+    struct P a;
+    a.zzz = 1;
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.error!.message).toContain("zzz");
+  });
+
   it("2차원 배열 거부", () => {
     const r = runC(`
 int main(void) {
