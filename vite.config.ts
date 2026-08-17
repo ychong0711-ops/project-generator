@@ -8,16 +8,15 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), viteSingleFile()],
   server: {
-    host: true, // 0.0.0.0 바인딩 (컨테이너/프리뷰 환경)
+    host: true,
     allowedHosts: true,
+    port: 5173,
+    open: true, // ← 이게 있어야 자동 오픈
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
+    alias: { "@": path.resolve(__dirname, "src") },
   },
 });
