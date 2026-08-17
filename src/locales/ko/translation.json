@@ -1,6 +1,5 @@
 {
   "appSubtitle": "독일 임베디드 석사 준비",
-
   "navHome": "홈",
   "navGenerator": "프로젝트 생성기",
   "navUniversities": "대학 정보",
@@ -9,22 +8,19 @@
   "navCompete": "경쟁력 센터",
   "navLabs": "실습 예제",
   "navGuide": "사용 가이드",
-
+  "navAriaLabel": "주요 메뉴",
   "heroTagline": "독일 자동차 임베디드 석사 지원 준비",
   "heroH1First": "프로젝트로 증명하는",
   "heroH1Second": "독일 대학원 지원 포트폴리오",
   "heroDescription": "난이도·분야·기간을 고르면 목표, 주차별 로드맵, 산출물, 면접 질문까지 갖춘 임베디드 프로젝트가 만들어집니다. 코드 작성부터 GitHub 배포까지 한 곳에서 준비하세요.",
   "heroButtonGenerate": "프로젝트 생성하기",
   "heroButtonUni": "대학 정보 보기",
-
   "heroStatCuration": "엄선된 프로젝트",
   "heroStatGermanProgram": "독일 대학 프로그램",
   "heroStatRoadmapStep": "입학 로드맵 단계",
   "heroStatInterviewQuestions": "면접 예상 질문",
-
   "footerDescription": "독일 자동차 임베디드 석사 지원을 위한 올인원 포트폴리오 빌더. 프로젝트 생성부터 지원 서류와 면접 준비까지 한 곳에서 관리하세요.",
   "footerCopyright": "학습 목적으로 제작된 비영리 프로젝트입니다.",
-
   "languageLabel": "언어",
   "loading": "로딩 중...",
   "error": "오류",

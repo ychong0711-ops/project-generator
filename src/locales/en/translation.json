@@ -1,6 +1,5 @@
 {
   "appSubtitle": "DE Embedded Systems Master Prep",
-
   "navHome": "Home",
   "navGenerator": "Project Generator",
   "navUniversities": "Universities",
@@ -9,22 +8,19 @@
   "navCompete": "Competitiveness",
   "navLabs": "Lab Exercises",
   "navGuide": "User Guide",
-
+  "navAriaLabel": "Main navigation",
   "heroTagline": "Preparing for a German automotive embedded systems master's",
   "heroH1First": "Prove your skills with projects",
   "heroH1Second": "A portfolio for German graduate applications",
   "heroDescription": "Pick a level, field and duration, and get an embedded project complete with goals, a weekly roadmap, deliverables and interview questions. From writing code to deploying on GitHub, all in one place.",
   "heroButtonGenerate": "Generate a project",
   "heroButtonUni": "Browse universities",
-
   "heroStatCuration": "Curated projects",
   "heroStatGermanProgram": "German degree programmes",
   "heroStatRoadmapStep": "Roadmap steps",
   "heroStatInterviewQuestions": "Interview questions",
-
   "footerDescription": "An all-in-one portfolio builder for applying to automotive embedded systems master's programmes in Germany — from generating projects to preparing documents and interviews.",
   "footerCopyright": "A non-commercial project built for learning purposes.",
-
   "languageLabel": "Language",
   "loading": "Loading...",
   "error": "Error",

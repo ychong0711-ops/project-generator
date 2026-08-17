@@ -1,6 +1,5 @@
 {
   "appSubtitle": "Vorbereitung Master Embedded Systems",
-
   "navHome": "Start",
   "navGenerator": "Projekt-Generator",
   "navUniversities": "Hochschulen",
@@ -9,22 +8,19 @@
   "navCompete": "Wettbewerbsfähigkeit",
   "navLabs": "Praktische Übungen",
   "navGuide": "Benutzerhandbuch",
-
+  "navAriaLabel": "Hauptmenü",
   "heroTagline": "Vorbereitung auf den Master Automotive Embedded Systems",
   "heroH1First": "Mit Projekten überzeugen",
   "heroH1Second": "Portfolio für die Bewerbung in Deutschland",
   "heroDescription": "Wählen Sie Niveau, Fachgebiet und Dauer — und Sie erhalten ein Embedded-Projekt mit Zielen, Wochenplan, Ergebnissen und Interviewfragen. Vom Code bis zum GitHub-Deployment alles an einem Ort.",
   "heroButtonGenerate": "Projekt erstellen",
   "heroButtonUni": "Hochschulen ansehen",
-
   "heroStatCuration": "Kuratierte Projekte",
   "heroStatGermanProgram": "Studiengänge in Deutschland",
   "heroStatRoadmapStep": "Schritte der Roadmap",
   "heroStatInterviewQuestions": "Mögliche Interviewfragen",
-
   "footerDescription": "All-in-one Portfolio-Builder für die Bewerbung zum Master Automotive Embedded Systems in Deutschland — von der Projekterstellung bis zu Bewerbungsunterlagen und Interviewvorbereitung.",
   "footerCopyright": "Ein nichtkommerzielles Projekt zu Lernzwecken.",
-
   "languageLabel": "Sprache",
   "loading": "Wird geladen...",
   "error": "Fehler",
