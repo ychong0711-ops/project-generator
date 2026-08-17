@@ -85,7 +85,34 @@ describe('Navbar', () => {
   ])('언어(%s) 전환 시 탭 라벨이 번역된다', async (lng, expected) => {
     await i18n.changeLanguage(lng);
     renderNavbar();
+    // 접근성 이름은 축약형이 아닌 전체 명칭이어야 한다
     expect(screen.getByRole('button', { name: expected })).toBeInTheDocument();
+  });
+
+  it('축약 라벨을 쓰되 툴팁/접근성 이름에는 전체 명칭을 유지한다', async () => {
+    await i18n.changeLanguage('de');
+    renderNavbar();
+    const btn = screen.getByRole('button', { name: 'Wettbewerbsfähigkeit' });
+    expect(btn.textContent).toBe('Wettbewerb'); // 화면에는 축약형
+    expect(btn).toHaveAttribute('title', 'Wettbewerbsfähigkeit');
+  });
+
+  /* 회귀 방지: 라벨이 길어지면 헤더 폭을 넘겨 마지막 탭이 잘린다.
+     실제 폭 측정은 jsdom 에서 불가하므로 문자 수로 상한을 건다.
+     (독일어 합성어가 길어 과거 995px 로 초과, 2개 탭이 접근 불가였다) */
+  it.each(['ko', 'de', 'en'])('언어(%s) 탭 라벨 총 길이가 상한 이내다', (lng) => {
+    const dict = { ko, de, en }[lng] as Record<string, string>;
+    const keys = [
+      'navHome', 'navGenerator', 'navUniversities', 'navRoadmap',
+      'navPortfolio', 'navCompete', 'navLabs', 'navGuide',
+    ];
+    const labels = keys.map((k) => dict[k]);
+    // 라틴 문자는 한글의 약 절반 폭이므로 가중치를 달리 센다
+    const weighted = labels.reduce(
+      (sum, s) => sum + [...s].reduce((w, c) => w + (/[가-힣]/.test(c) ? 2 : 1), 0),
+      0
+    );
+    expect(weighted, `${lng} 라벨이 너무 김: ${labels.join(' / ')}`).toBeLessThanOrEqual(100);
   });
 
   it('활성 탭을 보이도록 스크롤한다', () => {

@@ -67,6 +67,8 @@ export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
                 ref={tab.id === active ? activeTabRef : undefined}
                 onClick={() => onChange(tab.id)}
                 aria-current={active === tab.id ? 'page' : undefined}
+                title={t(`${tab.labelKey}Full`)}
+                aria-label={t(`${tab.labelKey}Full`)}
                 className={cn(
                   'relative shrink-0 whitespace-nowrap rounded-lg px-2.5 lg:px-3 py-2 text-[13px] lg:text-sm font-semibold transition-colors',
                   active === tab.id
