@@ -2,8 +2,8 @@ import React, { useCallback, useState, Suspense, lazy, Component } from 'react';
 import type { TabId } from './types';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { LanguageSwitcher } from './components/LanguageSwitcher';
 // ✅ 추가: 누락된 import
+import { useTranslation } from 'react-i18next';
 import { useSavedProjects } from './hooks/useSavedProjects';
 import { projectById } from './data/projects';
 
@@ -57,6 +57,15 @@ class ErrorBoundary extends Component<
   }
 }
 
+function TabFallback() {
+  const { t } = useTranslation();
+  return (
+    <div className="grid min-h-[300px] place-items-center p-8" role="status" aria-live="polite">
+      <p className="text-sm text-slate-500">{t('loading')}</p>
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabId>('home');
   const [focusProjectId, setFocusProjectId] = useState<string | null>(null);
@@ -66,11 +75,14 @@ export default function App() {
     setTab(t);
     window.scrollTo({ top: 0, behavior: 'auto' });
     // 포커스 관리: 새로운 탭의 콘텐츠로 포커스 이동 (키보드 네비게이션 지원)
-    // 현재 활성화된 탭의 제목을 가진 h2 요소로 포커스 이동
-    const targetH2 = document.querySelector('main h2');
-    if (targetH2) {
+    // lazy 탭이 마운트된 뒤에 포커스를 옮겨야 하므로 다음 프레임에서 수행한다.
+    requestAnimationFrame(() => {
+      const targetH2 = document.querySelector<HTMLElement>('main h2');
+      if (!targetH2) return;
+      // h2는 기본적으로 포커스 대상이 아니므로 tabIndex를 부여한다.
+      if (!targetH2.hasAttribute('tabindex')) targetH2.setAttribute('tabindex', '-1');
       targetH2.focus();
-    }
+    });
   }, []);
 
   const handleViewProject = useCallback((id: string) => {
@@ -90,18 +102,13 @@ export default function App() {
     <div className="min-h-screen bg-[#07090d] text-slate-200">
       <Navbar active={tab} onChange={changeTab} savedCount={savedIds.length} />
 
-      <div className="absolute top-0 right-0 p-2 z-50">
-        <LanguageSwitcher />
-      </div>
-
       <main>
-        <ErrorBoundary>
-          <Suspense fallback={<div>로딩 중...</div>}>
+        {/* 탭이 바뀌면 ErrorBoundary를 리셋해 이전 탭의 오류가 남지 않게 한다 */}
+        <ErrorBoundary key={tab}>
+          <Suspense fallback={<TabFallback />}>
             {tab === 'home' && (
               <Dashboard savedProjects={savedProjects} onNavigate={changeTab} onView={handleViewProject} />
             )}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'generator' && (
               <>
                 <Hero onGenerate={scrollToGenerator} onUni={() => changeTab('universities')} />
@@ -113,14 +120,8 @@ export default function App() {
                 />
               </>
             )}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'universities' && <Universities savedProjects={savedProjects} />}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'roadmap' && <Roadmap />}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'portfolio' && (
               <Portfolio
                 savedProjects={savedProjects}
@@ -130,14 +131,8 @@ export default function App() {
                 onGoGenerate={() => changeTab('generator')}
               />
             )}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'compete' && <Competitiveness savedProjects={savedProjects} />}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'labs' && <LabExercises savedProjects={savedProjects} />}
-          </Suspense>
-          <Suspense fallback={<div>로딩 중...</div>}>
             {tab === 'guide' && <GuideTab savedProjects={savedProjects} />}
           </Suspense>
         </ErrorBoundary>

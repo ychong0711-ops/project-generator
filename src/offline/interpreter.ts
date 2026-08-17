@@ -4,9 +4,10 @@
  *
  *  지원: int/double/char, 배열, 포인터(기본), 함수, if/for/while/
  *        do-while/switch, printf(%d %u %x %X %f %.2f %e %g %c %s,
- *        폭/정밀도/0패딩), 수학/문자열/메모리 내장 함수
- *  미지원: struct/enum/typedef, 전역 변수 초기화식, 2차원 배열,
- *          sizeof — 미지원 문법은 명확한 오류 메시지로 안내
+ *        폭/정밀도/0패딩), 수학/문자열/메모리 내장 함수,
+ *        struct/union/enum/typedef(기본), 멤버 접근(. 및 ->)
+ *  미지원: 2차원 배열, 구조체 값 대입/반환 — 미지원 문법은
+ *          명확한 오류 메시지로 안내
  * ============================================================ */
 
 export interface OfflineResult {
@@ -38,7 +39,8 @@ interface Cell {
   ptr: Ptr | null;
   arr: Cell[] | null;
   isStr: boolean;
-  structDef?: string; /* struct 정의 이름 참조 */
+  structDef?: string; /* struct/union 정의 키 참조 */
+  fields?: Map<string, Cell>; /* struct/union 멤버 저장소 */
 }
 type Val = number | Ptr | Cell;
 
@@ -48,14 +50,21 @@ function numCell(n: number): Cell {
 function arrCell(items: Cell[], isStr = false): Cell {
   return { kind: 'arr', n: 0, ptr: null, arr: items, isStr };
 }
+function isCell(v: Val): v is Cell {
+  return typeof v !== 'number' && (v as Cell).kind !== undefined;
+}
 function isPtr(v: Val): v is Ptr {
-  return typeof v !== 'number' && (v as Ptr).cell !== undefined && (v as Cell).arr === undefined;
+  return typeof v !== 'number' && !isCell(v) && (v as Ptr).cell !== undefined;
 }
 function isArrCell(v: Val): v is Cell {
-  return typeof v !== 'number' && (v as Cell).kind === 'arr';
+  return isCell(v) && v.kind === 'arr';
+}
+function isStructCell(v: Val): v is Cell {
+  return isCell(v) && v.kind === 'struct';
 }
 function readCell(cell: Cell): Val {
   if (cell.kind === 'arr') return { cell, idx: 0 };
+  if (cell.kind === 'struct') return cell;
   return cell.ptr ?? cell.n;
 }
 function derefNum(p: Ptr): number {
@@ -90,7 +99,8 @@ interface Tok {
 }
 
 const TYPE_WORDS = new Set([
-  'int', 'double', 'char', 'void', 'long', 'short', 'unsigned', 'signed', 'static', 'const',
+  'int', 'double', 'float', 'char', 'void', 'long', 'short', 'unsigned', 'signed',
+  'static', 'const', 'volatile', 'extern', 'register', 'inline',
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
   'int8_t', 'int16_t', 'int32_t', 'int64_t', 'size_t', 'bool',
 ]);
@@ -244,7 +254,7 @@ function tokenize(src: string): Tok[] {
       continue;
     }
     const two = src.substr(i, 2);
-    if (['<=', '>=', '==', '!=', '&&', '||', '++', '--', '<<', '>>', '+=', '-=', '*=', '/=', '%=', '^='].includes(two)) {
+    if (['<=', '>=', '==', '!=', '&&', '||', '++', '--', '<<', '>>', '+=', '-=', '*=', '/=', '%=', '^=', '->', '|=', '&='].includes(two)) {
       toks.push({ t: 'op', v: two, line });
       i += 2;
       continue;
@@ -272,6 +282,9 @@ interface DeclItem {
   isPtr: boolean;
   dimExpr: ExprNode | null;
   init?: InitVal;
+  line?: number;
+  /* struct/union 선언인 경우 태그 이름 (structDefs 키) */
+  aggTag?: string;
 }
 type ExprNode =
   | { k: 'num'; n: number; line: number }
@@ -285,7 +298,8 @@ type ExprNode =
   | { k: 'call'; f: string; args: ExprNode[]; line: number }
   | { k: 'idx'; a: ExprNode; i: ExprNode; line: number }
   | { k: 'sizeof'; e: ExprNode; line: number }
-  | { k: 'cast'; ty: string; e: ExprNode; line: number };
+  | { k: 'cast'; ty: string; e: ExprNode; line: number }
+  | { k: 'member'; e: ExprNode; mname: string; arrow: boolean; line: number };
 
 type Stmt =
   | { k: 'block'; body: Stmt[]; line: number }
@@ -300,6 +314,21 @@ type Stmt =
   | { k: 'continue'; line: number }
   | { k: 'expr'; e: ExprNode | null; line: number }
   | { k: 'empty'; line: number };
+
+/* ---------- struct / union 정의 ---------- */
+interface AggMember {
+  name: string;
+  type: string;
+  /* 멤버가 배열이면 요소 개수 */
+  dim: number | null;
+  /* 멤버 자신이 struct/union 이면 그 정의 키 */
+  aggTag: string | null;
+}
+interface AggDef {
+  kind: 'struct' | 'union';
+  members: AggMember[];
+  size: number;
+}
 
 /* ---------- 파서 + 런타임 ---------- */
 class Scope {
@@ -332,7 +361,11 @@ class CInterpreter {
   rng = 12345;
   globals: { ty: string; items: DeclItem[]; line: number }[] = [];
   typedefNames = new Set<string>();
-  structDefs = new Map<string, { members: { name: string; type: string }[]; size: number }>();
+  /* struct/union 정의: 키는 'struct <tag>' / 'union <tag>' 또는 typedef 별칭 */
+  structDefs = new Map<string, AggDef>();
+  /* 가장 최근에 파싱한 타입의 struct/union 태그 (parseType의 부가 출력) */
+  lastAggTag: string | null = null;
+  anonSeq = 0;
 
   constructor(src: string) {
     const { code } = preprocess(src);
@@ -363,16 +396,37 @@ class CInterpreter {
     return this.next().v;
   }
   isTypeStart(): boolean {
-    return this.typedefNames.has(this.cur().v) || (this.cur().t === 'id' && TYPE_WORDS.has(this.cur().v));
+    if (this.cur().t !== 'id') return false;
+    const v = this.cur().v;
+    return TYPE_WORDS.has(v) || this.typedefNames.has(v) || v === 'struct' || v === 'union' || v === 'enum';
   }
-  isStructType(): boolean {
-    return this.typedefNames.has(this.cur().v) && this.structDefs.has(this.cur().v);
-  }
+  /* 타입을 소비하고 'int'|'double'|'char'|'void'|'struct'|'union'|'enum' 반환.
+     struct/union 이면 this.lastAggTag 에 정의 키를 기록한다. */
   parseType(): string {
-    if (this.typedefNames.has(this.cur().v)) {
+    this.lastAggTag = null;
+    const c = this.cur();
+    /* struct Tag / union Tag */
+    if (c.t === 'id' && (c.v === 'struct' || c.v === 'union')) {
+      const kw = this.next().v as 'struct' | 'union';
+      if (this.cur().t !== 'id') throw new CError(this.cur().line, `${kw} 태그 이름 필요`);
+      const tag = this.next().v;
+      const key = `${kw} ${tag}`;
+      if (!this.structDefs.has(key)) throw new CError(this.cur().line, `알려진 ${kw} '${tag}'가 없습니다`);
+      this.lastAggTag = key;
+      return kw;
+    }
+    if (c.t === 'id' && c.v === 'enum') {
       this.next();
-      if (this.isStructType()) {
-        return 'struct';
+      if (this.cur().t === 'id') this.next(); /* 태그 이름 */
+      return 'int';
+    }
+    /* typedef 별칭 */
+    if (c.t === 'id' && this.typedefNames.has(c.v) && !TYPE_WORDS.has(c.v)) {
+      const name = this.next().v;
+      const def = this.structDefs.get(name);
+      if (def) {
+        this.lastAggTag = name;
+        return def.kind;
       }
       return 'int';
     }
@@ -381,12 +435,9 @@ class CInterpreter {
       words.add(this.next().v);
     }
     if (words.size === 0) throw new CError(this.cur().line, '타입 키워드 필요');
-    if (words.has('double')) return 'double';
-    if (words.has('char')) return 'char';
+    if (words.has('double') || words.has('float')) return 'double';
     if (words.has('void')) return 'void';
-    if (words.has('struct')) return 'struct';
-    if (words.has('enum')) return 'enum';
-    if (words.has('union')) return 'union';
+    if (words.has('char')) return 'char';
     return 'int';
   }
 
@@ -447,23 +498,75 @@ class CInterpreter {
     this.typedefNames.add(typename);
   }
 
-  parseStructDef() {
-    this.next(); /* consume 'struct' */
-    const structName = this.expectId(); /* struct tag name */
+  /* struct/union 멤버 목록 파싱: '{' 부터 '}' 까지 */
+  parseAggMembers(): AggMember[] {
     this.eat('{');
-    const members: { name: string; type: string }[] = [];
+    const members: AggMember[] = [];
     while (!this.isOp('}')) {
+      if (this.cur().v === '<eof>') throw new CError(this.cur().line, '닫는 } 가 없습니다');
       const mtype = this.parseType();
-      const mname = this.expectId();
-      members.push({ name: mname, type: mtype });
-      this.eat(';'); /* 각 멤버 뒤의 세미콜론 */
+      const memberAgg = this.lastAggTag;
+      for (;;) {
+        const isPtrMember = this.isOp('*') ? (this.next(), true) : false;
+        const mname = this.expectId();
+        let dim: number | null = null;
+        if (this.isOp('[')) {
+          this.next();
+          dim = Math.max(0, Math.trunc(this.foldConst(this.parseExpr())));
+          this.eat(']');
+        }
+        members.push({
+          name: mname,
+          type: isPtrMember ? 'ptr' : mtype,
+          dim,
+          aggTag: isPtrMember ? null : memberAgg,
+        });
+        if (!this.isOp(',')) break;
+        this.next();
+      }
+      this.eat(';'); /* 각 멤버 선언 뒤의 세미콜론 */
     }
     this.eat('}');
-    this.eat(';'); /* struct 정의 끝 세미콜론 */
+    return members;
+  }
 
-    // ✅ 수정: Set에는 .add() 사용
-    this.typedefNames.add(structName);
-    this.structDefs.set(structName, { members, size: members.length * 4 });
+  /* 'struct'/'union' 키워드로 시작하는 최상위 정의 또는 변수 선언 */
+  parseAggTopLevel(kw: 'struct' | 'union', isTypedef = false): boolean {
+    /* 정의가 아닌 변수 선언(struct foo x;)이면 false 반환 후 호출자가 처리 */
+    const save = this.pos;
+    this.next(); /* struct|union */
+    let tag = '';
+    if (this.cur().t === 'id') tag = this.next().v;
+    if (!this.isOp('{')) {
+      this.pos = save;
+      return false;
+    }
+    const members = this.parseAggMembers();
+    const size = kw === 'union'
+      ? Math.max(4, ...members.map((m) => 4 * (m.dim ?? 1)))
+      : members.reduce((acc, m) => acc + 4 * (m.dim ?? 1), 0);
+    const def: AggDef = { kind: kw, members, size };
+    const key = tag ? `${kw} ${tag}` : `${kw} <anon${this.anonSeq++}>`;
+    this.structDefs.set(key, def);
+    if (this.cur().t === 'id') {
+      const trailing = this.next().v;
+      if (isTypedef) {
+        /* typedef struct { ... } Alias; */
+        this.typedefNames.add(trailing);
+        this.structDefs.set(trailing, def);
+      } else {
+        /* struct Tag { ... } gvar; — 전역 변수 선언 */
+        const line = this.cur().line;
+        const items = this.parseDeclRest(trailing, false);
+        for (const it of items) {
+          it.aggTag = key;
+          it.line = line;
+        }
+        this.globals.push({ ty: kw, items, line });
+      }
+    }
+    this.eat(';');
+    return true;
   }
 
   parseProgram() {
@@ -471,87 +574,82 @@ class CInterpreter {
       const line = this.cur().line;
       if (this.cur().t === 'id' && this.cur().v === 'typedef') {
         this.next();
-        if (this.cur().t === 'id' && this.cur().v === 'enum') {
+        const kw = this.cur().v;
+        if (this.cur().t === 'id' && kw === 'enum') {
           this.parseTypedefEnum();
           continue;
         }
-        throw new CError(line, "typedef는 enum만 지원합니다. struct는 온라인 모드(arm-gcc)로 검증하세요.");
-      }
-      if (this.cur().t === 'id' && this.cur().v === 'struct') {
-        this.parseStructDef();
-        continue;
-      }
-      if (this.cur().t === 'id' && this.cur().v === 'enum') {
-        this.next(); /* consume enum */
-        if (this.cur().t === 'id') this.next(); /* optional tag name */
-        this.eat('{');
-        let val = 0;
-        while (!this.isOp('}')) {
-          const ename = this.expectId();
-          if (this.isOp('=')) {
-            this.next();
-            val = Math.trunc(this.foldConst(this.parseAssign()));
-          }
-          if (!this.global.vars.has(ename)) this.global.declare(ename, numCell(val));
-          val++;
-          if (this.isOp(',')) {
-            this.next();
-            continue;
-          }
-          break;
+        if (this.cur().t === 'id' && (kw === 'struct' || kw === 'union')) {
+          if (this.parseAggTopLevel(kw as 'struct' | 'union', true)) continue;
+          /* typedef struct Tag Alias; — 기존 정의의 별칭 */
+          this.next(); /* struct|union */
+          const tag = this.expectId();
+          const alias = this.expectId();
+          this.eat(';');
+          const def = this.structDefs.get(`${kw} ${tag}`);
+          if (!def) throw new CError(line, `알려진 ${kw} '${tag}'가 없습니다`);
+          this.typedefNames.add(alias);
+          this.structDefs.set(alias, def);
+          continue;
         }
-        this.eat('}');
-        const typename = this.expectId();
+        /* typedef <기본타입> Alias; (예: typedef unsigned int u32;) */
+        this.parseType();
+        while (this.isOp('*')) this.next();
+        const alias = this.expectId();
         this.eat(';');
-        this.typedefNames.add(typename);
+        this.typedefNames.add(alias);
         continue;
       }
-      if (this.cur().t === 'id' && this.cur().v === 'union') {
-        this.next(); /* consume union */
-        let unionTag = '';
-        /* union tag can be before { (union u { ... }) or after } (union { ... } u;) */
-        if (this.cur().t === 'id' && this.cur().v !== '{') {
-          unionTag = this.next().v; /* tag before { */
-        }
-        this.eat('{');
-        while (!this.isOp('}')) {
-          /* union member: type name; */
-          this.parseType(); /* skip member type */
-          this.expectId(); /* member name */
-          if (this.isOp('=')) {
-            this.next();
-            this.next(); /* skip initializer */
+      if (this.cur().t === 'id' && (this.cur().v === 'struct' || this.cur().v === 'union')) {
+        if (this.parseAggTopLevel(this.cur().v as 'struct' | 'union')) continue;
+        /* 정의가 아니면 아래 일반 선언 경로로 진행 */
+      }
+      if (this.cur().t === 'id' && this.cur().v === 'enum' && this.toks[this.pos + 1]?.v !== '<eof>') {
+        /* enum 정의: enum [Tag] { ... } [Alias];  — 값들을 전역 상수로 등록 */
+        const save = this.pos;
+        this.next();
+        if (this.cur().t === 'id') this.next();
+        if (this.isOp('{')) {
+          this.next();
+          let val = 0;
+          while (!this.isOp('}')) {
+            const ename = this.expectId();
+            if (this.isOp('=')) {
+              this.next();
+              val = Math.trunc(this.foldConst(this.parseAssign()));
+            }
+            if (!this.global.vars.has(ename)) this.global.declare(ename, numCell(val));
+            val++;
+            if (this.isOp(',')) {
+              this.next();
+              continue;
+            }
+            break;
           }
-          if (this.isOp(',')) {
-            this.next();
-            continue;
-          }
-          if (this.isOp(';')) {
-            this.next(); /* consume ; after member */
-            continue;
-          }
-          break;
+          this.eat('}');
+          if (this.cur().t === 'id') this.typedefNames.add(this.next().v);
+          this.eat(';');
+          continue;
         }
-        this.eat('}');
-        /* check for tag after } if not found before { */
-        if (!unionTag && this.cur().t === 'id') {
-          unionTag = this.next().v;
-        }
-        if (this.isOp(';')) {
-          this.next(); /* consume optional ; after tag */
-        }
-        if (unionTag) {
-          this.typedefNames.add(unionTag);
-          this.structDefs.set(unionTag, { members: [], size: 4 });
-        }
-        continue;
+        this.pos = save; /* enum Tag var; — 일반 선언 */
       }
       if (this.cur().t === 'id' && this.cur().v === 'goto') {
         throw new CError(line, `'goto'는 오프라인 모드에서 지원하지 않습니다.`);
       }
-      this.parseType();
+      const gty = this.parseType();
+      const gTag = this.lastAggTag;
       const isPtr = this.isOp('*') ? (this.next(), true) : false;
       const name = this.expectId();
+      if ((gty === 'struct' || gty === 'union') && !this.isOp('(')) {
+        const items = this.parseDeclRest(name, isPtr);
+        for (const it of items) {
+          if (!isPtr) it.aggTag = gTag!;
+          it.line = line;
+        }
+        this.eat(';');
+        this.globals.push({ ty: gty, items, line });
+        continue;
+      }
       if (this.isOp('(')) {
         /* 함수 정의 */
         this.next();
@@ -590,7 +688,7 @@ class CInterpreter {
     let name = firstName;
     let curPtr = firstIsPtr;
     for (;;) {
-      const item: DeclItem = { name, isPtr: curPtr, dimExpr: null };
+      const item: DeclItem = { name, isPtr: curPtr, dimExpr: null, line: this.cur().line };
       if (this.isOp('[')) {
         this.next();
         if (this.isOp(']')) {
@@ -758,34 +856,20 @@ class CInterpreter {
         this.eat(';');
         return { k: 'continue', line };
       }
-      if (c.v === 'struct' || c.v === 'enum' || c.v === 'union') {
-        /* struct/enum/union 키워드는 타입 지정자로 처리하므로 여기서 예외 throw 생략 */
-        /* struct인 경우 아래 TYPE_WORDS 처리 로직으로 전달됨 */
+      /* 지역 struct/union 정의: struct Tag { ... }; */
+      if ((c.v === 'struct' || c.v === 'union') && this.toks[this.pos + 2]?.v === '{') {
+        this.parseAggTopLevel(c.v as 'struct' | 'union');
+        return { k: 'empty', line };
       }
-      if (TYPE_WORDS.has(c.v) || this.typedefNames.has(c.v)) {
+      if (this.isTypeStart()) {
         const ty = this.parseType();
+        const aggTag = this.lastAggTag;
         if (ty === 'void') throw new CError(line, 'void 변수는 선언할 수 없습니다');
-        /* struct 타입인 경우 변수명 처리 후 decl 아이템 생성 */
-        let items: DeclItem[];
-        if (ty === 'struct' || ty === 'union') {
-          /* struct/union tag name은 현재 토큰으로 이미 소비됨 (parseType에서 struct/union 키워드만 소비하고 tag 이름은 남김) */
-          const tagName = this.cur().v;
-          if (!this.structDefs.has(tagName)) throw new CError(this.cur().line, `알려진 ${ty} '${tagName}'가 없습니다`);
-          this.next(); /* consume tag name */
-          if (this.cur().t !== 'id') throw new CError(this.cur().line, `${ty} 변수명 필요`);
-          const varName = this.next().v;
-          items = this.parseDeclRest(varName, false);
-          /* struct/union 멤버 타입 표시를 위해 item별로 타입 정보 기록 */
-          for (const item of items) {
-            /* struct/union 타입임을 표시 - execDeclItem에서 사용 */
-            (item as any).structTy = ty === 'struct';
-            (item as any).unionTy = ty === 'union';
-            (item as any).tagName = tagName;
-          }
-        } else {
-          const isPtr = this.isOp('*') ? (this.next(), true) : false;
-          const name = this.expectId();
-          items = this.parseDeclRest(name, isPtr);
+        const isPtr = this.isOp('*') ? (this.next(), true) : false;
+        const name = this.expectId();
+        const items = this.parseDeclRest(name, isPtr);
+        if ((ty === 'struct' || ty === 'union') && !isPtr) {
+          for (const item of items) item.aggTag = aggTag!;
         }
         this.eat(';');
         return { k: 'decl', items, line };
@@ -817,7 +901,7 @@ class CInterpreter {
     const line = this.cur().line;
     const l = this.parseTern();
     const op = this.cur();
-    if (op.t === 'op' && ['=', '+=', '-=', '*=', '/=', '%=', '^='].includes(op.v)) {
+    if (op.t === 'op' && ['=', '+=', '-=', '*=', '/=', '%=', '^=', '|=', '&='].includes(op.v)) {
       this.next();
       const r = this.parseAssign();
       return { k: 'assign', op: op.v, l, r, line };
@@ -973,11 +1057,12 @@ class CInterpreter {
         e = { k: 'call', f: e.name, args, line };
         continue;
       }
-      if (this.isOp('.')) {
+      if (this.isOp('.') || this.isOp('->')) {
+        const arrow = this.cur().v === '->';
         this.next();
         if (this.cur().t !== 'id') throw new CError(line, '구조체 멤버명 필요');
         const mname = this.next().v;
-        e = { k: 'member', e, mname, line };
+        e = { k: 'member', e, mname, arrow, line };
         continue;
       }
       if (this.isOp('++') || this.isOp('--')) {
@@ -1024,18 +1109,63 @@ class CInterpreter {
     this.callUser('main', []);
   }
 
+  /* struct/union 인스턴스 셀 생성 */
+  makeAggCell(tag: string, line: number): Cell {
+    const def = this.structDefs.get(tag);
+    if (!def) throw new CError(line, `알려진 struct/union '${tag}'가 없습니다`);
+    const fields = new Map<string, Cell>();
+    const cell: Cell = { kind: 'struct', n: 0, ptr: null, arr: null, isStr: false, structDef: tag, fields };
+    /* union은 모든 스칼라 멤버가 같은 저장소를 공유한다 (근사 구현) */
+    const shared = def.kind === 'union' ? numCell(0) : null;
+    for (const m of def.members) {
+      let mc: Cell;
+      if (shared && m.dim === null && !m.aggTag) {
+        fields.set(m.name, shared);
+        continue;
+      }
+      if (m.dim !== null) {
+        mc = arrCell(
+          Array.from({ length: m.dim }, () =>
+            m.aggTag ? this.makeAggCell(m.aggTag, line) : numCell(0)
+          )
+        );
+      } else if (m.aggTag) {
+        mc = this.makeAggCell(m.aggTag, line);
+      } else {
+        mc = numCell(0);
+      }
+      fields.set(m.name, mc);
+    }
+    return cell;
+  }
+
   execDeclItem(item: DeclItem, scope: Scope) {
     let cell: Cell;
-    /* struct 타입인 경우 */
-    if ((item as any).structTy) {
-      const structName = item.name;
-      const structInfo = this.structDefs.get(structName);
-      if (!structInfo) throw new CError(item.line, `알려진 struct '${structName}'가 없습니다`);
-      /* struct 크기만큼 메모리 할당 (바이트 단위, 여기서는 워드 크기 4로 간주) */
-      const size = structInfo.size;
-      cell = numCell(0);
-      cell.ptr = { cell: { kind: 'struct', structDef: structName, n: 0, ptr: null, arr: null, isStr: false }, idx: -1 };
-      /* TODO: 실제 구현 시 멤버 오프셋 계산 후 포인터 멤버 접근 지원 */
+    /* struct/union 타입 변수 */
+    if (item.aggTag) {
+      const line = item.line ?? 0;
+      if (item.dimExpr !== null) {
+        const size = Math.max(0, Math.trunc(this.evalNum(item.dimExpr)));
+        cell = arrCell(Array.from({ length: size }, () => this.makeAggCell(item.aggTag!, line)));
+      } else {
+        cell = this.makeAggCell(item.aggTag, line);
+        if (item.init?.kind === 'list') {
+          const def = this.structDefs.get(item.aggTag)!;
+          const list = item.init.list ?? [];
+          for (let i = 0; i < Math.min(list.length, def.members.length); i++) {
+            const target = cell.fields!.get(def.members[i].name)!;
+            const v = this.evalExpr(list[i]);
+            if (isPtr(v)) target.ptr = v;
+            else if (isArrCell(v)) target.ptr = { cell: v, idx: 0 };
+            else if (isStructCell(v)) cell.fields!.set(def.members[i].name, v);
+            else target.n = v;
+          }
+        } else if (item.init?.kind === 'expr') {
+          const v = this.evalExpr(item.init.expr!);
+          if (isStructCell(v)) cell = this.copyAggCell(v);
+          else throw new CError(line, '구조체에는 구조체 값만 대입할 수 있습니다');
+        }
+      }
       scope.declare(item.name, cell);
       return;
     }
@@ -1101,6 +1231,21 @@ class CInterpreter {
       }
     }
     scope.declare(item.name, cell);
+  }
+
+  /* struct 값 복사 (얕은 대입 의미론: 멤버 단위 값 복사) */
+  copyAggCell(src: Cell): Cell {
+    const fields = new Map<string, Cell>();
+    const out: Cell = {
+      kind: 'struct', n: 0, ptr: null, arr: null, isStr: false,
+      structDef: src.structDef, fields,
+    };
+    src.fields?.forEach((v, k) => {
+      if (v.kind === 'struct') fields.set(k, this.copyAggCell(v));
+      else if (v.kind === 'arr') fields.set(k, arrCell((v.arr ?? []).map((c) => ({ ...c })), v.isStr));
+      else fields.set(k, { ...v });
+    });
+    return out;
   }
 
   strLiteralCell(s: string): Cell {
@@ -1262,26 +1407,8 @@ class CInterpreter {
         return this.call(e);
       case 'idx':
         return this.evalIdx(e);
-      case 'member': {
-        /* 구조체 멤버 접근: struct_var.member */
-        const base = this.evalExpr(e.e);
-        if (isPtr(base) || isArrCell(base)) {
-          const cell = base.cell.arr ? base.cell : (base.ptr ? base.ptr.cell : null);
-          if (!cell) throw new CError(e.line, '구조체 변수가 아닙니다');
-          if (cell.kind !== 'struct') throw new CError(e.line, '구조체가 아닙니다');
-          /* 멤버 찾기 */
-          const members = this.structDefs.get(cell.structDef);
-          if (!members) throw new CError(e.line, '구조체 정의를 찾을 수 없습니다');
-          const member = members.find((m: { name: string }) => m.name === e.mname);
-          if (!member) throw new CError(e.line, `구조체에 멤버 '${e.mname}'가 없습니다`);
-          /* 멤버의 기본 타입에 따른 기본 값 반환 */
-          if (member.type === 'int' || member.type === 'unsigned') return numCell(0);
-          if (member.type === 'double') return numCell(0);
-          if (member.type === 'char') return numCell(0);
-          return numCell(0);
-        }
-        throw new CError(e.line, '구조체 변수에 멤버 접근 필요');
-      }
+      case 'member':
+        return readCell(this.resolveMemberCell(e));
       case 'sizeof': {
         /* 배열은 요소 개수, 그 외(요소/스칼라)는 1 반환
            -> sizeof(arr)/sizeof(arr[0]) 패턴으로 배열 길이 계산 지원 */
@@ -1388,7 +1515,38 @@ class CInterpreter {
     if (!c) return 0;
     return readCell(c);
   }
+  /* struct/union 멤버 셀 반환 (읽기/쓰기 공용) */
+  resolveMemberCell(e: Extract<ExprNode, { k: 'member' }>): Cell {
+    const base = this.evalExpr(e.e);
+    let agg: Cell | null = null;
+    if (isStructCell(base)) {
+      agg = base;
+    } else if (isPtr(base)) {
+      const target = base.idx === -1 || base.idx === 0 ? base.cell : base.cell.arr?.[base.idx] ?? null;
+      if (target && target.kind === 'struct') agg = target;
+      else if (target && target.arr && target.arr[0]?.kind === 'struct') agg = target.arr[0];
+      else if (base.cell.arr && base.cell.arr[Math.max(0, base.idx)]?.kind === 'struct')
+        agg = base.cell.arr[Math.max(0, base.idx)];
+      else if (base.cell.ptr) {
+        const via = base.cell.ptr.cell;
+        if (via.kind === 'struct') agg = via;
+      }
+    } else if (isArrCell(base)) {
+      const first = base.arr?.[0];
+      if (first && first.kind === 'struct') agg = first;
+    }
+    if (!agg) throw new CError(e.line, `${e.arrow ? '->' : '.'} 연산은 구조체/공용체에만 사용할 수 있습니다`);
+    const cell = agg.fields?.get(e.mname);
+    if (!cell) throw new CError(e.line, `구조체에 멤버 '${e.mname}'가 없습니다`);
+    return cell;
+  }
+
   evalLVal(e: ExprNode): { cell: Cell; idx?: number } {
+    if (e.k === 'member') {
+      const cell = this.resolveMemberCell(e);
+      if (cell.kind === 'arr') return { cell, idx: 0 };
+      return { cell };
+    }
     if (e.k === 'id') {
       const cell = this.scope.lookup(e.name);
       if (!cell) throw new CError(e.line, `정의되지 않은 변수 '${e.name}'`);
@@ -1438,6 +1596,13 @@ class CInterpreter {
   evalAssign(e: Extract<ExprNode, { k: 'assign' }>): Val {
     const lv = this.evalLVal(e.l);
     const rv = this.evalExpr(e.r);
+    /* 구조체 값 대입: 멤버 단위 복사 */
+    if (e.op === '=' && lv.idx === undefined && lv.cell.kind === 'struct') {
+      if (!isStructCell(rv)) throw new CError(e.line, '구조체에는 구조체 값만 대입할 수 있습니다');
+      const copy = this.copyAggCell(rv);
+      lv.cell.fields = copy.fields;
+      return lv.cell;
+    }
     if (e.op === '=') {
       if (typeof rv === 'number') {
         this.writeLValNum(lv, rv, e.line);
@@ -1461,6 +1626,8 @@ class CInterpreter {
       case '/=': out = cur / n; break;
       case '%=': out = Math.trunc(cur) % Math.trunc(n); break;
       case '^=': out = Math.trunc(cur) ^ Math.trunc(n); break;
+      case '|=': out = (Math.trunc(cur) | Math.trunc(n)) >>> 0; break;
+      case '&=': out = (Math.trunc(cur) & Math.trunc(n)) >>> 0; break;
     }
     this.writeLValNum(lv, out, e.line);
     return out;

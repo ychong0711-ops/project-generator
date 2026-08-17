@@ -38,7 +38,7 @@ interface CELine {
   tag?: { line?: number; text?: string };
 }
 
-function parseDiagnostics(data: { stdout?: CELine[]; stderr?: CELine[] }): CompilerDiagnostic[] {
+export function parseDiagnostics(data: { stdout?: CELine[]; stderr?: CELine[] }): CompilerDiagnostic[] {
   const out: CompilerDiagnostic[] = [];
   const scan = (lines: CELine[] | undefined) => {
     (lines ?? []).forEach((l) => {
@@ -47,10 +47,12 @@ function parseDiagnostics(data: { stdout?: CELine[]; stderr?: CELine[] }): Compi
         out.push({ line: l.tag.line, text: l.tag.text, type });
         return;
       }
+      /* m[1]=행, m[2]=열, m[3]=심각도, m[4]=메시지 */
       const m = l.text.match(/:(\d+):(\d+):\s*(fatal error|error|warning|note):\s*(.*)/);
       if (m) {
-        const type = m[2].includes('error') ? 'error' : m[2] === 'warning' ? 'warning' : 'note';
-        out.push({ line: Number(m[1]), text: `${m[2]}: ${m[3]}`, type });
+        const severity = m[3];
+        const type = severity.includes('error') ? 'error' : severity === 'warning' ? 'warning' : 'note';
+        out.push({ line: Number(m[1]), text: `${severity}: ${m[4]}`, type });
       }
     });
   };
