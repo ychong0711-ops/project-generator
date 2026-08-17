@@ -5,6 +5,7 @@ import { compileWithCE, COMPILERS, type CompileResult } from '../compiler/ce';
 import { editorHtml } from '../mentor/highlight';
 import { INCLUDE_FIXES, type IncludeFixId } from '../mentor/analyzer';
 import { runC, type OfflineResult } from '../offline/interpreter';
+import OfflineWarnings from './OfflineWarnings';
 import { recordActivity, recordEvent } from '../store/activity';
 import { findGccHelp } from '../data/gccHelp';
 import MentorPanel from './MentorPanel';
@@ -385,6 +386,7 @@ export default function CodeLab({ project }: CodeLabProps) {
                   <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap text-slate-300">
                     {offlineResult.output || '(출력 없음 — 정상 종료)'}
                   </pre>
+                  <OfflineWarnings warnings={offlineResult.warnings} />
                   {offlineMissing !== null &&
                     (offlineMissing.length === 0 ? (
                       <p className="mt-2 rounded-lg border border-emerald-400/30 bg-emerald-400/[0.08] px-3 py-2 text-[11px] font-bold text-emerald-300">
@@ -412,6 +414,7 @@ export default function CodeLab({ project }: CodeLabProps) {
                   {offlineResult.output && (
                     <pre className="mt-2 max-h-24 overflow-auto whitespace-pre-wrap text-slate-400">{offlineResult.output}</pre>
                   )}
+                  <OfflineWarnings warnings={offlineResult.warnings} />
                   <pre className="mt-2 whitespace-pre-wrap text-red-300/90">
                     {offlineResult.error
                       ? `L${offlineResult.error.line}: ${offlineResult.error.message}`
