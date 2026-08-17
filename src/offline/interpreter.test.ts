@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { runC } from "./interpreter";
+import { runC, UNION_APPROX_WARNING } from "./interpreter";
 
 function okOutput(src: string): string {
   const r = runC(src);
@@ -495,6 +495,61 @@ int main(void) {
     return 0;
 }`);
     expect(out).toBe("65 65\n");
+  });
+
+  it("union 선언 시 근사 구현 경고를 반환한다", () => {
+    const r = runC(`
+union U { int a; char b; };
+int main(void) {
+    union U v;
+    v.a = 65;
+    printf("%d\\n", v.a);
+    return 0;
+}`);
+    expect(r.ok).toBe(true);
+    expect(r.warnings).toBeDefined();
+    expect(r.warnings).toContain(UNION_APPROX_WARNING);
+    expect(r.warnings).toHaveLength(1);
+  });
+
+  it("union을 여러 번 선언해도 경고는 한 번만 쌓인다", () => {
+    const r = runC(`
+union U { int a; char b; };
+int main(void) {
+    union U x;
+    union U y;
+    x.a = 1; y.a = 2;
+    printf("%d %d\\n", x.a, y.a);
+    return 0;
+}`);
+    expect(r.ok).toBe(true);
+    expect(r.warnings).toHaveLength(1);
+  });
+
+  it("union이 없으면 경고가 없다", () => {
+    const r = runC(`
+struct S { int a; };
+int main(void) {
+    struct S s;
+    s.a = 1;
+    printf("%d\\n", s.a);
+    return 0;
+}`);
+    expect(r.ok).toBe(true);
+    expect(r.warnings).toBeUndefined();
+  });
+
+  it("실행이 실패해도 이미 발생한 union 경고는 유지된다", () => {
+    const r = runC(`
+union U { int a; char b; };
+int main(void) {
+    union U v;
+    v.a = 1;
+    undefinedFn();
+    return 0;
+}`);
+    expect(r.ok).toBe(false);
+    expect(r.warnings).toContain(UNION_APPROX_WARNING);
   });
 
   it("float / volatile 타입 키워드 지원", () => {

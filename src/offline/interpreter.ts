@@ -15,7 +15,16 @@ export interface OfflineResult {
   output: string;
   steps: number;
   error?: { line: number; message: string };
+  /* 실행을 막지는 않지만 결과를 신뢰하기 전에 알아야 할 사항 */
+  warnings?: string[];
 }
+
+/* 오프라인 엔진의 union은 "스칼라 멤버가 하나의 저장소를 공유"하는 근사 구현이다.
+ * 같은 크기의 정수 계열끼리는 대체로 맞지만, 바이트 오버레이(예: union {int w; char b[4];})나
+ * 타입 재해석(예: union {float f; int i;})은 실제 C와 다른 값을 낼 수 있다. */
+export const UNION_APPROX_WARNING =
+  'union은 오프라인 엔진에서 근사 구현입니다(스칼라 멤버가 저장소를 공유). ' +
+  '바이트 오버레이나 타입 재해석 결과는 실제 C와 다를 수 있으니 온라인 모드로 검증하세요.';
 
 class CError extends Error {
   constructor(public line: number, message: string) {
@@ -357,6 +366,7 @@ class CInterpreter {
   scope: Scope = this.global;
   output = '';
   outputFull = false;
+  warnings: string[] = [];
   steps = 0;
   rng = 12345;
   globals: { ty: string; items: DeclItem[]; line: number }[] = [];
@@ -373,6 +383,11 @@ class CInterpreter {
     this.global.vars.set('true', numCell(1));
     this.global.vars.set('false', numCell(0));
     this.parseProgram();
+  }
+
+  /* 같은 경고는 한 번만 쌓는다 */
+  warn(message: string) {
+    if (!this.warnings.includes(message)) this.warnings.push(message);
   }
 
   /* ---------- 파서 유틸 ---------- */
@@ -1117,6 +1132,7 @@ class CInterpreter {
     const cell: Cell = { kind: 'struct', n: 0, ptr: null, arr: null, isStr: false, structDef: tag, fields };
     /* union은 모든 스칼라 멤버가 같은 저장소를 공유한다 (근사 구현) */
     const shared = def.kind === 'union' ? numCell(0) : null;
+    if (def.kind === 'union') this.warn(UNION_APPROX_WARNING);
     for (const m of def.members) {
       let mc: Cell;
       if (shared && m.dim === null && !m.aggTag) {
@@ -1889,7 +1905,12 @@ export function runC(source: string): OfflineResult {
   try {
     interp = new CInterpreter(source);
     interp.exec();
-    return { ok: true, output: interp.output, steps: interp.steps };
+    return {
+      ok: true,
+      output: interp.output,
+      steps: interp.steps,
+      ...(interp.warnings.length > 0 ? { warnings: [...interp.warnings] } : {}),
+    };
   } catch (e) {
     if (e instanceof CError) {
       return {
@@ -1897,6 +1918,7 @@ export function runC(source: string): OfflineResult {
         output: interp?.output ?? '',
         steps: interp?.steps ?? 0,
         error: { line: e.line, message: e.message },
+        ...(interp && interp.warnings.length > 0 ? { warnings: [...interp.warnings] } : {}),
       };
     }
     return {
@@ -1904,6 +1926,7 @@ export function runC(source: string): OfflineResult {
       output: interp?.output ?? '',
       steps: interp?.steps ?? 0,
       error: { line: 0, message: '내부 오류: ' + (e as Error).message },
+      ...(interp && interp.warnings.length > 0 ? { warnings: [...interp.warnings] } : {}),
     };
   }
 }
