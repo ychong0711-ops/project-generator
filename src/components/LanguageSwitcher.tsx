@@ -19,7 +19,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps = {}) => {
   const current = (i18n.resolvedLanguage ?? i18n.language ?? 'ko').split('-')[0] as Lang;
 
   return (
-    <div className={cn('flex items-center gap-2', className)} role="group" aria-label={t('languageLabel')}>
+    <div className={cn('flex items-center gap-1', className)} role="group" aria-label={t('languageLabel')}>
       {LANGS.map(({ id, label, title }) => (
         <button
           key={id}
@@ -27,7 +27,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps = {}) => {
           onClick={() => void i18n.changeLanguage(id)}
           aria-pressed={current === id}
           className={cn(
-            'rounded-lg border border-white/10 px-3 py-2 text-xs font-medium transition-colors',
+            'rounded-md border border-white/10 px-2 py-1 text-[11px] font-semibold leading-none transition-colors',
             current === id
               ? 'bg-white/10 text-white'
               : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'

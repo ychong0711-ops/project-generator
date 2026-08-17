@@ -2,6 +2,7 @@ import type { TabId } from '../types';
 import { ChipIcon } from './icons';
 import { cn } from '../utils/cn';
 import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavbarProps {
   active: TabId;
@@ -41,7 +42,7 @@ export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
             </span>
           </button>
 
-          <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto no-scrollbar">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -64,10 +65,15 @@ export default function Navbar({ active, onChange, savedCount }: NavbarProps) {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-1">
-            <span className="h-2 w-6 rounded-sm bg-black border border-white/20" title="Deutschland" />
-            <span className="h-2 w-6 rounded-sm bg-red-600" />
-            <span className="h-2 w-6 rounded-sm bg-amber-400" />
+          {/* 언어 전환은 헤더 레이아웃 안에 두어야 한다.
+              (App 에서 absolute 로 띄우면 탭 목록 위에 겹쳐 가린다) */}
+          <div className="flex shrink-0 items-center gap-3">
+            <div className="hidden xl:flex items-center gap-1">
+              <span className="h-2 w-6 rounded-sm bg-black border border-white/20" title="Deutschland" />
+              <span className="h-2 w-6 rounded-sm bg-red-600" />
+              <span className="h-2 w-6 rounded-sm bg-amber-400" />
+            </div>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>

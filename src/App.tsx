@@ -2,7 +2,6 @@ import React, { useCallback, useState, Suspense, lazy, Component } from 'react';
 import type { TabId } from './types';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { LanguageSwitcher } from './components/LanguageSwitcher';
 // ✅ 추가: 누락된 import
 import { useTranslation } from 'react-i18next';
 import { useSavedProjects } from './hooks/useSavedProjects';
@@ -102,10 +101,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#07090d] text-slate-200">
       <Navbar active={tab} onChange={changeTab} savedCount={savedIds.length} />
-
-      <div className="absolute top-0 right-0 p-2 z-50">
-        <LanguageSwitcher />
-      </div>
 
       <main>
         {/* 탭이 바뀌면 ErrorBoundary를 리셋해 이전 탭의 오류가 남지 않게 한다 */}
