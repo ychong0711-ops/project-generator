@@ -45,7 +45,7 @@ export interface ReqStage {
 }
 
 export interface UniRequirement {
-  id: string; // 'rwth' | 'tum' | 'tub' | 'kit' | 'stuttgart'
+  id: string; // 'rwth' | 'tum' | 'tub' | 'kit' | 'stuttgart' | 'fau' | 'darmstadt' | 'chemnitz' | 'freiburg'
   name: string;
   programs: string[];
   lang: string; // '영어' | '독일어' | '영어/독일어'
@@ -58,6 +58,7 @@ export interface UniRequirement {
   docs: string[]; // 필수 서류
   subjectChecklist: { area: string; desc: string }[]; // 과목 매칭 체크리스트
   source: string; // 정보 출처
+  selectionFocus: string; // '면접중심' | '정량중심' | '혼합' — 입학 사정 주요 축
 }
 
 const COMMON_DOCS = [
@@ -98,6 +99,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '차량 전공', desc: '차량 전장, 전기차, 자동차 공학 중 택' },
     ],
     source: 'RWTH 공식 웹사이트 + uni-assist (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'tum',
@@ -128,6 +130,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '임베디드/통신', desc: '임베디드 시스템, 차량 통신(CAN 등)' },
     ],
     source: 'TUM 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '혼합',
   },
   {
     id: 'tub',
@@ -150,6 +153,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '제어/시스템', desc: '자동제어, 차량 시스템 공학' },
     ],
     source: 'TU Berlin 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'kit',
@@ -172,6 +176,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '메카트로닉스', desc: '기계요소, 센서·액추에이터, 제어' },
     ],
     source: 'KIT 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'stuttgart',
@@ -194,6 +199,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '제어', desc: '자동제어, 차량 제어 — 구동계(E-Mobility) 선호' },
     ],
     source: 'Universität Stuttgart 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'fau',
@@ -216,6 +222,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '제어공학', desc: '자동제어, 시스템 이론' },
     ],
     source: 'FAU 공식 웹사이트 + uni-assist (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '혼합',
   },
   {
     id: 'darmstadt',
@@ -238,6 +245,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '통신', desc: '데이터 통신, 네트워크 프로토콜' },
     ],
     source: 'TU Darmstadt 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '혼합',
   },
   {
     id: 'chemnitz',
@@ -260,6 +268,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '제어공학', desc: '자동제어, 디지털 제어' },
     ],
     source: 'TU Chemnitz 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '면접중심',
   },
   {
     id: 'freiburg',
@@ -282,6 +291,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '공학 기초', desc: '전기회로, 역학' },
     ],
     source: 'Universität Freiburg 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
 ];
 

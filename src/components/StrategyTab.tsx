@@ -386,6 +386,11 @@ export default function StrategyTab({ savedProjects }: StrategyTabProps) {
             <div className="rounded-xl border border-sky-400/20 bg-sky-400/[0.05] px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-sky-300">선발 방식</p>
               <p className="mt-1 text-[13px] leading-relaxed text-slate-300">{uni.scoreSystem}</p>
+              {uni.selectionFocus && (
+                <p className="mt-2 text-[11px] font-semibold text-amber-300">
+                  📌 {uni.selectionFocus}
+                </p>
+              )}
             </div>
 
             {/* 배점표 */}
