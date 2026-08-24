@@ -1,7 +1,7 @@
 {
-  "name": "react-vite-tailwind",
+  "name": "autoembed-lab",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,15 +9,14 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "i18next": "^23.11.0",
     "jszip": "^3.10.1",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-i18next": "^15.7.4",
     "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
@@ -29,6 +28,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
+    "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^24.0.0",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",

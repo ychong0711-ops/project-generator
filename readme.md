@@ -3,7 +3,7 @@
 > 독일 자동차 임베디드 석사 지원을 위한 올인원 포트폴리오 빌더. 난이도·분야·기간을 선택하면 목표, 주차별 로드맵, 산출물, 면접 질문까지 갖춘 임베디드 프로젝트를 생성하고, 코드 작성부터 GitHub 배포까지 한 곳에서 준비합니다.
 
 **Live Demo (Single-file build):** `npm run build` → `dist/index.html`  
-**Stack:** React 19 + Vite 7 + Tailwind CSS 4 + i18next + TypeScript
+**Stack:** React 19 + Vite 7 + Tailwind CSS 4 + TypeScript
 
 ---
 
@@ -49,12 +49,11 @@
 - **대학 정보 및 입학 로드맵:** 독일 10대 대학(RWTH 아헨, TUM 뮌헨, KIT 카를스루에, 슈투트가르트, TU 바이에른, FAU 에를랑겐-뉘른베르크, TU 다름슈타트, TU 퓸센트, 프리버르크 등)의 모집 요강, 언어 요구사항(영어/독일어), 필수 과목 체크리스트, 목표 GPA를 확인합니다. 최근 5개 대학(FAU, 다름슈타트, 퓸센트, 프리버르크)의 합격 기준 데이터가 추가되어 모든 대학의 지원 전략을 수립할 수 있습니다.
 - **앱 배포:** `npm run build` 명령어로 `dist/index.html` 단일 파일을 생성하고, GitHub Pages 등 정적 호스팅 서비스에 업로드합니다. 앱 내 `GitHubDeploy` 기능을 이용하면 GitHub PAT를 통해 직접 리포지토리에 배포할 수 있습니다.
 - **백업 및 복원:** `Backup` 탭을 통해 localStorage에 프로젝트 진행 상황과 설정을 JSON 형식으로 저장하고 복구할 수 있습니다. (이중 인코딩 버그는 수정되었습니다.)
-- **다국어 지원:** 우측 상단 KO/DE/EN 버튼을 클릭하여 한국어, 독일어, 영어 인터페이스로 전환할 수 있습니다.
+- **한국어 전용 UI:** 다국어(KO/DE/EN) 지원은 공식적으로 중단되었으며, 인터페이스는 한국어로만 제공됩니다.
 
 ### 9. 부가 기능
 - **GitHub 배포** (`GitHubDeploy.tsx`) — PAT로 리포지토리 생성/푸시
 - **백업/복원** (`Backup.tsx`) — JSON export/import, `AUTOEMBED_` prefix로 localStorage 관리 (이중 인코딩 버그 수정됨)
-- **다국어** — KO / DE / EN, 파일 위치 `src/locales/{ko,de,en}/translation.json`
 - **벤치마크 / 멘토 / 아키텍처 다이어그램 / 전략 탭** 등 포트폴리오 강화 도구
 
 ---
@@ -66,8 +65,7 @@
 | 프레임워크 | React 19, React-DOM 19 |
 | 빌드 | Vite 7, vite-plugin-singlefile (단일 `index.html` 빌드) |
 | 스타일 | Tailwind CSS 4, @tailwindcss/vite, clsx + tailwind-merge |
-| 상태/ 훅 | 커스텀 훅 `useSavedProjects`, `useTranslation` |
-| 다국어 | i18next 15, react-i18next 15 |
+| 상태/ 훅 | 커스텀 훅 `useSavedProjects` |
 | 유틸 | jszip (백업 압축) |
 | 테스트 | Vitest 4, jsdom 24, @testing-library/react 16, jest-dom |
 | 언어 | TypeScript 5.9 (strict) |
@@ -92,7 +90,7 @@ npm run dev
 # 타입 체크
 npm run typecheck
 
-# 테스트 (184개)
+# 테스트 (215개)
 npm test
 
 # 감시 모드
@@ -109,7 +107,7 @@ npm run preview
 
 ### 로컬에서 동작 확인 체크리스트
 
-- 상단 KO / DE / EN 버튼 — 언어 전환 시 네비/푸터 번역 변경 여부
+- 상단 네비게이션 탭 전환 및 활성 탭 표시 확인
 - 탭 전환 (홈 / 생성기 / 대학 / 로드맵 / 포트폴리오 / 경쟁력 / 실습 / 가이드) — Suspense + ErrorBoundary 동작
 - CodeLab 오프라인 실행: `float x = 2.5;` 동작 확인
 - union 경고 확인:
@@ -132,7 +130,7 @@ npm run preview
 ```
 src/
   App.tsx                 # 탭 라우팅, ErrorBoundary, 포커스 관리
-  main.tsx                # React root + I18nProvider
+  main.tsx                # React root
   types.ts                # Project, University, TabId 등
   index.css               # Tailwind entry
   components/             # 30+ 컴포넌트
@@ -154,8 +152,6 @@ src/
     interpreter.test.ts   # 180+ 케이스
   compiler/  # 온라인 컴파일 연동
   hooks/     # useSavedProjects 등
-  locales/   # ko/de/en 번역 JSON + translation.test.ts
-  providers/ # I18nProvider
   serial/    # SerialLab
   store/     # 저장소
   utils/     # cn 등
@@ -199,7 +195,7 @@ docs/        # 인수인계, 할일, CI 패치
 
 ```bash
 npm test
-# 184 tests (interpreter  + components + locales + competition 등)
+# 215 tests (interpreter + components + data 등)
 ```
 
 - `vitest.config.ts`: `jsdom` 환경, `src/**/*.test.{ts,tsx}` 포함, `vitest.setup.ts`에서 `@testing-library/jest-dom` 로드
@@ -277,7 +273,7 @@ A. 네. 대부분 2보드(마스터/슬레이브) 구성이나 시뮬레이션(P
 A. 의도된 근사 구현입니다. 학습 콘텐츠에 union 사용이 0건이고, 정확한 검증은 온라인 모드(gcc)로 할 수 있습니다. 경고는 사용자가 조용히 틀린 값을 믿지 않도록 안내하기 위한 것입니다.
 
 **Q. npm ci가 실패해요.**  
-A. `node_modules`를 완전히 삭제 후 `npm install`을 실행하세요. React 19 + i18next peer 의존성으로 인해 구버전이 남아 있으면 충돌할 수 있습니다.
+A. `node_modules`를 완전히 삭제 후 `npm install`을 실행하세요. 구버전 패키지가 남아 있으면 peer 의존성이 충돌할 수 있습니다.
 
 ```
 rmdir /s /q node_modules   # Windows
