@@ -1,5 +1,4 @@
 import { BoltIcon } from './icons';
-import { useTranslation } from 'react-i18next';
 
 interface HeroProps {
   onGenerate: () => void;
@@ -7,10 +6,10 @@ interface HeroProps {
 }
 
 const STATS = [
-  { value: '14', label: 'heroStatCuration' },
-  { value: '10', label: 'heroStatGermanProgram' },
-  { value: '8', label: 'heroStatRoadmapStep' },
-  { value: '40+', label: 'heroStatInterviewQuestions' },
+  { value: '14', label: '엄선된 프로젝트' },
+  { value: '10', label: '독일 대학 프로그램' },
+  { value: '8', label: '입학 로드맵 단계' },
+  { value: '40+', label: '면접 예상 질문' },
 ];
 
 const MARQUEE = [
@@ -19,8 +18,6 @@ const MARQUEE = [
 ];
 
 export default function Hero({ onGenerate, onUni }: HeroProps) {
-  const { t } = useTranslation();
-
   return (
     <section className="relative overflow-hidden">
       {/* 배경 이미지 */}
@@ -35,19 +32,19 @@ export default function Hero({ onGenerate, onUni }: HeroProps) {
         <div className="max-w-3xl animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300">
             <BoltIcon className="h-3.5 w-3.5" />
-            {t('heroTagline')}
+            독일 자동차 임베디드 석사 지원 준비
           </div>
 
 <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.15] tracking-tight text-white">
-              {t('heroH1First')} ,
+              프로젝트로 증명하는 ,
               <br />
               <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-300 bg-clip-text text-transparent">
-                {t('heroH1Second')}
+                독일 대학원 지원 포트폴리오
               </span>
             </h1>
 
 <p className="mt-6 text-base sm:text-lg leading-relaxed text-slate-300 max-w-2xl">
-              {t('heroDescription')}
+              난이도·분야·기간을 고르면 목표, 주차별 로드맵, 산출물, 면접 질문까지 갖춘 임베디드 프로젝트가 만들어집니다. 코드 작성부터 GitHub 배포까지 한 곳에서 준비하세요.
             </p>
 
 <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -55,14 +52,14 @@ export default function Hero({ onGenerate, onUni }: HeroProps) {
                 onClick={onGenerate}
                 className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3.5 text-sm sm:text-base font-bold text-black shadow-xl shadow-orange-500/25 transition-transform hover:scale-[1.03] active:scale-95"
               >
-                {t('heroButtonGenerate')}
+                프로젝트 생성하기
                 <span className="transition-transform group-hover:translate-x-1">→</span>
               </button>
               <button
                 onClick={onUni}
                 className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/10"
               >
-                {t('heroButtonUni')}
+                대학 정보 보기
               </button>
             </div>
 
@@ -71,7 +68,7 @@ export default function Hero({ onGenerate, onUni }: HeroProps) {
             {STATS.map((s) => (
               <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur">
                 <dt className="font-mono text-2xl font-bold text-amber-300">{s.value}</dt>
-                <dd className="mt-0.5 text-xs text-slate-400">{t(s.label)}</dd>
+                <dd className="mt-0.5 text-xs text-slate-400">{s.label}</dd>
               </div>
             ))}
           </dl>

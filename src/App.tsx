@@ -2,8 +2,6 @@ import React, { useCallback, useState, Suspense, lazy, Component } from 'react';
 import type { TabId } from './types';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-// ✅ 추가: 누락된 import
-import { useTranslation } from 'react-i18next';
 import { useSavedProjects } from './hooks/useSavedProjects';
 import { projectById } from './data/projects';
 
@@ -59,10 +57,9 @@ class ErrorBoundary extends Component<
 }
 
 function TabFallback() {
-  const { t } = useTranslation();
   return (
     <div className="grid min-h-[300px] place-items-center p-8" role="status" aria-live="polite">
-      <p className="text-sm text-slate-500">{t('loading')}</p>
+      <p className="text-sm text-slate-500">로딩 중...</p>
     </div>
   );
 }
