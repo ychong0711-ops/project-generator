@@ -611,6 +611,44 @@ export const PROJECTS: Project[] = [
     ],
     tip: '"슬립 적용 전 12mA → 적용 후 40μA" 같은 측정 수치는 이 프로젝트의 핵심 증거입니다. 멀티미터나 전류 프로브로 파형을 캡처해 문서에 넣으세요.',
   },
+  {
+    id: 'de-emb-1015',
+    code: 'DE-EMB-1015',
+    title: 'Functional Safety — ASIL-B ECU Fault Injection & Safety Mechanism',
+    titleEn: 'Functional Safety — ASIL-B ECU Fault Injection & Safety Mechanism',
+    tagline: 'ISO 26262 기반 기능안전 설계: 결함 주입(Fault Injection)을 통한 안전 메커니즘 검증 및 FMEA 실습',
+    category: 'diag',
+    level: '심화',
+    weeks: 8,
+    mcu: ['STM32F4 (ARM Cortex-M4)'],
+    sw: ['C (ISO C90/C99)', 'Python (테스트 스크립트)', 'Git'],
+    description:
+      '독일 자동차 산업의 핵심 요구사항인 기능안전(ISO 26262)을 실습합니다. ECU의 하드웨어 및 소프트웨어 결함을 주입(Fault Injection)하여 시스템이 안전 상태로 전환되는지를 검증하고, FMEA(Failure Mode and Effects Analysis) 및 안전 요구사항 명세를 작성하는 것이 목표입니다.',
+    goals: [
+      'ISO 26262 표준에 따른 기능안전 개념 이해 및 안전 목표(Safety Goal) 설정',
+      'FMEA(고장모드영향분석) 테이블 작성 및 위험 분석',
+      '소프트웨어 기반 결함 주입(Fault Injection) 테스트 환경 구축',
+      '안전 메커니즘(Watchdog, Checksum, Alive Monitor) 구현 및 검증',
+    ],
+    milestones: [
+      { phase: '1주차 — 기능안전 기초', tasks: ['ISO 26262 표준 핵심 개념 학습', '프로젝트 대상 ECU의 안전 목표(Safety Goal) 정의'] },
+      { phase: '2주차 — FMEA 분석', tasks: ['FMEA 테이블 작성 (고장 모드, 원인, 영향, RPN 계산)', '안전 요구사항 명세서(SRS) 작성'] },
+      { phase: '3주차 — 결함 주입 환경', tasks: ['GPIO/PWM 기반 Fault Injection 스크립트 작성', '하드웨어 결함 시나리오 정의'] },
+      { phase: '4주차 — 안전 메커니즘 구현', tasks: ['Window Watchdog 및 독립 Watchdog 구현', '프로세서 상태 레지스터(WDG/LVD) 모니터링'] },
+      { phase: '5주차 — 검증 및 리포트', tasks: ['Fault Injection 실행 및 결과 로깅', '기능안전 검증 리포트 작성'] },
+      { phase: '6주차 — 심화 (선택)', tasks: ['ASIL 레벨 분석 (ASIL-A vs B)', '하드웨어 메트릭(SPFM/LFM) 추정'] },
+    ],
+    deliverables: ['FMEA 분석 엑셀/마크다운', 'Fault Injection 테스트 결과 리포트', '안전 메커니즘 소스코드', '기능안전 검증 영상'],
+    skills: ['ISO 26262', 'FMEA', 'Fault Injection', 'Watchdog Timer', 'C', 'Autosar', 'Embedded Safety'],
+    uniIds: ['tum', 'rwth', 'kit', 'tub', 'stuttgart'],
+    interviewQs: [
+      '기능안전에서 ASIL 레벨은 어떻게 결정하며, 프로젝트에서 어떤 ASIL을 목표로 했나요?',
+      'FMEA에서 RPN(Risk Priority Number)은 어떻게 계산하며, 어떤 기준으로 개선 우선순위를 정하나요?',
+      '소프트웨어 기반 Fault Injection과 하드웨어 기반 Fault Injection의 장단점은?',
+      '기능안전과 사이버보안(ISO 21434)의 관계에 대해 어떻게 이해하고 있나요?',
+    ],
+    tip: '면접관들은 "어떤 결함을 주입했고, 시스템이 어떻게 반응했는지"를 구체적으로 묻습니다. 단순한 코드 구현보다는 "분석 → 설계 → 검증"의 기능안전 프로세스를 논리적으로 설명하는 것이 중요합니다.',
+  },
 ];
 
 export const projectById = (id: string) => PROJECTS.find((p) => p.id === id);

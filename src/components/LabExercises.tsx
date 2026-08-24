@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Project } from '../types';
 import { LAB_EXAMPLES, fetchRepoIndex, type RepoExampleFile } from '../data/labs';
+import { ALL_ENTRIES, type PracticeEntry, type PracticeExample, type ImplementationGuide } from '../data/practice-examples';
 import { runC, type OfflineResult } from '../offline/interpreter';
 import OfflineWarnings from './OfflineWarnings';
 import { findGccHelp } from '../data/gccHelp';
@@ -10,14 +11,17 @@ import { useAllProgress, projectTotal, projectDoneCount } from '../store/progres
 import RepoExplorer from './RepoExplorer';
 import TextbookTracks from './TextbookTracks';
 import { loadCustomProblems, type CustomProblem } from '../data/textbooks';
-import { ClipboardIcon, DownloadIcon } from './icons';
+import { ClipboardIcon, DownloadIcon, ChipIcon, EyeIcon, PlayIcon } from './icons';
 import { cn } from '../utils/cn';
 
 /* ============================================================
  *  실습 예제 탭 — 저장소 연계 코드 실습
- *  - 내장 예제 은행(8개) + GitHub 저장소 연계(풀)
+ *  - 통합 레지스트리(ALL_ENTRIES) + GitHub 저장소 연계(풀)
  *  - 스켈레톤 채우기 → 오프라인 실행 → 기대 출력 자동 채점
  * ============================================================ */
+
+const isLab = (e: PracticeEntry): e is PracticeExample => e.type === 'lab';
+const isGuide = (e: PracticeEntry): e is ImplementationGuide => e.type === 'guide';
 
 interface LabExercisesProps {
   savedProjects: Project[];
@@ -65,8 +69,13 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
   }, [solvedIds]);
 
   const active = useMemo(
-    () => LAB_EXAMPLES.find((l) => l.id === activeId) ?? null,
+    () => ALL_ENTRIES.find((l) => l.id === activeId) ?? null,
     [activeId]
+  );
+
+  const activeLabData = useMemo(
+    () => (active && active.type === 'lab' ? LAB_EXAMPLES.find((l) => l.id === active.id) ?? null : null),
+    [active]
   );
 
   const repoActive = useMemo(
@@ -81,7 +90,7 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
 
   const activeTitle = active?.title ?? repoActive?.title ?? customActive?.title ?? '';
   const activeDesc = active?.desc ?? repoActive?.desc ?? customActive?.desc ?? '';
-  const activeExpect = active?.expect ?? repoActive?.expect ?? customActive?.expect ?? [];
+  const activeExpect = activeLabData?.expect ?? repoActive?.expect ?? customActive?.expect ?? [];
 
   const openExample = (id: string, skeleton: string) => {
     setActiveId(id);
@@ -99,6 +108,18 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
     setShowHint(0);
     setOriginView('textbooks');
     setView('solve');
+  };
+
+  /* 영상 미리보기 — 새 탭에서 안전하게 열기 */
+  const openVideoUrl = (url: string) => {
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  /* videoUrl 안전 접근 — undefined/null/빈 문자열 모두 무시 */
+  const safeVideoUrl = (entry: PracticeEntry): string | null => {
+    const raw = entry.videoUrl;
+    return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
   };
 
   const run = () => {
@@ -167,19 +188,21 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <p className="font-mono text-xs font-bold tracking-[0.3em] text-amber-400">PRAKTISCHE ÜBUNGEN</p>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-white">실습 예제 — 저장소 연계 코드 트레이닝</h2>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-white">실습 예제 — 통합 코드 & 구현 가이드</h2>
             <p className="mt-3 text-slate-400 leading-relaxed">
-              스켈레톤을 채우고 → 오프라인 엔진으로 실행하고 → 기대 출력과 자동 채점. 내장 예제 8개로 시작하고,
-              공개 GitHub 저장소의 실습 커리큘럼도 바로 불러올 수 있습니다.
+              스켈레톤을 채우고 → 오프라인 엔진으로 실행하고 → 기대 출력과 자동 채점. 통합 예제와 구현 가이드로
+              학습하고, 공개 GitHub 저장소의 실습 커리큘럼도 바로 불러올 수 있습니다.
             </p>
+
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setView('list')}
-              className={cn('rounded-xl border px-4 py-2.5 text-xs font-bold', view === 'list' ? 'border-amber-400/60 bg-amber-400/15 text-amber-300' : 'border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200')}
-            >
-              📚 내장 예제
-            </button>
+              <button
+                onClick={() => setView('list')}
+                className={cn('rounded-xl border px-4 py-2.5 text-xs font-bold', view === 'list' ? 'border-amber-400/60 bg-amber-400/15 text-amber-300' : 'border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200')}
+              >
+                📚 통합 예제 & 가이드
+              </button>
+
             <button
               onClick={() => setView('textbooks')}
               className={cn('rounded-xl border px-4 py-2.5 text-xs font-bold', view === 'textbooks' ? 'border-amber-400/60 bg-amber-400/15 text-amber-300' : 'border-white/10 bg-white/[0.03] text-slate-400 hover:text-slate-200')}
@@ -198,33 +221,108 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
         {/* ===== 내장 예제 목록 ===== */}
         {view === 'list' && (
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {LAB_EXAMPLES.map((l) => {
-              const solved = solvedIds.includes(l.id);
+            {ALL_ENTRIES.map((entry) => {
+              const solved = solvedIds.includes(entry.id);
+              const lab = isLab(entry);
+              const videoUrl = safeVideoUrl(entry);
               return (
                 <button
-                  key={l.id}
-                  onClick={() => openExample(l.id, l.skeleton)}
+                  key={entry.id}
+                  onClick={() => {
+                    if (lab) {
+                      const labData = LAB_EXAMPLES.find((lx) => lx.id === entry.id);
+                      openExample(entry.id, labData?.skeleton ?? '');
+                    } else if (isGuide(entry)) {
+                      window.open(entry.htmlPath, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
                   className={cn(
                     'group rounded-2xl border p-5 text-left transition-all hover:-translate-y-0.5',
                     solved ? 'border-emerald-400/40 bg-emerald-400/[0.04]' : 'border-white/10 bg-[#0b0f16] hover:border-white/25'
                   )}
                 >
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-mono text-[10px] font-bold text-slate-500">{l.id}</span>
-                    <span className={cn('rounded border px-1.5 py-0.5 text-[10px] font-bold', LEVEL_STYLE[l.level])}>{l.level}</span>
-                    <span className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-400">{l.category}</span>
+                    <span className="font-mono text-[10px] font-bold text-slate-500">{entry.id}</span>
+                    <span className={cn('rounded border px-1.5 py-0.5 text-[10px] font-bold', LEVEL_STYLE[entry.level])}>{entry.level}</span>
+                    <span className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-400">{entry.category}</span>
                     {solved && <span className="ml-auto rounded bg-emerald-400/15 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">✓ 해결</span>}
                   </div>
-                  <p className="mt-2.5 text-sm font-extrabold text-white">{l.title}</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-500 line-clamp-2">{l.desc}</p>
-                  <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 group-hover:text-amber-200">
-                    풀어보기 →
-                  </p>
+                  <div className="mt-3 flex items-start gap-3">
+                    <div
+                      className={cn(
+                        'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border',
+                        lab
+                          ? 'border-amber-500/20 bg-amber-500/10 text-amber-400'
+                          : 'border-sky-500/20 bg-sky-500/10 text-sky-400'
+                      )}
+                    >
+                      {lab ? <ChipIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-extrabold text-white">{entry.title}</p>
+                        <span
+                          className={cn(
+                            'shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold',
+                            lab
+                              ? 'border-amber-400/30 bg-amber-400/10 text-amber-300'
+                              : 'border-sky-400/30 bg-sky-400/10 text-sky-300'
+                          )}
+                        >
+                          {lab ? 'Lab' : 'Guide'}
+                        </span>
+                        {videoUrl && (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${entry.title} 학습 영상 새 탭에서 열기`}
+                            title="학습 영상 보기 (새 탭)"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              openVideoUrl(videoUrl);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                openVideoUrl(videoUrl);
+                              }
+                            }}
+                            className={cn(
+                              'group/video ml-auto inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5',
+                              'border-rose-400/30 bg-gradient-to-r from-rose-500/15 to-fuchsia-500/15',
+                              'text-[9px] font-bold text-rose-300 transition-all duration-150',
+                              'hover:scale-105 hover:border-rose-300/50 hover:text-rose-200',
+                              'focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-rose-300'
+                            )}
+                          >
+                            <PlayIcon className="h-2.5 w-2.5 transition-transform duration-150 group-hover/video:translate-x-[1.5px]" />
+                            영상
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500 line-clamp-2">{entry.desc}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-4">
+                    <div className="flex flex-wrap gap-2">
+                      {entry.skills.slice(0, 3).map((s) => (
+                        <span key={s} className="text-[10px] font-medium text-slate-600">
+                          #{s}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 group-hover:text-amber-200">
+                      {lab ? '풀어보기 →' : '가이드 보기 →'}
+                    </p>
+                  </div>
                 </button>
               );
             })}
             <p className="rounded-2xl border border-dashed border-white/10 px-5 py-4 text-xs leading-relaxed text-slate-500 md:col-span-2 xl:col-span-3">
-              📊 현재 상태: 예제 {solvedIds.length}/{LAB_EXAMPLES.length} 해결 · 포트폴리오 전체 진행 {overallTotal ? Math.round((overallDone / overallTotal) * 100) : 0}%
+              📊 현재 상태: 예제 {solvedIds.length}/{ALL_ENTRIES.length} 해결 · 포트폴리오 전체 진행{' '}
+              {overallTotal ? Math.round((overallDone / overallTotal) * 100) : 0}%
               — 예제를 풀 때마다 스트릭과 배지가 기록됩니다.
             </p>
           </div>
@@ -321,28 +419,39 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
               <aside className="h-fit space-y-4 rounded-2xl border border-white/10 bg-[#0b0f16] p-5">
                 <div className="flex flex-wrap gap-1.5">
                   <span className="font-mono text-[10px] font-bold text-slate-500">{activeId}</span>
-                  <span className={cn('rounded border px-1.5 py-0.5 text-[10px] font-bold', active ? LEVEL_STYLE[active.level] : 'bg-sky-500/15 text-sky-300 border-sky-500/30')}>
-                    {active?.level ?? (customActive ? '내 문제' : '저장소')}
-                  </span>
+                  {active ? (
+                    <>
+                      <span className={cn('rounded border px-1.5 py-0.5 text-[10px] font-bold', LEVEL_STYLE[active.level])}>
+                        {active.level}
+                      </span>
+                      <span className={cn('rounded-full border px-2 py-0.5 text-[9px] font-bold', active.type === 'lab' ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-sky-400/30 bg-sky-400/10 text-sky-300')}>
+                        {active.type === 'lab' ? 'Code Lab' : 'HTML Guide'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="rounded border border-sky-500/30 bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-bold text-sky-300">
+                      {customActive ? '내 문제' : '저장소'}
+                    </span>
+                  )}
                   {solvedIds.includes(activeId) && (
                     <span className="rounded bg-emerald-400/15 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">✓ 해결</span>
                   )}
                 </div>
                 <h3 className="text-lg font-extrabold text-white">{activeTitle}</h3>
                 <p className="text-[13px] leading-relaxed text-slate-400">{activeDesc}</p>
-                {active && active.hints.length > 0 && (
+                {activeLabData && activeLabData.hints.length > 0 && (
                   <div>
                     <p className="text-xs font-bold text-amber-300">💡 힌트</p>
                     <ul className="mt-2 space-y-1.5">
-                      {active.hints.map((h, i) => (
+                      {activeLabData.hints.map((h, i) => (
                         <li key={i} className={cn('text-[11px] leading-relaxed', i < showHint ? 'text-slate-300' : 'text-slate-600')}>
                           {i < showHint ? h : '···'}
                         </li>
                       ))}
                     </ul>
-                    {showHint < active.hints.length && (
+                    {showHint < activeLabData.hints.length && (
                       <button onClick={() => setShowHint((s) => s + 1)} className="mt-2 rounded-md border border-white/10 px-2 py-1 text-[10px] font-bold text-slate-400 hover:text-slate-200">
-                        힌트 보기 ({showHint}/{active.hints.length})
+                        힌트 보기 ({showHint}/{activeLabData.hints.length})
                       </button>
                     )}
                   </div>

@@ -41,9 +41,9 @@ describe('bavarianGpa — Modified Bavarian Formula', () => {
 });
 
 describe('UNIVERSITY_REQS — 대학별 요구사항', () => {
-  it('5개 대학 포함 (rwth/tum/tub/kit/stuttgart)', () => {
+  it('9개 대학 포함 (rwth/tum/tub/kit/stuttgart/fau/darmstadt/chemnitz/freiburg)', () => {
     const ids = UNIVERSITY_REQS.map((u) => u.id).sort();
-    expect(ids).toEqual(['kit', 'rwth', 'stuttgart', 'tub', 'tum']);
+    expect(ids).toEqual(['chemnitz', 'darmstadt', 'fau', 'freiburg', 'kit', 'rwth', 'stuttgart', 'tub', 'tum']);
   });
 
   it('모든 대학이 필수 필드 보유', () => {

@@ -45,7 +45,7 @@ export interface ReqStage {
 }
 
 export interface UniRequirement {
-  id: string; // 'rwth' | 'tum' | 'tub' | 'kit' | 'stuttgart'
+  id: string; // 'rwth' | 'tum' | 'tub' | 'kit' | 'stuttgart' | 'fau' | 'darmstadt' | 'chemnitz' | 'freiburg'
   name: string;
   programs: string[];
   lang: string; // '영어' | '독일어' | '영어/독일어'
@@ -58,6 +58,7 @@ export interface UniRequirement {
   docs: string[]; // 필수 서류
   subjectChecklist: { area: string; desc: string }[]; // 과목 매칭 체크리스트
   source: string; // 정보 출처
+  selectionFocus: string; // '면접중심' | '정량중심' | '혼합' — 입학 사정 주요 축
 }
 
 const COMMON_DOCS = [
@@ -98,6 +99,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '차량 전공', desc: '차량 전장, 전기차, 자동차 공학 중 택' },
     ],
     source: 'RWTH 공식 웹사이트 + uni-assist (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'tum',
@@ -128,6 +130,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '임베디드/통신', desc: '임베디드 시스템, 차량 통신(CAN 등)' },
     ],
     source: 'TUM 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '혼합',
   },
   {
     id: 'tub',
@@ -150,6 +153,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '제어/시스템', desc: '자동제어, 차량 시스템 공학' },
     ],
     source: 'TU Berlin 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'kit',
@@ -172,6 +176,7 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '메카트로닉스', desc: '기계요소, 센서·액추에이터, 제어' },
     ],
     source: 'KIT 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
   {
     id: 'stuttgart',
@@ -194,6 +199,99 @@ export const UNIVERSITY_REQS: UniRequirement[] = [
       { area: '제어', desc: '자동제어, 차량 제어 — 구동계(E-Mobility) 선호' },
     ],
     source: 'Universität Stuttgart 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
+  },
+  {
+    id: 'fau',
+    name: 'Friedrich-Alexander-Universität Erlangen-Nürnberg',
+    programs: ['Automotive Engineering (M.Sc.)', 'Electrical Engineering (M.Sc.)'],
+    lang: '영어/독일어',
+    scoreSystem: '과목 매칭 + GPA 정량 평가 — 프로그램별 커트라인 존재',
+    stages: [
+      { name: '과목 매칭', max: 80, desc: '지원 프로그램 이수 과목과 학부 커리큘럼 일치도 평가' },
+      { name: 'GPA 환산', max: 20, desc: '바이에른 공식으로 성적표 환산 후 정량 반영' },
+    ],
+    passLine: '과목 매칭 충족 + 최소 GPA 기준 이상',
+    interview: '서류 심사 후 면접 초청 가능 (전공 동기 및 연구 계획 중심)',
+    gpaTarget: '2.5 이하 권장',
+    tests: ['TOEFL iBT 80↑ / IELTS 6.0↑ (영어 프로그램)', 'DSH / TestDaF (독일어 프로그램)'],
+    docs: [...COMMON_DOCS, '언어 성적 증빙', '연구 계획서 (Statement of Purpose)'],
+    subjectChecklist: [
+      { area: '수학·물리', desc: '미적분, 선형대수, 일반물리' },
+      { area: '전기/전자', desc: '회로이론, 전자기학' },
+      { area: '제어공학', desc: '자동제어, 시스템 이론' },
+    ],
+    source: 'FAU 공식 웹사이트 + uni-assist (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '혼합',
+  },
+  {
+    id: 'darmstadt',
+    name: 'Technische Universität Darmstadt',
+    programs: ['Mobility Systems (M.Sc.)', 'Electrical Engineering (M.Sc.)'],
+    lang: '영어',
+    scoreSystem: '100점 만점 종합 평가 — 과목 매칭 점수 + 동기서 평가',
+    stages: [
+      { name: '서류 심사', max: 50, desc: '학부 성적, 동기서, 추천서 평가' },
+      { name: '면접', max: 50, desc: '전공 이해도 및 지원 동기 면접 (온라인 또는 대면)' },
+    ],
+    passLine: '종합 점수 60점 이상',
+    interview: '30분 내외, 전공 질문 및 동기 설명',
+    gpaTarget: '2.7 이하 권장',
+    tests: ['TOEFL iBT 90↑ / IELTS 6.5↑'],
+    docs: [...COMMON_DOCS, '언어 성적증명서', '학위증명서 공증본'],
+    subjectChecklist: [
+      { area: '수학', desc: '미적분, 선형대수' },
+      { area: '제어·자동화', desc: '자동제어 이론, PLC 및 임베디드 제어' },
+      { area: '통신', desc: '데이터 통신, 네트워크 프로토콜' },
+    ],
+    source: 'TU Darmstadt 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '혼합',
+  },
+  {
+    id: 'chemnitz',
+    name: 'Technische Universität Chemnitz',
+    programs: ['Automotive Engineering (M.Sc.)', 'Embedded Systems (M.Sc.)'],
+    lang: '독일어',
+    scoreSystem: 'GPA 기반 선발 + 면접 — 독일어 능력 필수 (일부 영어 프로그램 예외)',
+    stages: [
+      { name: '서류 심사', max: 60, desc: '성적증명서 및 전공 이수 과목 검증' },
+      { name: '면접', max: 40, desc: '독일어 구사 능력 및 전공 동기 평가' },
+    ],
+    passLine: '서류 심사 통과 + 면접 최소 점수 이상',
+    interview: '20~30분, 독일어로 전공 주제 질문',
+    gpaTarget: '2.3 이하 권장',
+    tests: ['DSH 2↑ / TestDaF 4개 등급 3↑ (독일어 프로그램)'],
+    docs: [...COMMON_DOCS, '독일어 성적증명서', '입학 허가서 사본 (해당 시)'],
+    subjectChecklist: [
+      { area: '수학·물리', desc: '미적분, 선형대수, 일반물리' },
+      { area: '임베디드 시스템', desc: '마이크로컨트롤러, C 프로그래밍' },
+      { area: '제어공학', desc: '자동제어, 디지털 제어' },
+    ],
+    source: 'TU Chemnitz 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '면접중심',
+  },
+  {
+    id: 'freiburg',
+    name: 'Universität Freiburg',
+    programs: ['Microtechnology (M.Sc.)', 'Materials Science (M.Sc.)'],
+    lang: '영어/독일어',
+    scoreSystem: '학부 성적 비중 70% + 동기서 30% — 연구 역량 중심 선발',
+    stages: [
+      { name: '학업 평가', max: 70, desc: '성적 및 이수 과목 누적 점수' },
+      { name: '동기서 평가', max: 30, desc: '연구 계획서 및 지원 동기의 질적 평가' },
+    ],
+    passLine: '총점 65점 이상',
+    interview: '일반적으로 면접 없음 — 서류 심사 결과에 따라 초청 가능',
+    gpaTarget: '2.5 이하 권장',
+    tests: ['TOEFL iBT 85↑ / IELTS 6.5↑ (영어 프로그램)', 'DSH (독일어 프로그램)'],
+    docs: [...COMMON_DOCS, '연구 계획서 (Letter of Motivation)', '포트폴리오 (해당 시)'],
+    subjectChecklist: [
+      { area: '수학·물리', desc: '미적분, 선형대수, 실험물리' },
+      { area: '재료과학', desc: '재료 특성, 박리 공정' },
+      { area: '공학 기초', desc: '전기회로, 역학' },
+    ],
+    source: 'Universität Freiburg 공식 웹사이트 (2025/26 기준, 지원 시 재확인 필요)',
+    selectionFocus: '정량중심',
   },
 ];
 

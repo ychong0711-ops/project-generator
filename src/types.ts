@@ -65,4 +65,4 @@ export interface University {
   pros: string;
 }
 
-export type TabId = 'home' | 'generator' | 'universities' | 'roadmap' | 'portfolio' | 'compete' | 'guide' | 'labs';
+export type TabId = 'home' | 'generator' | 'universities' | 'roadmap' | 'portfolio' | 'compete' | 'guide' | 'labs' | 'demo';

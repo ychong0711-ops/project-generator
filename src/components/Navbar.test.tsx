@@ -32,11 +32,11 @@ beforeEach(async () => {
 });
 
 describe('Navbar', () => {
-  it('탭 8개를 모두 렌더링한다', () => {
+  it('탭 9개를 모두 렌더링한다', () => {
     renderNavbar();
     const nav = screen.getByRole('navigation');
     // 언어 전환 버튼(KO/DE/EN)은 nav 밖이므로 포함되지 않아야 한다
-    expect(nav.querySelectorAll('button')).toHaveLength(8);
+    expect(nav.querySelectorAll('button')).toHaveLength(9);
   });
 
   it('탭 클릭 시 해당 id 로 onChange 가 호출된다', async () => {

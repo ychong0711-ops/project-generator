@@ -13,7 +13,8 @@ import {
   nextStatus,
   type ApplyStatus,
 } from '../data/apply';
-import { BuildingIcon, MapPinIcon, CheckIcon, ClipboardIcon } from './icons';
+import { BuildingIcon, MapPinIcon, CheckIcon, ClipboardIcon, ChevronIcon } from './icons';
+import SopGenerator from './SopGenerator';
 import { copyText } from '../utils/markdown';
 import { cn } from '../utils/cn';
 
@@ -30,6 +31,7 @@ export default function Universities({ savedProjects }: { savedProjects: Project
   const [emailOpen, setEmailOpen] = useState<string | null>(null);
   const [emailName, setEmailName] = useState('');
   const [copiedId, setCopiedId] = useState('');
+  const [sopOpen, setSopOpen] = useState(false);
   const { map, set } = useApply();
 
   const filtered = UNIVERSITIES.filter((u) => {
@@ -276,6 +278,36 @@ export default function Universities({ savedProjects }: { savedProjects: Project
               </article>
             );
           })}
+        </div>
+
+        {/* ===== SOP (Motivationsschreiben) 동기서 생성기 — 접이식 ===== */}
+        <div className="mt-12">
+          <button
+            type="button"
+            onClick={() => setSopOpen((o) => !o)}
+            aria-expanded={sopOpen}
+            aria-controls="sop-generator-panel"
+            className={cn(
+              'flex w-full items-center justify-between gap-4 rounded-2xl border bg-[#0b0f16] px-6 py-5 text-left transition-colors',
+              sopOpen ? 'border-amber-400/30' : 'border-white/10 hover:border-amber-400/30'
+            )}
+          >
+            <span>
+              <span className="font-mono text-[10px] font-bold tracking-[0.3em] text-amber-400">MOTIVATIONSSCHREIBEN</span>
+              <span className="mt-1 block text-lg font-extrabold text-white">SOP 동기서 초안 생성기</span>
+              <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+                대학과 내 프로젝트를 연결해 동기서 초안을 자동 생성 — 클립보드 복사 및 .txt 저장 지원
+              </span>
+            </span>
+            <ChevronIcon open={sopOpen} className="h-5 w-5 shrink-0 text-amber-400" />
+          </button>
+          <div id="sop-generator-panel">
+            {sopOpen && (
+              <div className="mt-4 animate-fade-in">
+                <SopGenerator />
+              </div>
+            )}
+          </div>
         </div>
 
         <p className="mt-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 text-xs leading-relaxed text-slate-500">
