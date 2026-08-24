@@ -312,6 +312,12 @@ export default function RepoExplorer() {
 
       {/* ===== 우측: 에디터 + 실행 ===== */}
       <div className="min-w-0 space-y-3">
+        {/* 파일 열기 실패 등 current 없이 loadMsg 만 있는 경우도 안내를 보여준다 */}
+        {!current && loadMsg && (
+          <p className="rounded-xl border border-white/10 bg-[#0b0f16] px-3.5 py-2.5 text-[11px] text-slate-400">
+            {loadMsg}
+          </p>
+        )}
         {!current ? (
           <div className="grid place-items-center rounded-2xl border border-dashed border-white/10 px-6 py-20 text-center">
             <span className="text-4xl">🐙</span>

@@ -65,8 +65,12 @@ describe('LabExercises — 영상 미리보기 배지', () => {
       (e) => !(typeof e.videoUrl === 'string' && e.videoUrl.trim().length > 0)
     );
     expect(noVideo.length).toBeGreaterThan(0);
+    /* 접근성 트리 반복 스캔은 계측(coverage) 시 느려지므로 버튼 이름을 한 번만 수집해 비교 */
+    const badgeNames = new Set(
+      screen.getAllByRole('button').map((b) => b.textContent ?? '')
+    );
     for (const entry of noVideo) {
-      expect(screen.queryByRole('button', { name: `${entry.title} 학습 영상 새 탭에서 열기` })).toBeNull();
+      expect(badgeNames.has(`${entry.title} 학습 영상 새 탭에서 열기`)).toBe(false);
     }
   });
 
