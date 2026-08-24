@@ -103,3 +103,16 @@ export const FilterIcon = ({ className = 'w-4 h-4' }: IconProps) => (
     <path d="M3 5h18l-7 8v6l-4 2v-8L3 5z" strokeLinejoin="round" />
   </svg>
 );
+
+export const PlayIcon = ({ className = 'w-4 h-4' }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M7 4.8v14.4a1 1 0 0 0 1.52.85l11.7-7.2a1 1 0 0 0 0-1.7L8.52 3.95A1 1 0 0 0 7 4.8z" />
+  </svg>
+);
+
+export const CopyIcon = ({ className = 'w-4 h-4' }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);

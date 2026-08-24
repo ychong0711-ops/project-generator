@@ -20,6 +20,7 @@ const TABS: { id: TabId; labelKey: string }[] = [
   { id: 'compete', labelKey: 'navCompete' },
   { id: 'labs', labelKey: 'navLabs' },
   { id: 'guide', labelKey: 'navGuide' },
+  { id: 'demo', labelKey: 'navDemo' },
 ];
 
 export default function Navbar({ active, onChange, savedCount }: NavbarProps) {

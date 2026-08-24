@@ -17,6 +17,7 @@ const LabExercises = lazy(() => import('./components/LabExercises'));
 const GuideTab = lazy(() => import('./components/GuideTab'));
 const Hero = lazy(() => import('./components/Hero'));
 const Generator = lazy(() => import('./components/Generator'));
+const DemoStudio = lazy(() => import('./components/DemoStudio'));
 
 // ✅ 추가: Error Boundary 컴포넌트 정의
 class ErrorBoundary extends Component<
@@ -134,6 +135,7 @@ export default function App() {
             {tab === 'compete' && <Competitiveness savedProjects={savedProjects} />}
             {tab === 'labs' && <LabExercises savedProjects={savedProjects} />}
             {tab === 'guide' && <GuideTab savedProjects={savedProjects} />}
+            {tab === 'demo' && <DemoStudio />}
           </Suspense>
         </ErrorBoundary>
       </main>

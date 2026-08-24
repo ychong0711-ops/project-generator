@@ -71,6 +71,7 @@ const TAB_NAMES: Record<TabId, string> = {
   compete: '경쟁력 센터',
   guide: '사용 가이드',
   labs: '실습 예제',
+  demo: '데모 스튜디오',
 };
 
 function tabForWeak(key: string): TabId {
