@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import JSZip from 'jszip';
 import type { Project } from '../types';
-import { portfolioToMarkdown, projectToMarkdown } from '../utils/markdown';
-import { genMainC, genMakefile, genPlan, genInterview, genAlgoReadme } from '../utils/codegen';
-import { samplesFor } from '../data/samples';
+import { portfolioToMarkdown } from '../utils/markdown';
+import { buildProjectFiles } from '../utils/scaffold-pipeline';
+import { codeKey } from '../utils/storage';
 import { DownloadIcon, CheckIcon } from './icons';
 import { cn } from '../utils/cn';
 
@@ -27,20 +27,14 @@ function buildFiles(projects: Project[]): DeployFile[] {
     { path: 'README.md', content: portfolioToMarkdown(projects) },
   ];
   for (const p of projects) {
-    files.push(
-      { path: `${p.id}/README.md`, content: projectToMarkdown(p) },
-      { path: `${p.id}/src/main.c`, content: genMainC(p) },
-      { path: `${p.id}/Makefile`, content: genMakefile(p) },
-      { path: `${p.id}/docs/plan.md`, content: genPlan(p) },
-      { path: `${p.id}/docs/interview-prep.md`, content: genInterview(p) },
-      { path: `${p.id}/algo/README.md`, content: genAlgoReadme(p) }
-    );
-    samplesFor(p.id).forEach((s) => {
-      files.push({ path: `${p.id}/algo/${s.id}.c`, content: s.code });
-    });
+    /* 프로젝트 파일셋은 Phase C 단일 파이프라인(buildProjectFiles)에서 가져온다.
+     * 스캐폴드 지원 프로젝트는 실제 빌드 코드 + 문서, 미지원은 문서 스타터팩. */
+    for (const f of buildProjectFiles(p)) {
+      files.push({ path: `${p.id}/${f.path}`, content: f.content });
+    }
     /* 코드 랩에서 사용자가 수정한 코드 포함 */
     try {
-      const raw = localStorage.getItem(`autoembed-code-${p.id}`);
+      const raw = localStorage.getItem(codeKey(p.id));
       if (raw) {
         const stored = JSON.parse(raw) as { sampleId: string; code: string };
         files.push({ path: `${p.id}/code-lab/${stored.sampleId}.c`, content: stored.code });

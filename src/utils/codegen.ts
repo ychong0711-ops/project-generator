@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import type { Project } from '../types';
 import { CATEGORIES } from '../data/projects';
 import { samplesFor } from '../data/samples';
@@ -361,27 +360,30 @@ ${results}
 `;
 }
 
-/** 스타터팩 zip 생성 및 다운로드 */
-export async function downloadStarterZip(p: Project): Promise<void> {
-  const zip = new JSZip();
-  zip.file('README.md', genReadme(p));
-  zip.file('Makefile', genMakefile(p));
-  zip.file('src/main.c', genMainC(p));
-  zip.file('docs/plan.md', genPlan(p));
-  zip.file('docs/interview-prep.md', genInterview(p));
-  zip.file('algo/README.md', genAlgoReadme(p));
-  zip.file('docs/architecture.svg', genArchitectureSvg(p));
-  zip.file('docs/technische-dokumentation.md', genGermanDoc(p));
-  zip.file('docs/messvorlage.md', genMeasurementTemplate(p));
-  samplesFor(p.id).forEach((s) => zip.file(`algo/${s.id}.c`, s.code));
+/** 단일 프로젝트의 생성 파일 (경로는 ZIP 루트 / 저장소 기준 상대 경로) */
+export interface ProjectFile {
+  path: string;
+  content: string;
+}
 
-  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${p.id}-starter.zip`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+/**
+ * 레거시 문서 기반 파일셋 (스캐폴드 미지원 프로젝트 폴백).
+ * ZIP 다운로드·GitHub 배포는 scaffold-pipeline 의 buildProjectFiles 를 사용한다.
+ */
+export function projectFiles(p: Project): ProjectFile[] {
+  const files: ProjectFile[] = [
+    { path: 'README.md', content: genReadme(p) },
+    { path: 'Makefile', content: genMakefile(p) },
+    { path: 'src/main.c', content: genMainC(p) },
+    { path: 'docs/plan.md', content: genPlan(p) },
+    { path: 'docs/interview-prep.md', content: genInterview(p) },
+    { path: 'algo/README.md', content: genAlgoReadme(p) },
+    { path: 'docs/architecture.svg', content: genArchitectureSvg(p) },
+    { path: 'docs/technische-dokumentation.md', content: genGermanDoc(p) },
+    { path: 'docs/messvorlage.md', content: genMeasurementTemplate(p) },
+  ];
+  for (const s of samplesFor(p.id)) {
+    files.push({ path: `algo/${s.id}.c`, content: s.code });
+  }
+  return files;
 }

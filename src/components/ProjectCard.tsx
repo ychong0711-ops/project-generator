@@ -3,7 +3,7 @@ import type { Project } from '../types';
 import { CATEGORIES, LEVEL_STYLE } from '../data/projects';
 import { universityById } from '../data/universities';
 import { projectToMarkdown, copyText, downloadMarkdown } from '../utils/markdown';
-import { downloadStarterZip } from '../utils/codegen';
+import ScaffoldDialog from './ScaffoldDialog';
 import { useProjectProgress, projectTotal, projectDoneCount, resetProject } from '../store/progress';
 import CodeLab from './CodeLab';
 import SerialLab from './SerialLab';
@@ -49,7 +49,7 @@ const NUMS = ['①', '②', '③', '④', '⑤', '⑥'];
 
 export default function ProjectCard({ project: p, saved, onToggleSave }: ProjectCardProps) {
   const [copied, setCopied] = useState(false);
-  const [zipping, setZipping] = useState(false);
+  const [scaffoldOpen, setScaffoldOpen] = useState(false);
   const { done, isDone, toggle } = useProjectProgress(p.id);
 
   const cat = CATEGORIES[p.category];
@@ -63,15 +63,6 @@ export default function ProjectCard({ project: p, saved, onToggleSave }: Project
     if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleZip = async () => {
-    setZipping(true);
-    try {
-      await downloadStarterZip(p);
-    } finally {
-      setZipping(false);
     }
   };
 
@@ -388,17 +379,11 @@ export default function ProjectCard({ project: p, saved, onToggleSave }: Project
             {saved ? '저장됨' : '포트폴리오에 저장'}
           </button>
           <button
-            onClick={handleZip}
-            disabled={zipping}
-            className={cn(
-              'inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-bold transition-all active:scale-95',
-              zipping
-                ? 'cursor-wait border-amber-400/40 bg-amber-400/10 text-amber-300'
-                : 'border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20'
-            )}
+            onClick={() => setScaffoldOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-5 py-2.5 text-sm font-bold text-amber-300 transition-all hover:bg-amber-400/20 active:scale-95"
           >
-            <DownloadIcon className={cn('h-4 w-4', zipping && 'animate-pulse-dot')} />
-            {zipping ? '패키징 중...' : '스타터팩 다운로드 (.zip)'}
+            <DownloadIcon className="h-4 w-4" />
+            스캐폴드 생성 (.zip)
           </button>
           <button
             onClick={handleCopy}
@@ -416,10 +401,13 @@ export default function ProjectCard({ project: p, saved, onToggleSave }: Project
           </button>
         </div>
         <p className="text-xs text-slate-600">
-          ✓ 체크한 진행 상황은 브라우저에 자동 저장됩니다. 스타터팩에는 빌드 가능한 <span className="font-mono text-slate-500">main.c</span> 스켈레톤과{' '}
-          <span className="font-mono text-slate-500">Makefile</span>이 포함됩니다.
+          ✓ 체크한 진행 상황은 브라우저에 자동 저장됩니다. 스캐폴드는 실제로 빌드되는 코드 트리
+          (<span className="font-mono text-slate-500">Makefile</span>·<span className="font-mono text-slate-500">CMake</span>·
+          <span className="font-mono text-slate-500">make sim</span> 호스트 시뮬)와 문서(plan/interview/German)를 함께 담습니다.
         </p>
       </div>
+
+      <ScaffoldDialog project={p} open={scaffoldOpen} onClose={() => setScaffoldOpen(false)} />
     </article>
   );
 }

@@ -8,6 +8,7 @@ import {
   genAlgoReadme,
   genGermanDoc,
   genMeasurementTemplate,
+  projectFiles,
 } from "./codegen";
 import { projectById, PROJECTS } from "../data/projects";
 import { samplesFor } from "../data/samples";
@@ -137,6 +138,45 @@ describe("codegen — genMeasurementTemplate", () => {
     expect(doc).toContain("Ergebnisse");
     expect(doc).toContain("Vergleich");
     expect(doc).toContain("Qualitätskontrolle");
+  });
+});
+
+describe("codegen — projectFiles", () => {
+  it.each(projectIds)("%s: 필수 경로 + 샘플(.c) 포함", (id) => {
+    const p = projectById(id);
+    const files = projectFiles(p!);
+    const paths = files.map((f) => f.path);
+
+    for (const req of [
+      "README.md",
+      "Makefile",
+      "src/main.c",
+      "docs/plan.md",
+      "docs/interview-prep.md",
+      "docs/architecture.svg",
+      "docs/technische-dokumentation.md",
+      "docs/messvorlage.md",
+      "algo/README.md",
+    ]) {
+      expect(paths).toContain(req);
+    }
+
+    // 샘플 코드가 algo/<id>.c 로 포함된다
+    const samples = samplesFor(id);
+    for (const s of samples) {
+      expect(paths).toContain(`algo/${s.id}.c`);
+    }
+
+    // 경로 중복이 없어야 한다
+    expect(new Set(paths).size).toBe(paths.length);
+  });
+
+  it("모든 프로젝트가 파일셋을 반환한다", () => {
+    for (const p of PROJECTS) {
+      const files = projectFiles(p);
+      expect(files.length).toBeGreaterThan(0);
+      expect(files.every((f) => f.content.length > 0)).toBe(true);
+    }
   });
 });
 
