@@ -1,3 +1,4 @@
+import { AUTOEMBED_DEADLINE, AUTOEMBED_CHECKLIST } from '../utils/storage';
 import { useMemo } from 'react';
 import type { Project, TabId } from '../types';
 import { useAllProgress, projectTotal, projectDoneCount } from '../store/progress';
@@ -43,7 +44,7 @@ export default function WeeklyPlan({ savedProjects, onNavigate, onView }: Weekly
     );
     let weeksUntil = 0;
     try {
-      const raw = localStorage.getItem('autoembed-deadline');
+      const raw = localStorage.getItem(AUTOEMBED_DEADLINE);
       if (raw) weeksUntil = Math.max(0, Math.floor((new Date(raw).getTime() - Date.now()) / 604800000));
     } catch {
       /* ignore */
@@ -52,7 +53,7 @@ export default function WeeklyPlan({ savedProjects, onNavigate, onView }: Weekly
 
     let roadmapNext: string[] = [];
     try {
-      const raw = localStorage.getItem('autoembed-checklist');
+      const raw = localStorage.getItem(AUTOEMBED_CHECKLIST);
       const doneL = raw ? (JSON.parse(raw) as string[]) : [];
       roadmapNext = CHECKLIST.filter((c) => !doneL.includes(c.id)).slice(0, 2).map((c) => c.label);
     } catch {

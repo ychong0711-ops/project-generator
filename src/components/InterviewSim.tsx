@@ -1,3 +1,4 @@
+import { AUTOEMBED_INTERVIEW_STATS } from '../utils/storage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Project } from '../types';
 import { PROJECTS } from '../data/projects';
@@ -21,7 +22,7 @@ interface QItem {
   q: string;
 }
 
-const STATS_KEY = 'autoembed-interview-stats';
+const STATS_KEY = AUTOEMBED_INTERVIEW_STATS;
 
 interface Stats {
   pass: number;

@@ -1,5 +1,12 @@
-import { SAMPLES_A } from './samples-a';
-import { SAMPLES_B } from './samples-b';
+import { SAMPLES_A_1 } from './sample-sets/a1';
+import { SAMPLES_A_2 } from './sample-sets/a2';
+import { SAMPLES_A_3 } from './sample-sets/a3';
+import { SAMPLES_A_4 } from './sample-sets/a4';
+import { SAMPLES_B_1 } from './sample-sets/b1';
+import { SAMPLES_B_2 } from './sample-sets/b2';
+import { SAMPLES_B_3 } from './sample-sets/b3';
+import { SAMPLES_B_4 } from './sample-sets/b4';
+import { SAMPLES_B_5 } from './sample-sets/b5';
 
 export interface CodeSample {
   id: string;    // 파일명: algo/<id>.c
@@ -15,6 +22,7 @@ const OFFLINE_OK = new Set([
   'uds_session', 'priority_inversion', 'watchdog',
   'lin_checksum', 'window_sm', 'crc32', 'flash_driver',
   'sd_state', 'ecu_modes', 'ignition_sm',
+  'ara_service_broker', 'secoc_can_ids',
 ]);
 
 /* 자동 검증 기대 출력 */
@@ -29,10 +37,22 @@ const EXPECTS: Record<string, string[]> = {
   sd_state: ['MAIN phase', 'self-test done'],
   ecu_modes: ['SLEEP', 'self-test done'],
   ignition_sm: ['state=RUN', '(PASS)', 'self-test done'],
+  ara_service_broker: ['(PASS)', 'self-test done'],
+  secoc_can_ids: ['(PASS)', 'self-test done'],
 };
 
 const ALL: Record<string, CodeSample[]> = (() => {
-  const merged: Record<string, CodeSample[]> = { ...SAMPLES_A, ...SAMPLES_B };
+  const merged: Record<string, CodeSample[]> = {
+    ...SAMPLES_A_1,
+    ...SAMPLES_A_2,
+    ...SAMPLES_A_3,
+    ...SAMPLES_A_4,
+    ...SAMPLES_B_1,
+    ...SAMPLES_B_2,
+    ...SAMPLES_B_3,
+    ...SAMPLES_B_4,
+    ...SAMPLES_B_5,
+  };
   for (const key of Object.keys(merged)) {
     merged[key] = merged[key].map((s) => ({ ...s, offline: OFFLINE_OK.has(s.id), expect: EXPECTS[s.id] }));
   }

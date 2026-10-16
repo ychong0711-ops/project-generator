@@ -1,10 +1,11 @@
+import { AUTOEMBED_CHECKLIST } from '../utils/storage';
 import { useEffect, useState } from 'react';
 import { CHECKLIST, FAQS, TIMELINE } from '../data/guide';
 import { recordActivity } from '../store/activity';
 import { CheckIcon, ChevronIcon } from './icons';
 import { cn } from '../utils/cn';
 
-const CHECK_KEY = 'autoembed-checklist';
+const CHECK_KEY = AUTOEMBED_CHECKLIST;
 
 function useChecklist() {
   const [checked, setChecked] = useState<string[]>(() => {

@@ -1,3 +1,4 @@
+import { AUTOEMBED_APPLY } from '../utils/storage';
 import { useSyncExternalStore } from 'react';
 import type { Project } from '../types';
 import { PROJECTS } from './projects';
@@ -50,7 +51,7 @@ export const APPLY_STATUS: Record<ApplyStatus, { label: string; cls: string }> =
 
 export const APPLY_ORDER: ApplyStatus[] = ['none', 'wish', 'preparing', 'submitted', 'interview', 'accepted'];
 
-const APPLY_KEY = 'autoembed-apply';
+const APPLY_KEY = AUTOEMBED_APPLY;
 let applyState: Record<string, ApplyStatus> = (() => {
   try {
     const raw = localStorage.getItem(APPLY_KEY);
@@ -260,6 +261,13 @@ export const SERIES: SeriesDef[] = [
     desc: '센서 퓨전 → 차선 인식 → 서비스 통신',
     story: '"인지-판단-통신의 자율주행 파이프라인을 축소 구현한 경험"',
     projects: ['sensor-fusion-ekf', 'adas-lane', 'someip'],
+  },
+  {
+    id: 'sdv-nextgen',
+    name: '차세대 SDV & 보안 트랙',
+    desc: 'Classic SWC → Adaptive SOME/IP → ISO 21434 SecOC',
+    story: '"클래식 정적 ECU에서 출발하여 현대적 서비스 지향 SDV 플랫폼과 차량 사이버보안 규제 대응까지 섭렵한 차세대 아키텍트"',
+    projects: ['autosar-swc', 'sdv-adaptive-autosar', 'vehicle-cybersecurity'],
   },
 ];
 

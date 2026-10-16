@@ -1,3 +1,4 @@
+import { AUTOEMBED_DIAGNOSIS, AUTOEMBED_INTERVIEW_STATS, AUTOEMBED_CHECKLIST } from '../utils/storage';
 import { useMemo } from 'react';
 import type { Project } from '../types';
 import { useAllProgress, projectTotal, projectDoneCount } from '../store/progress';
@@ -30,7 +31,7 @@ interface Tier {
 
 function readDiag(): Record<string, number | null> {
   try {
-    const raw = localStorage.getItem('autoembed-diagnosis');
+    const raw = localStorage.getItem(AUTOEMBED_DIAGNOSIS);
     return raw ? (JSON.parse(raw) as Record<string, number | null>) : {};
   } catch {
     return {};
@@ -39,7 +40,7 @@ function readDiag(): Record<string, number | null> {
 
 function readInterviewTotal(): number {
   try {
-    const raw = localStorage.getItem('autoembed-interview-stats');
+    const raw = localStorage.getItem(AUTOEMBED_INTERVIEW_STATS);
     if (!raw) return 0;
     const s = JSON.parse(raw) as { pass: number; review: number };
     return (s.pass ?? 0) + (s.review ?? 0);
@@ -50,7 +51,7 @@ function readInterviewTotal(): number {
 
 function readChecklistDone(): number {
   try {
-    const raw = localStorage.getItem('autoembed-checklist');
+    const raw = localStorage.getItem(AUTOEMBED_CHECKLIST);
     return raw ? (JSON.parse(raw) as string[]).length : 0;
   } catch {
     return 0;

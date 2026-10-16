@@ -1,3 +1,4 @@
+import { strategyKey } from '../utils/storage';
 import { useEffect, useMemo, useState } from 'react';
 import type { Project } from '../types';
 import {
@@ -20,7 +21,6 @@ interface StrategyTabProps {
   savedProjects: Project[];
 }
 
-const DOC_KEY_PREFIX = 'autoembed-strategy-uni-';
 const MAX_SCORES = [4.5, 4.3, 4.0];
 const MIN_PASSES = [1.0, 1.5, 2.0, 2.5];
 
@@ -91,7 +91,7 @@ function firstNumber(s: string): number | null {
 
 function readDone(uniId: string): string[] {
   try {
-    const raw = localStorage.getItem(`${DOC_KEY_PREFIX}${uniId}`);
+    const raw = localStorage.getItem(strategyKey(uniId));
     return raw ? (JSON.parse(raw) as string[]) : [];
   } catch {
     return [];
@@ -125,7 +125,7 @@ export default function StrategyTab({ savedProjects }: StrategyTabProps) {
   useEffect(() => {
     for (const [k, v] of Object.entries(doneDocs)) {
       try {
-        localStorage.setItem(`${DOC_KEY_PREFIX}${k}`, JSON.stringify(v));
+        localStorage.setItem(strategyKey(k), JSON.stringify(v));
       } catch {
         /* ignore */
       }

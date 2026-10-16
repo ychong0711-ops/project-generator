@@ -1,3 +1,4 @@
+import { AUTOEMBED_INTERVIEW_STATS, AUTOEMBED_CHECKLIST } from '../utils/storage';
 import { useMemo } from 'react';
 import type { Project } from '../types';
 import { useAllProgress, projectTotal, projectDoneCount } from '../store/progress';
@@ -27,7 +28,7 @@ export default function Badges({ savedProjects }: { savedProjects: Project[] }) 
     let interviewTotal = 0;
     let checklistDone = 0;
     try {
-      const raw = localStorage.getItem('autoembed-interview-stats');
+      const raw = localStorage.getItem(AUTOEMBED_INTERVIEW_STATS);
       if (raw) {
         const s = JSON.parse(raw) as { pass: number; review: number };
         interviewTotal = (s.pass ?? 0) + (s.review ?? 0);
@@ -36,7 +37,7 @@ export default function Badges({ savedProjects }: { savedProjects: Project[] }) 
       /* ignore */
     }
     try {
-      const raw = localStorage.getItem('autoembed-checklist');
+      const raw = localStorage.getItem(AUTOEMBED_CHECKLIST);
       if (raw) checklistDone = (JSON.parse(raw) as string[]).length;
     } catch {
       /* ignore */

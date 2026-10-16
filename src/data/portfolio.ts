@@ -1,3 +1,4 @@
+import { AUTOEMBED_DEMO_STUDIO } from '../utils/storage';
 import { useSyncExternalStore } from 'react';
 import type { Project } from '../types';
 import { PROJECTS } from './projects';
@@ -16,7 +17,7 @@ export interface DemoVideo {
   createdAt: number; // timestamp
 }
 
-export const DEMO_VIDEOS_KEY = 'autoembed-demo-studio';
+export const DEMO_VIDEOS_KEY = AUTOEMBED_DEMO_STUDIO;
 
 /* ---------- 저장/로드 헬퍼 ---------- */
 

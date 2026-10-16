@@ -1,3 +1,4 @@
+import { AUTOEMBED_CUSTOM_LABS } from '../utils/storage';
 /* ============================================================
  *  공개 교재 트랙 — 공개 교재·강의 자료의 "학습 순서(주제)"를
  *  참고해 앱이 자체 제작한 실습 세트
@@ -154,7 +155,7 @@ export interface CustomProblem {
   expect: string[];
 }
 
-const CUSTOM_KEY = 'autoembed-custom-labs';
+const CUSTOM_KEY = AUTOEMBED_CUSTOM_LABS;
 
 export function loadCustomProblems(): CustomProblem[] {
   try {

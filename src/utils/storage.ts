@@ -19,6 +19,7 @@ export const AUTOEMBED_REPO_SOLVED = 'autoembed-repo-solved';
 export const AUTOEMBED_CUSTOM_LABS = 'autoembed-custom-labs';
 export const AUTOEMBED_APPLY = 'autoembed-apply';
 export const AUTOEMBED_BACKUP = 'autoembed-backup';
+export const AUTOEMBED_DEMO_STUDIO = 'autoembed-demo-studio';
 
 /** 앱이 사용하는 모든 키의 공통 접두사 */
 export const KEY_PREFIX = 'autoembed-';

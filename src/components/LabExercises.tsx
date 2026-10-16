@@ -1,3 +1,4 @@
+import { AUTOEMBED_LAB_SOLVED } from '../utils/storage';
 import { useEffect, useMemo, useState } from 'react';
 import type { Project } from '../types';
 import { LAB_EXAMPLES, fetchRepoIndex, type RepoExampleFile } from '../data/labs';
@@ -46,7 +47,7 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
   const [busy, setBusy] = useState(false);
   const [solvedIds, setSolvedIds] = useState<string[]>(() => {
     try {
-      const raw = localStorage.getItem('autoembed-lab-solved');
+      const raw = localStorage.getItem(AUTOEMBED_LAB_SOLVED);
       return raw ? (JSON.parse(raw) as string[]) : [];
     } catch {
       return [];
@@ -62,7 +63,7 @@ export default function LabExercises({ savedProjects }: LabExercisesProps) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('autoembed-lab-solved', JSON.stringify(solvedIds));
+      localStorage.setItem(AUTOEMBED_LAB_SOLVED, JSON.stringify(solvedIds));
     } catch {
       /* ignore */
     }

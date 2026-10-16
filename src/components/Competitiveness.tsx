@@ -1,3 +1,4 @@
+import { AUTOEMBED_DIAGNOSIS } from '../utils/storage';
 import { useEffect, useMemo, useState } from 'react';
 import type { Project } from '../types';
 import {
@@ -25,7 +26,7 @@ interface CompetitivenessProps {
 
 type SubTab = 'diag' | 'strategy' | 'docs' | 'interview' | 'benchmark' | 'german';
 
-const DIAG_KEY = 'autoembed-diagnosis';
+const DIAG_KEY = AUTOEMBED_DIAGNOSIS;
 
 const SUB_TABS: { id: SubTab; label: string; icon: string }[] = [
   { id: 'diag', label: '경쟁력 진단', icon: '📊' },

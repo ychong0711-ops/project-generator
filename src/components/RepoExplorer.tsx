@@ -1,3 +1,4 @@
+import { AUTOEMBED_REPO_SOLVED } from '../utils/storage';
 import { useEffect, useState } from 'react';
 import { CURATED_REPOS, type CuratedRepo } from '../data/curatedRepos';
 import {
@@ -32,7 +33,7 @@ const KIND_STYLE: Record<RepoTreeFile['kind'], { icon: string; label: string; cl
   header: { icon: '🧾', label: '헤더', cls: 'border-white/10 bg-white/[0.03] text-slate-500' },
 };
 
-const SOLVED_KEY = 'autoembed-repo-solved';
+const SOLVED_KEY = AUTOEMBED_REPO_SOLVED;
 
 function loadSolved(): string[] {
   try {

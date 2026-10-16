@@ -1,3 +1,4 @@
+import { AUTOEMBED_DEADLINE, AUTOEMBED_CHECKLIST, AUTOEMBED_INTERVIEW_STATS, AUTOEMBED_DIAGNOSIS } from '../utils/storage';
 import { useMemo, useState } from 'react';
 import type { Project, TabId } from '../types';
 import { useAllProgress, projectDoneCount, projectTotal } from '../store/progress';
@@ -25,7 +26,7 @@ interface DashboardProps {
   onView: (projectId: string) => void;
 }
 
-const DEADLINE_KEY = 'autoembed-deadline';
+const DEADLINE_KEY = AUTOEMBED_DEADLINE;
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 function readDeadline(): Date {
@@ -148,7 +149,7 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
     }
     /* 2) 로드맵 체크리스트 미완료 */
     try {
-      const raw = localStorage.getItem('autoembed-checklist');
+      const raw = localStorage.getItem(AUTOEMBED_CHECKLIST);
       const done = raw ? (JSON.parse(raw) as string[]) : [];
       const next = CHECKLIST.filter((c) => !done.includes(c.id)).slice(0, 2);
       for (const c of next) {
@@ -159,7 +160,7 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
     }
     /* 3) 면접 복습 */
     try {
-      const raw = localStorage.getItem('autoembed-interview-stats');
+      const raw = localStorage.getItem(AUTOEMBED_INTERVIEW_STATS);
       if (raw) {
         const stats = JSON.parse(raw) as { pass: number; review: number };
         if (stats.review > 0 && stats.review >= stats.pass / 2) {
@@ -178,7 +179,7 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
       return { icon: '🎲', text: '아직 프로젝트가 없습니다. 첫 프로젝트를 생성해 포트폴리오의 시작을 만드세요.', tab: 'generator' as TabId };
     }
     try {
-      const raw = localStorage.getItem('autoembed-diagnosis');
+      const raw = localStorage.getItem(AUTOEMBED_DIAGNOSIS);
       const picks = raw ? (JSON.parse(raw) as Partial<Record<DiagKey, number | null>>) : {};
       const result = computeDiagnosis(savedProjects, picks);
       const top = result.weaknesses[0];

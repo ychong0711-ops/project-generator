@@ -1,3 +1,4 @@
+import { AUTOEMBED_GERMAN_STATS } from '../utils/storage';
 import { useEffect, useState } from 'react';
 import { GERMAN_TERMS } from '../data/german';
 import { recordActivity } from '../store/activity';
@@ -7,7 +8,7 @@ import { recordActivity } from '../store/activity';
  *  — 자동차 임베디드 면접·정착 필수 단어 학습
  * ============================================================ */
 
-const STATS_KEY = 'autoembed-german-stats';
+const STATS_KEY = AUTOEMBED_GERMAN_STATS;
 
 function shuffled(n: number): number[] {
   const a = Array.from({ length: n }, (_, i) => i);
