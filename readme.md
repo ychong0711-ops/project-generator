@@ -10,14 +10,14 @@
 ## ✨ 주요 기능
 
 ### 1. 홈 / 히어로
-- 서비스 소개, 통계 (14개 프로젝트, 독일 대학 프로그램, 로드맵, 면접 질문)
+- 서비스 소개, 통계 (17개 프로젝트, 독일 대학 프로그램, 로드맵, 면접 질문)
 - 프로젝트 생성기로 바로 이동하는 CTA
 
 ### 2. 프로젝트 생성기 (Generator)
 - **카테고리 12종:** `basic` / `comm(CAN·LIN)` / `rtos` / `motor` / `sensor` / `power(BMS)` / `diag` / `linux` / `adas` / `autosar` / `control` / `wireless`
 - **난이도:** 입문 / 중급 / 심화, **기간:** 3~10주 필터
-- 14개 엄선된 프로젝트 템플릿 (`src/data/projects.ts`)
-  - CAN UDS 스캐너, FreeRTOS ECU 시뮬레이터, LIN 파워 윈도우, BLDC FOC, IMU+GNSS EKF, BMS SoC 추정, UDS 부트로더, Embedded Linux 클러스터, LKAS 차선 유지, SOME/IP 이더넷, ABS 시뮬레이터, 시동 상태머신, AUTOSAR SWC/RTE, TPMS
+- 17개 엄선된 프로젝트 템플릿 (`src/data/projects.ts`)
+  - CAN UDS 스캐너, FreeRTOS ECU 시뮬레이터, LIN 파워 윈도우, BLDC FOC, IMU+GNSS EKF, BMS SoC 추정, UDS 부트로더, Embedded Linux 클러스터, LKAS 차선 유지, SOME/IP 이더넷, ABS 시뮬레이터, 시동 상태머신, AUTOSAR SWC/RTE, TPMS, [기능안전] DE-EMB-1015, SDV adaptive AUTOSAR DE-EMB-1016, 차량 사이버보안 DE-EMB-1017
 - 각 프로젝트에 목표, 주차별 마일스톤, 산출물, 필요 스킬, 관련 대학, 면접 질문, 팁 포함
 - 프로젝트 저장 / 삭제 / 로컬 백업
 
@@ -35,11 +35,12 @@
 - 스킬 갭 분석, 경쟁력 점수, 추천 학습 경로
 
 ### 7. 실습 / CodeLab (Labs)
-- **오프라인 C 인터프리터** (`src/offline/interpreter.ts`)
-  - 타입: `int`, `double`, `float`(double 매핑), `char`, `void`, `long`, `short`, `unsigned`, `signed`, `static`, `const`, `volatile`, `extern`, `register`, `inline`
-  - 구조체 / 공용체 (`struct` / `union`) — union은 근사 구현, 실행 시 경고 출력
-  - 제어문, 함수, 포인터 기초, 배열
-  - 2차원 배열/구조체 값 반환 등은 미지원 — 명확한 오류 메시지 제공
+- **오프라인 C 인터프리터 & 가상 메모리 엔진** (`src/offline/interpreter.ts`)
+  - **듀얼 엔진 모드 지원**:
+    - **🎯 정밀 바이트 모드 (Byte-Accurate, 기본):** DataView 기반 Little-Endian 가상 메모리 에뮬레이션. `union` 폭 마스킹(321 -> 65), CAN 프레임 바이트 오버레이(`raw` <-> `bytes[4]`), 부동소수점 비트 재해석(Float Type Punning: `1.0f` -> `0x3F800000`), 구조체 바이트 대입 완벽 지원.
+    - **⚡ 표준 고속 모드 (Fast AST):** 초경량 AST 직접 실행 모드.
+  - 타입: `int`, `double`, `float`, `char`, `void`, `long`, `short`, `unsigned`, `signed`, `uint8_t`~`uint64_t`, `int8_t`~`int64_t`, `size_t`, `bool`, `static`, `const`, `volatile`, `extern`, `register`, `inline`
+  - 구조체 / 공용체 (`struct` / `union`), 제어문, 함수, 포인터 기초, 배열
 - **온라인 모드:** arm-none-eabi-gcc 기반 컴파일 (Compiler Explorer 연동)
 - 경고 UI 공통 컴포넌트 (`OfflineWarnings.tsx`) — CodeLab / LabExercises / RepoExplorer에서 동일 표시
 - 샘플 코드, 대학 실습 과제 (`src/data/samples-*.ts`, `labs.ts`)
@@ -144,7 +145,7 @@ src/
     Backup.tsx            # 백업/복원
     Navbar.tsx / Footer.tsx / Hero.tsx / ProjectCard.tsx ...
   data/
-    projects.ts           # 14개 프로젝트 정의 + CATEGORIES
+    projects.ts           # 17개 프로젝트 정의 + CATEGORIES
     samples-a.ts / samples-b.ts / labs.ts / competition.ts ...
     gccHelp.ts / german.ts / guide.ts / curatedRepos.ts
   offline/
@@ -171,13 +172,14 @@ docs/        # 인수인계, 할일, CI 패치
 
 ### 지원 범위
 - 기본 타입, 포인터 기초, 배열, 함수, `if`/`for`/`while`, `struct`, `union`, 전처리기 일부
-- `float`는 JS `number` (double) 로 매핑 — 단정밀도 오차 재현 없음
-
-### 제한 & 경고
-- **union:** 스칼라 멤버가 하나의 `numCell`을 공유하는 근사 구현. `char`/`short` 폭 마스킹 없음, `float` 재해석·배열 오버레이 미지원 → 실행 시 `OfflineResult.warnings[]`로 경고 추가
-  - 경고는 중복 제거되어 1회만 표시
-  - 정확한 바이트 레이아웃 검증은 온라인 모드(gcc) 사용 권장
-- **2차원 배열, 구조체 값 반환:** 미지원, 명확한 오류 메시지 출력
+- **🎯 정밀 바이트 가상 메모리 모드 (`precise`, 기본):**
+  - **Little-Endian 바이트 레이아웃:** ARM Cortex-M 및 x86 표준 ABI 완벽 호환
+  - **`union` 폭(width) 마스킹:** `v.a = 321` 할당 후 `char` 멤버 읽기 시 하위 1바이트인 `65` (`0x41`) 정확히 추출
+  - **`union` 바이트 오버레이:** CAN Frame(`uint32_t raw` <-> `uint8_t bytes[4]`) 등 바이트 배열과 스칼라 간 메모리 실시간 공유
+  - **Float Type Punning:** 부동소수점 비트 재해석(`1.0f` -> `0x3F800000`) 100% 지원
+  - **구조체 값 복사:** `p2 = p1` 바이트 단위 딥 복제 및 격리
+- **⚡ 표준 고속 모드 (`fast`):**
+  - 가벼운 AST 기반 고속 실행
 - **결과 타입:**
   ```ts
   interface OfflineResult {
@@ -185,7 +187,8 @@ docs/        # 인수인계, 할일, CI 패치
     output: string;
     steps: number;
     error?: { line: number; message: string };
-    warnings?: string[]; // union 등 근사 구현 경고
+    warnings?: string[];
+    engineMode?: 'fast' | 'precise';
   }
   ```
 
@@ -195,7 +198,7 @@ docs/        # 인수인계, 할일, CI 패치
 
 ```bash
 npm test
-# 215 tests (interpreter + components + data 등)
+# 351 tests (29 test files: interpreter-precise + components + data 등)
 ```
 
 - `vitest.config.ts`: `jsdom` 환경, `src/**/*.test.{ts,tsx}` 포함, `vitest.setup.ts`에서 `@testing-library/jest-dom` 로드

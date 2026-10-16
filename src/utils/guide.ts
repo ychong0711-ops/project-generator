@@ -161,7 +161,7 @@ export function buildGuideHtml(ctx: GuideContext, printMode: boolean): string {
 
 <section class="gs" id="s-gen">
   <h2><span class="n">03</span>프로젝트 생성기 — 필터와 선정</h2>
-  <p class="desc">14개의 큐레이션 프로젝트 중 "지금 완주 가능하면서도 지원 전략에 맞는 것"만 남기는 도구입니다.</p>
+  <p class="desc">17개의 큐레이션 프로젝트 중 "지금 완주 가능하면서도 지원 전략에 맞는 것"만 남기는 도구입니다.</p>
   <h3 class="gs-sub">필터 3축의 의미</h3>
   <table class="g-tbl">
     <tr><th>필터</th><th>의미</th><th>선택 요령</th></tr>
