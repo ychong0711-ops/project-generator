@@ -1,0 +1,43 @@
+name: scaffold
+
+# Phase B 생성 엔진 게이트 (M3)
+#  - PR/push: 카테고리 패밀리별 대표 프로젝트를 실제로 생성·빌드한다
+#             (호스트 sim = 전 대표, ARM ELF = ARM 패밀리, CMake = 네이티브+ARM)
+#  - nightly: 동일 게이트를 예약 실행 (M5 에서 17개 전체 ARM 매트릭스로 확장 예정)
+on:
+  push:
+    branches: ["main", "arena/**"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  scaffold-representatives:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install ARM toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+
+      - name: Install CMake + Ninja
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Generate + build scaffolds
+        # PR/push: 호스트 sim 전체(17) + ARM 대표 + CMake
+        # nightly(schedule): SCAFFOLD_FULL_ARM=1 → 전 ARM 패밀리 전체 매트릭스
+        env:
+          SCAFFOLD_FULL_ARM: ${{ github.event_name == 'schedule' && '1' || '0' }}
+        run: npx vitest run src/scaffold/scaffold.build.test.ts

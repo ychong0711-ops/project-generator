@@ -1,0 +1,401 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > abs-sim (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/abs.c",
+  "bsp/arm/bluepill-f103/board_arm.c",
+  "bsp/arm/bluepill-f103/startup_stm32f103.s",
+  "bsp/arm/bluepill-f103/stm32f103.ld",
+  "bsp/arm/bluepill-f103/system_stm32f1.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/abs.h",
+  "include/board.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/abs_pid.c",
+  "tests/encoder_rpm.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > adas-lane (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/lane.c",
+  "include/lane.h",
+  "src/main.c",
+  "tests/lane_detect.c",
+  "tests/lane_fit.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > autosar-swc (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/rte_mock.c",
+  "app/swc_vehicle_speed.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/rte.h",
+  "include/swc.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/ecu_modes.c",
+  "tests/rte_sim.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > bldc-foc (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/foc.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/foc.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/clarke_park.c",
+  "tests/svpwm.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > bms-soc (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/bms.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/bms.h",
+  "include/board.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/coulomb.c",
+  "tests/ocv_lookup.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > can-uds-scanner (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/isotp.c",
+  "app/uds.c",
+  "bsp/arm/bluepill-f103/board_arm.c",
+  "bsp/arm/bluepill-f103/startup_stm32f103.s",
+  "bsp/arm/bluepill-f103/stm32f103.ld",
+  "bsp/arm/bluepill-f103/system_stm32f1.c",
+  "cmake/arm-none-eabi.cmake",
+  "drivers/can.c",
+  "include/board.h",
+  "include/can.h",
+  "include/isotp.h",
+  "include/uds.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/crc15.c",
+  "tests/uds_session.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > can-uds-scanner make-only 트리 변동 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "Makefile",
+  "README.md",
+  "app/isotp.c",
+  "app/uds.c",
+  "bsp/arm/bluepill-f103/board_arm.c",
+  "bsp/arm/bluepill-f103/startup_stm32f103.s",
+  "bsp/arm/bluepill-f103/stm32f103.ld",
+  "bsp/arm/bluepill-f103/system_stm32f1.c",
+  "drivers/can.c",
+  "include/board.h",
+  "include/can.h",
+  "include/isotp.h",
+  "include/uds.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/crc15.c",
+  "tests/uds_session.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > can-uds-scanner 보드 오버라이드(F407) 트리 변동 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/isotp.c",
+  "app/uds.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "drivers/can.c",
+  "include/board.h",
+  "include/can.h",
+  "include/isotp.h",
+  "include/uds.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/crc15.c",
+  "tests/uds_session.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > de-emb-1015 (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/dtc.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/dtc.h",
+  "sim/board_sim.c",
+  "src/main.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > freertos-ecu (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/rtos.c",
+  "app/tasks.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/rtos.h",
+  "include/tasks.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/priority_inversion.c",
+  "tests/watchdog.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > lin-window (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/lin_window.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/lin_window.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/lin_checksum.c",
+  "tests/window_sm.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > linux-cluster (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/mac.c",
+  "include/mac.h",
+  "src/main.c",
+  "tests/dbc_decode.c",
+  "tests/gauge_filter.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > sdv-adaptive-autosar (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/soa.c",
+  "include/soa.h",
+  "src/main.c",
+  "tests/ara_service_broker.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > sensor-fusion-ekf (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/ekf.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/ekf.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/kalman1d.c",
+  "tests/mahony.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > someip (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/someip.c",
+  "include/someip.h",
+  "src/main.c",
+  "tests/sd_state.c",
+  "tests/someip_encode.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > state-machine-intro (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/fsm.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/fsm.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/debounce.c",
+  "tests/ignition_sm.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > tpms (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/manchester.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/manchester.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/power_budget.c",
+  "tests/rf_packet.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > uds-bootloader (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/bootloader.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/bootloader.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/crc32.c",
+  "tests/flash_driver.c",
+]
+`;
+
+exports[`scaffold golden — 생성 파일트리 스냅샷 > vehicle-cybersecurity (기본: make+cmake) 1`] = `
+[
+  ".github/workflows/build.yml",
+  ".gitignore",
+  "CMakeLists.txt",
+  "Makefile",
+  "README.md",
+  "app/secoc.c",
+  "bsp/arm/stm32f407-discovery/board_arm.c",
+  "bsp/arm/stm32f407-discovery/startup_stm32f407.s",
+  "bsp/arm/stm32f407-discovery/stm32f407.ld",
+  "bsp/arm/stm32f407-discovery/system_stm32f4.c",
+  "cmake/arm-none-eabi.cmake",
+  "include/board.h",
+  "include/secoc.h",
+  "sim/board_sim.c",
+  "src/main.c",
+  "tests/secoc_can_ids.c",
+]
+`;
