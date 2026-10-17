@@ -181,15 +181,13 @@ export default function Portfolio({ savedProjects, onView, onRemove, onClear, on
                       )}
                     </div>
                     <div className="mt-4 flex items-center gap-2 border-t border-white/5 pt-4">
-                      {canVisit(phase, 'generator') && (
-                        <button
-                          onClick={() => onView(p.id)}
-                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 transition-colors hover:bg-white/10"
-                        >
-                          <EyeIcon className="h-3.5 w-3.5" />
-                          상세 보기
-                        </button>
-                      )}
+                      <button
+                        onClick={() => onView(p.id)}
+                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 transition-colors hover:bg-white/10"
+                      >
+                        <EyeIcon className="h-3.5 w-3.5" />
+                        상세 보기
+                      </button>
                       <button
                         onClick={() => onRemove(p.id)}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-slate-400 transition-colors hover:border-red-500/40 hover:text-red-300"

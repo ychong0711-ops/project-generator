@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Portfolio from './Portfolio';
 import { PROJECTS } from '../data/projects';
 import type { Phase } from '../types';
@@ -47,8 +48,30 @@ describe('Portfolio — 단계별 프로젝트 상세 링크', () => {
     expect(screen.getByRole('button', { name: /상세 보기/ })).toBeInTheDocument();
   });
 
-  it('study 단계에서는 "상세 보기" 를 숨긴다', () => {
+  /* 상세는 phase 무관 오버레이로 열리므로 study / thesis 에서도 노출된다. */
+  it('study 단계에서도 "상세 보기" 를 노출한다', () => {
     renderPortfolio('study', one);
-    expect(screen.queryByRole('button', { name: /상세 보기/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /상세 보기/ })).toBeInTheDocument();
+  });
+
+  it('thesis 단계에서도 "상세 보기" 를 노출한다', () => {
+    renderPortfolio('thesis', one);
+    expect(screen.getByRole('button', { name: /상세 보기/ })).toBeInTheDocument();
+  });
+
+  it('"상세 보기" 클릭 시 해당 프로젝트 id 로 onView 가 호출된다', async () => {
+    const onView = vi.fn();
+    render(
+      <Portfolio
+        savedProjects={one}
+        onView={onView}
+        onRemove={noop}
+        onClear={noop}
+        onGoGenerate={noop}
+        phase="thesis"
+      />
+    );
+    await userEvent.click(screen.getByRole('button', { name: /상세 보기/ }));
+    expect(onView).toHaveBeenCalledWith(PROJECTS[0].id);
   });
 });

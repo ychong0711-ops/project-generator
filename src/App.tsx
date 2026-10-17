@@ -18,6 +18,7 @@ const GuideTab = lazy(() => import('./components/GuideTab'));
 const Hero = lazy(() => import('./components/Hero'));
 const Generator = lazy(() => import('./components/Generator'));
 const DemoStudio = lazy(() => import('./components/DemoStudio'));
+const ProjectDetailOverlay = lazy(() => import('./components/ProjectDetailOverlay'));
 
 // ✅ 추가: Error Boundary 컴포넌트 정의
 class ErrorBoundary extends Component<
@@ -90,7 +91,7 @@ function PhaseNotice({ phase }: { phase: Phase }) {
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('home');
-  const [focusProjectId, setFocusProjectId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [phase, setPhase] = usePhase();
   const { savedIds, toggle, remove, clear } = useSavedProjects();
 
@@ -121,13 +122,15 @@ export default function App() {
     }
   }, [phase, tab]);
 
-  const handleViewProject = useCallback(
-    (id: string) => {
-      setFocusProjectId(id);
-      changeTab('generator');
-    },
-    [changeTab]
-  );
+  // 단계가 바뀌면 열려 있던 상세 오버레이를 닫는다 — 탭 컨텍스트가 교체되므로.
+  useEffect(() => {
+    setDetailId(null);
+  }, [phase]);
+
+  // 프로젝트 상세는 phase 무관 오버레이로 연다(모든 단계에서 사용 가능).
+  const handleViewProject = useCallback((id: string) => {
+    setDetailId(id);
+  }, []);
 
   const scrollToGenerator = () => {
     document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -136,6 +139,8 @@ export default function App() {
   const savedProjects = savedIds
     .map((id) => projectById(id))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+  const detailProject = detailId ? projectById(detailId) : undefined;
 
   return (
     <div className="min-h-screen bg-[#07090d] text-slate-200">
@@ -159,12 +164,7 @@ export default function App() {
             {tab === 'generator' && (
               <>
                 <Hero onGenerate={scrollToGenerator} onUni={() => changeTab('universities')} />
-                <Generator
-                  focusProjectId={focusProjectId}
-                  onConsumeFocus={() => setFocusProjectId(null)}
-                  savedIds={savedIds}
-                  onToggleSave={toggle}
-                />
+                <Generator savedIds={savedIds} onToggleSave={toggle} />
               </>
             )}
             {tab === 'universities' && <Universities savedProjects={savedProjects} />}
@@ -188,6 +188,18 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* 프로젝트 상세 오버레이 — phase 무관, Navbar/Footer 바깥 */}
+      <Suspense fallback={null}>
+        {detailProject && (
+          <ProjectDetailOverlay
+            project={detailProject}
+            saved={savedIds.includes(detailProject.id)}
+            onToggleSave={toggle}
+            onClose={() => setDetailId(null)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

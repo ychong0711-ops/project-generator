@@ -98,14 +98,12 @@ export default function WeeklyPlan({ savedProjects, onNavigate, onView, phase }:
                   </li>
                 ))}
               </ul>
-              {canVisit(phase, 'generator') && (
-                <button
-                  onClick={() => onView(r.p.id)}
-                  className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 hover:text-amber-200"
-                >
-                  이 프로젝트 계속하기 <ArrowRightIcon className="h-3 w-3" />
-                </button>
-              )}
+              <button
+                onClick={() => onView(r.p.id)}
+                className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 hover:text-amber-200"
+              >
+                이 프로젝트 계속하기 <ArrowRightIcon className="h-3 w-3" />
+              </button>
             </div>
           ))}
           {data.roadmapNext.length > 0 && (

@@ -176,9 +176,10 @@ export default function Dashboard({ savedProjects, onNavigate, onView, phase }: 
     return out.slice(0, 6);
   }, [savedProjects, progressMap]);
 
-  /* 현재 단계에서 이동 가능한 미션만 남긴다 (숨겨진 탭으로 가는 링크 제거) */
+  /* 현재 단계에서 이동 가능한 미션만 남긴다 (숨겨진 탭으로 가는 링크 제거).
+     프로젝트 미션은 상세 오버레이로 열리므로 단계와 무관하게 허용한다. */
   const visibleMissions = missions.filter((m) =>
-    canVisit(phase, m.projectId ? 'generator' : m.tab)
+    m.projectId ? true : canVisit(phase, m.tab)
   );
 
   /* 경쟁력 약점 기반 추천 */
@@ -267,7 +268,9 @@ export default function Dashboard({ savedProjects, onNavigate, onView, phase }: 
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-base">{m.icon}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-[13px] font-semibold leading-snug text-slate-200">{m.text}</span>
-                        <span className="mt-0.5 block text-[10px] text-slate-500">{TAB_NAMES[m.tab]}에서 진행</span>
+                        <span className="mt-0.5 block text-[10px] text-slate-500">
+                          {m.projectId ? '프로젝트 상세에서 진행' : `${TAB_NAMES[m.tab]}에서 진행`}
+                        </span>
                       </span>
                       <ArrowRightIcon className="h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-1 group-hover:text-amber-300" />
                     </button>

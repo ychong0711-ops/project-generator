@@ -8,8 +8,6 @@ import { SERIES, type SeriesDef } from '../data/apply';
 import { cn } from '../utils/cn';
 
 interface GeneratorProps {
-  focusProjectId: string | null;
-  onConsumeFocus: () => void;
   savedIds: string[];
   onToggleSave: (id: string) => void;
 }
@@ -35,7 +33,7 @@ function matchesWeeks(p: Project, f: WeeksFilter): boolean {
   }
 }
 
-export default function Generator({ focusProjectId, onConsumeFocus, savedIds, onToggleSave }: GeneratorProps) {
+export default function Generator({ savedIds, onToggleSave }: GeneratorProps) {
   const [level, setLevel] = useState<LevelFilter>('전체');
   const [category, setCategory] = useState<CategoryId | '전체'>('전체');
   const [weeks, setWeeks] = useState<WeeksFilter>('전체');
@@ -53,17 +51,6 @@ export default function Generator({ focusProjectId, onConsumeFocus, savedIds, on
       ),
     [level, category, weeks]
   );
-
-  useEffect(() => {
-    if (focusProjectId) {
-      const p = PROJECTS.find((x) => x.id === focusProjectId);
-      if (p) {
-        setResult(p);
-        onConsumeFocus();
-        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-      }
-    }
-  }, [focusProjectId, onConsumeFocus]);
 
   useEffect(() => () => {
     if (timerRef.current) clearInterval(timerRef.current);
