@@ -1,11 +1,12 @@
 import { AUTOEMBED_DEADLINE, AUTOEMBED_CHECKLIST, AUTOEMBED_INTERVIEW_STATS, AUTOEMBED_DIAGNOSIS } from '../utils/storage';
 import { useMemo, useState } from 'react';
-import type { Project, TabId } from '../types';
+import type { Phase, Project, TabId } from '../types';
 import { useAllProgress, projectDoneCount, projectTotal } from '../store/progress';
 import { useActivity, calcStreak, recentActivity, ymdOf } from '../store/activity';
 import { computeDiagnosis, type DiagKey } from '../data/competition';
 import { CHECKLIST } from '../data/guide';
 import { UNIVERSITIES } from '../data/universities';
+import { canVisit } from '../data/phases';
 import { DicesIcon, EyeIcon, ArrowRightIcon } from './icons';
 import Badges from './Badges';
 import WeeklyPlan from './WeeklyPlan';
@@ -24,6 +25,8 @@ interface DashboardProps {
   savedProjects: Project[];
   onNavigate: (tab: TabId) => void;
   onView: (projectId: string) => void;
+  /** 현재 단계 — 숨겨진 탭으로 가는 링크를 걸러내는 데 사용 */
+  phase: Phase;
 }
 
 const DEADLINE_KEY = AUTOEMBED_DEADLINE;
@@ -81,7 +84,7 @@ function tabForWeak(key: string): TabId {
   return 'compete';
 }
 
-export default function Dashboard({ savedProjects, onNavigate, onView }: DashboardProps) {
+export default function Dashboard({ savedProjects, onNavigate, onView, phase }: DashboardProps) {
   const activity = useActivity();
   const progressMap = useAllProgress();
   const [deadline, setDeadline] = useState<Date>(readDeadline);
@@ -173,6 +176,11 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
     return out.slice(0, 6);
   }, [savedProjects, progressMap]);
 
+  /* 현재 단계에서 이동 가능한 미션만 남긴다 (숨겨진 탭으로 가는 링크 제거) */
+  const visibleMissions = missions.filter((m) =>
+    canVisit(phase, m.projectId ? 'generator' : m.tab)
+  );
+
   /* 경쟁력 약점 기반 추천 */
   const recommendation = useMemo(() => {
     if (savedProjects.length === 0) {
@@ -237,18 +245,20 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
               <h3 className="text-base font-extrabold text-white">✅ 오늘의 미션</h3>
               <span className="font-mono text-[11px] text-slate-500">진행 상황에서 자동 생성</span>
             </div>
-            {missions.length === 0 ? (
+            {visibleMissions.length === 0 ? (
               <div className="mt-4 grid place-items-center rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
                 <span className="text-3xl">🏁</span>
                 <p className="mt-3 text-sm font-bold text-slate-300">모든 태스크 완료!</p>
                 <p className="mt-1 text-xs text-slate-500">프로젝트를 저장하거나 새 프로젝트를 생성해 다음 미션을 만드세요.</p>
-                <button onClick={() => onNavigate('generator')} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-2.5 text-xs font-bold text-black hover:scale-[1.02] active:scale-95 transition-transform">
-                  <DicesIcon className="h-4 w-4" /> 새 프로젝트 생성
-                </button>
+                {canVisit(phase, 'generator') && (
+                  <button onClick={() => onNavigate('generator')} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-2.5 text-xs font-bold text-black hover:scale-[1.02] active:scale-95 transition-transform">
+                    <DicesIcon className="h-4 w-4" /> 새 프로젝트 생성
+                  </button>
+                )}
               </div>
             ) : (
               <ul className="mt-4 space-y-2.5">
-                {missions.map((m) => (
+                {visibleMissions.map((m) => (
                   <li key={m.id}>
                     <button
                       onClick={() => (m.projectId ? onView(m.projectId) : onNavigate(m.tab))}
@@ -328,27 +338,29 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
         {/* ===== 이번 주 계획 + 백업 ===== */}
         <div className="mt-5 grid gap-5 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <WeeklyPlan savedProjects={savedProjects} onNavigate={onNavigate} onView={onView} />
+            <WeeklyPlan savedProjects={savedProjects} onNavigate={onNavigate} onView={onView} phase={phase} />
           </div>
           <Backup />
         </div>
 
         {/* ===== 하단: 추천 + 요약 ===== */}
         <div className="mt-5 grid gap-5 lg:grid-cols-3">
-          {/* 추천 액션 */}
-          <button
-            onClick={() => onNavigate(recommendation.tab)}
-            className="group rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-400/[0.1] to-transparent p-6 text-left transition-all hover:border-amber-400/50"
-          >
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-400">💡 오늘의 추천 액션</p>
-            <p className="mt-2 text-[13px] font-semibold leading-relaxed text-slate-200">
-              {recommendation.icon} {recommendation.text}
-            </p>
-            <p className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-amber-300">
-              {TAB_NAMES[recommendation.tab]}에서 진행
-              <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </p>
-          </button>
+          {/* 추천 액션 — 추천 대상 탭이 현재 단계에 없으면 카드 자체를 숨긴다 */}
+          {canVisit(phase, recommendation.tab) && (
+            <button
+              onClick={() => onNavigate(recommendation.tab)}
+              className="group rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-400/[0.1] to-transparent p-6 text-left transition-all hover:border-amber-400/50"
+            >
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-400">💡 오늘의 추천 액션</p>
+              <p className="mt-2 text-[13px] font-semibold leading-relaxed text-slate-200">
+                {recommendation.icon} {recommendation.text}
+              </p>
+              <p className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-amber-300">
+                {TAB_NAMES[recommendation.tab]}에서 진행
+                <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </p>
+            </button>
+          )}
 
           {/* 전체 진행률 */}
           <button onClick={() => onNavigate('portfolio')} className="group rounded-2xl border border-white/10 bg-[#0b0f16] p-6 text-left transition-colors hover:border-white/25">
@@ -386,9 +398,11 @@ export default function Dashboard({ savedProjects, onNavigate, onView }: Dashboa
               각 대학의 실제 지원 마감일과 요건은 대학 정보 탭과 공식 홈페이지에서 확인하세요. 마감일을 위 입력란에 설정하면
               이 대시보드가 남은 시간을 관리합니다.
             </p>
-            <button onClick={() => onNavigate('universities')} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-sky-300 hover:text-sky-200">
-              <EyeIcon className="h-3.5 w-3.5" /> 대학 정보 보기
-            </button>
+            {canVisit(phase, 'universities') && (
+              <button onClick={() => onNavigate('universities')} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-sky-300 hover:text-sky-200">
+                <EyeIcon className="h-3.5 w-3.5" /> 대학 정보 보기
+              </button>
+            )}
           </div>
         </div>
       </div>

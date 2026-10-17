@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { Project } from '../types';
+import type { Phase, Project } from '../types';
 import { CATEGORIES, LEVEL_STYLE } from '../data/projects';
+import { canVisit } from '../data/phases';
 import { portfolioToMarkdown, downloadMarkdown, copyText } from '../utils/markdown';
 import { useAllProgress, projectTotal, projectDoneCount } from '../store/progress';
 import GitHubDeploy from './GitHubDeploy';
@@ -13,9 +14,11 @@ interface PortfolioProps {
   onRemove: (id: string) => void;
   onClear: () => void;
   onGoGenerate: () => void;
+  /** 현재 단계 — 숨겨진 탭(생성기)으로 가는 링크를 걸러내는 데 사용 */
+  phase: Phase;
 }
 
-export default function Portfolio({ savedProjects, onView, onRemove, onClear, onGoGenerate }: PortfolioProps) {
+export default function Portfolio({ savedProjects, onView, onRemove, onClear, onGoGenerate, phase }: PortfolioProps) {
   const [copied, setCopied] = useState(false);
   const progressMap = useAllProgress();
 
@@ -87,13 +90,15 @@ export default function Portfolio({ savedProjects, onView, onRemove, onClear, on
               생성기에서 마음에 드는 프로젝트를 골라 <span className="text-amber-300 font-semibold">"포트폴리오에 저장"</span>을
               누르면 여기에 모입니다.
             </p>
-            <button
-              onClick={onGoGenerate}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-bold text-black shadow-lg shadow-orange-500/20 transition-transform hover:scale-[1.03] active:scale-95"
-            >
-              <DicesIcon className="h-4 w-4" />
-              프로젝트 생성하러 가기
-            </button>
+            {canVisit(phase, 'generator') && (
+              <button
+                onClick={onGoGenerate}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-sm font-bold text-black shadow-lg shadow-orange-500/20 transition-transform hover:scale-[1.03] active:scale-95"
+              >
+                <DicesIcon className="h-4 w-4" />
+                프로젝트 생성하러 가기
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -176,13 +181,15 @@ export default function Portfolio({ savedProjects, onView, onRemove, onClear, on
                       )}
                     </div>
                     <div className="mt-4 flex items-center gap-2 border-t border-white/5 pt-4">
-                      <button
-                        onClick={() => onView(p.id)}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 transition-colors hover:bg-white/10"
-                      >
-                        <EyeIcon className="h-3.5 w-3.5" />
-                        상세 보기
-                      </button>
+                      {canVisit(phase, 'generator') && (
+                        <button
+                          onClick={() => onView(p.id)}
+                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 transition-colors hover:bg-white/10"
+                        >
+                          <EyeIcon className="h-3.5 w-3.5" />
+                          상세 보기
+                        </button>
+                      )}
                       <button
                         onClick={() => onRemove(p.id)}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-slate-400 transition-colors hover:border-red-500/40 hover:text-red-300"

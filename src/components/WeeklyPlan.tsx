@@ -1,8 +1,9 @@
 import { AUTOEMBED_DEADLINE, AUTOEMBED_CHECKLIST } from '../utils/storage';
 import { useMemo } from 'react';
-import type { Project, TabId } from '../types';
+import type { Phase, Project, TabId } from '../types';
 import { useAllProgress, projectTotal, projectDoneCount } from '../store/progress';
 import { CHECKLIST } from '../data/guide';
+import { canVisit } from '../data/phases';
 import { ArrowRightIcon } from './icons';
 
 /* ============================================================
@@ -13,9 +14,11 @@ interface WeeklyPlanProps {
   savedProjects: Project[];
   onNavigate: (t: TabId) => void;
   onView: (id: string) => void;
+  /** 현재 단계 — 숨겨진 탭으로 가는 링크를 걸러내는 데 사용 */
+  phase: Phase;
 }
 
-export default function WeeklyPlan({ savedProjects, onNavigate, onView }: WeeklyPlanProps) {
+export default function WeeklyPlan({ savedProjects, onNavigate, onView, phase }: WeeklyPlanProps) {
   const progressMap = useAllProgress();
 
   const data = useMemo(() => {
@@ -95,12 +98,14 @@ export default function WeeklyPlan({ savedProjects, onNavigate, onView }: Weekly
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => onView(r.p.id)}
-                className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 hover:text-amber-200"
-              >
-                이 프로젝트 계속하기 <ArrowRightIcon className="h-3 w-3" />
-              </button>
+              {canVisit(phase, 'generator') && (
+                <button
+                  onClick={() => onView(r.p.id)}
+                  className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 hover:text-amber-200"
+                >
+                  이 프로젝트 계속하기 <ArrowRightIcon className="h-3 w-3" />
+                </button>
+              )}
             </div>
           ))}
           {data.roadmapNext.length > 0 && (
@@ -114,12 +119,14 @@ export default function WeeklyPlan({ savedProjects, onNavigate, onView }: Weekly
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => onNavigate('roadmap')}
-                className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-sky-300 hover:text-sky-200"
-              >
-                로드맵에서 확인 <ArrowRightIcon className="h-3 w-3" />
-              </button>
+              {canVisit(phase, 'roadmap') && (
+                <button
+                  onClick={() => onNavigate('roadmap')}
+                  className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-sky-300 hover:text-sky-200"
+                >
+                  로드맵에서 확인 <ArrowRightIcon className="h-3 w-3" />
+                </button>
+              )}
             </div>
           )}
         </div>

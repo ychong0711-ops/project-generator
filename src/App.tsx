@@ -1,8 +1,10 @@
-import React, { useCallback, useState, Suspense, lazy, Component } from 'react';
-import type { TabId } from './types';
+import React, { useCallback, useEffect, useState, Suspense, lazy, Component } from 'react';
+import type { Phase, TabId } from './types';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { useSavedProjects } from './hooks/useSavedProjects';
+import { usePhase } from './hooks/usePhase';
+import { clampTab, hasDedicatedFeatures, TAB_LABELS, visibleTabs } from './data/phases';
 import { projectById } from './data/projects';
 
 // Lazy-loaded tab components for code splitting
@@ -64,29 +66,68 @@ function TabFallback() {
   );
 }
 
+/* 논문 단계 전용 기능이 아직 없음을 알리는 안내 배너 */
+function PhaseNotice({ phase }: { phase: Phase }) {
+  const tabs = visibleTabs(phase);
+  return (
+    <div className="pt-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-400/10 to-orange-500/5 px-5 py-4"
+        >
+          <p className="text-sm font-bold text-amber-300">논문 단계 전용 기능은 준비 중입니다</p>
+          <p className="mt-1 text-sm text-slate-400">
+            지금은 공통 기능만 제공됩니다. 사용 가능한 탭:{' '}
+            {tabs.map((id) => TAB_LABELS[id]).join(' · ')}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabId>('home');
   const [focusProjectId, setFocusProjectId] = useState<string | null>(null);
+  const [phase, setPhase] = usePhase();
   const { savedIds, toggle, remove, clear } = useSavedProjects();
 
-  const changeTab = useCallback((t: TabId) => {
-    setTab(t);
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    // 포커스 관리: 새로운 탭의 콘텐츠로 포커스 이동 (키보드 네비게이션 지원)
-    // lazy 탭이 마운트된 뒤에 포커스를 옮겨야 하므로 다음 프레임에서 수행한다.
-    requestAnimationFrame(() => {
-      const targetH2 = document.querySelector<HTMLElement>('main h2');
-      if (!targetH2) return;
-      // h2는 기본적으로 포커스 대상이 아니므로 tabIndex를 부여한다.
-      if (!targetH2.hasAttribute('tabindex')) targetH2.setAttribute('tabindex', '-1');
-      targetH2.focus();
-    });
-  }, []);
+  const changeTab = useCallback(
+    (t: TabId) => {
+      // 다른 단계의 탭으로는 진입할 수 없도록 방어한다.
+      const next = clampTab(phase, t);
+      setTab(next);
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      // 포커스 관리: 새로운 탭의 콘텐츠로 포커스 이동 (키보드 네비게이션 지원)
+      // lazy 탭이 마운트된 뒤에 포커스를 옮겨야 하므로 다음 프레임에서 수행한다.
+      requestAnimationFrame(() => {
+        const targetH2 = document.querySelector<HTMLElement>('main h2');
+        if (!targetH2) return;
+        // h2는 기본적으로 포커스 대상이 아니므로 tabIndex를 부여한다.
+        if (!targetH2.hasAttribute('tabindex')) targetH2.setAttribute('tabindex', '-1');
+        targetH2.focus();
+      });
+    },
+    [phase]
+  );
 
-  const handleViewProject = useCallback((id: string) => {
-    setFocusProjectId(id);
-    changeTab('generator');
-  }, [changeTab]);
+  // 단계가 바뀌어 현재 탭이 사라지면 해당 단계의 첫 탭으로 이동한다.
+  useEffect(() => {
+    if (!visibleTabs(phase).includes(tab)) {
+      setTab(visibleTabs(phase)[0]);
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [phase, tab]);
+
+  const handleViewProject = useCallback(
+    (id: string) => {
+      setFocusProjectId(id);
+      changeTab('generator');
+    },
+    [changeTab]
+  );
 
   const scrollToGenerator = () => {
     document.getElementById('generator')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -98,14 +139,22 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#07090d] text-slate-200">
-      <Navbar active={tab} onChange={changeTab} savedCount={savedIds.length} />
+      <Navbar
+        active={tab}
+        onChange={changeTab}
+        phase={phase}
+        onChangePhase={setPhase}
+        savedCount={savedIds.length}
+      />
 
       <main>
+        {!hasDedicatedFeatures(phase) && <PhaseNotice phase={phase} />}
+
         {/* 탭이 바뀌면 ErrorBoundary를 리셋해 이전 탭의 오류가 남지 않게 한다 */}
         <ErrorBoundary key={tab}>
           <Suspense fallback={<TabFallback />}>
             {tab === 'home' && (
-              <Dashboard savedProjects={savedProjects} onNavigate={changeTab} onView={handleViewProject} />
+              <Dashboard savedProjects={savedProjects} onNavigate={changeTab} onView={handleViewProject} phase={phase} />
             )}
             {tab === 'generator' && (
               <>
@@ -127,6 +176,7 @@ export default function App() {
                 onRemove={remove}
                 onClear={clear}
                 onGoGenerate={() => changeTab('generator')}
+                phase={phase}
               />
             )}
             {tab === 'compete' && <Competitiveness savedProjects={savedProjects} />}
