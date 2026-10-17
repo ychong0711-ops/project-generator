@@ -19,13 +19,22 @@ import {
   isStructCell,
   numCell,
   readCell,
+  readByteSlice,
+  writeByteSlice,
+  sizeofScalar,
 } from './values';
-import type { Cell, Ptr, Val } from './values';
+import type { Cell, Ptr, Val, ScalarType } from './values';
 import { TYPE_WORDS, preprocess, tokenize } from './lexer';
 import type { Tok } from './lexer';
 import type { AggDef, AggMember, DeclItem, ExprNode, Stmt } from './ast';
 import { formatOne } from './printf';
 import { BUILTINS } from './builtins';
+
+export type EngineMode = 'fast' | 'precise';
+
+export interface RunCOptions {
+  mode?: EngineMode;
+}
 
 export interface OfflineResult {
   ok: boolean;
@@ -34,6 +43,8 @@ export interface OfflineResult {
   error?: { line: number; message: string };
   /* 실행을 막지는 않지만 결과를 신뢰하기 전에 알아야 할 사항 */
   warnings?: string[];
+  /* 실행에 사용된 엔진 모드 */
+  engineMode?: EngineMode;
 }
 
 /* 오프라인 엔진의 union은 "스칼라 멤버가 하나의 저장소를 공유"하는 근사 구현이다.
@@ -62,6 +73,25 @@ class Scope {
   }
 }
 
+export function toScalarType(words: Set<string>): ScalarType {
+  if (words.has('float')) return 'f32';
+  if (words.has('double')) return 'f64';
+  if (words.has('char')) {
+    return words.has('unsigned') || words.has('uint8_t') ? 'u8' : 'i8';
+  }
+  if (words.has('uint8_t')) return 'u8';
+  if (words.has('int8_t')) return 'i8';
+  if (words.has('uint16_t')) return 'u16';
+  if (words.has('int16_t')) return 'i16';
+  if (words.has('short')) {
+    return words.has('unsigned') ? 'u16' : 'i16';
+  }
+  if (words.has('uint32_t') || words.has('size_t')) return 'u32';
+  if (words.has('int32_t')) return 'i32';
+  if (words.has('unsigned')) return 'u32';
+  return 'i32';
+}
+
 export class CInterpreter {
   toks: Tok[] = [];
   pos = 0;
@@ -79,9 +109,13 @@ export class CInterpreter {
   structDefs = new Map<string, AggDef>();
   /* 가장 최근에 파싱한 타입의 struct/union 태그 (parseType의 부가 출력) */
   lastAggTag: string | null = null;
+  /* 가장 최근에 파싱한 스칼라 정밀 타입 */
+  lastScalarType?: ScalarType;
   anonSeq = 0;
+  mode: EngineMode = 'fast';
 
-  constructor(src: string) {
+  constructor(src: string, options?: RunCOptions) {
+    this.mode = options?.mode ?? 'fast';
     const { code } = preprocess(src);
     this.toks = tokenize(code);
     this.global.vars.set('true', numCell(1));
@@ -123,6 +157,7 @@ export class CInterpreter {
      struct/union 이면 this.lastAggTag 에 정의 키를 기록한다. */
   parseType(): string {
     this.lastAggTag = null;
+    this.lastScalarType = undefined;
     const c = this.cur();
     /* struct Tag / union Tag */
     if (c.t === 'id' && (c.v === 'struct' || c.v === 'union')) {
@@ -137,6 +172,7 @@ export class CInterpreter {
     if (c.t === 'id' && c.v === 'enum') {
       this.next();
       if (this.cur().t === 'id') this.next(); /* 태그 이름 */
+      this.lastScalarType = 'i32';
       return 'int';
     }
     /* typedef 별칭 */
@@ -147,6 +183,7 @@ export class CInterpreter {
         this.lastAggTag = name;
         return def.kind;
       }
+      this.lastScalarType = 'i32';
       return 'int';
     }
     const words = new Set<string>();
@@ -154,6 +191,7 @@ export class CInterpreter {
       words.add(this.next().v);
     }
     if (words.size === 0) throw new CError(this.cur().line, '타입 키워드 필요');
+    this.lastScalarType = toScalarType(words);
     if (words.has('double') || words.has('float')) return 'double';
     if (words.has('void')) return 'void';
     if (words.has('char')) return 'char';
@@ -225,6 +263,7 @@ export class CInterpreter {
       if (this.cur().v === '<eof>') throw new CError(this.cur().line, '닫는 } 가 없습니다');
       const mtype = this.parseType();
       const memberAgg = this.lastAggTag;
+      const parsedScalar = this.lastScalarType;
       for (;;) {
         const isPtrMember = this.isOp('*') ? (this.next(), true) : false;
         const mname = this.expectId();
@@ -234,9 +273,15 @@ export class CInterpreter {
           dim = Math.max(0, Math.trunc(this.foldConst(this.parseExpr())));
           this.eat(']');
         }
+        const scalarType: ScalarType | undefined = isPtrMember
+          ? 'ptr'
+          : memberAgg
+          ? undefined
+          : (parsedScalar ?? (mtype === 'char' ? 'i8' : mtype === 'double' ? 'f64' : 'i32'));
         members.push({
           name: mname,
           type: isPtrMember ? 'ptr' : mtype,
+          scalarType,
           dim,
           aggTag: isPtrMember ? null : memberAgg,
         });
@@ -261,10 +306,57 @@ export class CInterpreter {
       return false;
     }
     const members = this.parseAggMembers();
-    const size = kw === 'union'
-      ? Math.max(4, ...members.map((m) => 4 * (m.dim ?? 1)))
-      : members.reduce((acc, m) => acc + 4 * (m.dim ?? 1), 0);
-    const def: AggDef = { kind: kw, members, size };
+    let maxAlign = 1;
+    let size = 0;
+
+    if (kw === 'union') {
+      let maxSize = 0;
+      for (const m of members) {
+        m.offset = 0;
+        let elemSize = 4;
+        let elemAlign = 4;
+        if (m.aggTag) {
+          const sub = this.structDefs.get(m.aggTag);
+          if (sub) {
+            elemSize = sub.size;
+            elemAlign = sub.alignment ?? 4;
+          }
+        } else {
+          const st = m.scalarType ?? 'i32';
+          elemSize = sizeofScalar(st);
+          elemAlign = elemSize;
+        }
+        m.byteSize = elemSize * (m.dim ?? 1);
+        if (elemAlign > maxAlign) maxAlign = elemAlign;
+        if (m.byteSize > maxSize) maxSize = m.byteSize;
+      }
+      size = Math.max(1, Math.ceil(maxSize / maxAlign) * maxAlign);
+    } else {
+      let curOffset = 0;
+      for (const m of members) {
+        let elemSize = 4;
+        let elemAlign = 4;
+        if (m.aggTag) {
+          const sub = this.structDefs.get(m.aggTag);
+          if (sub) {
+            elemSize = sub.size;
+            elemAlign = sub.alignment ?? 4;
+          }
+        } else {
+          const st = m.scalarType ?? 'i32';
+          elemSize = sizeofScalar(st);
+          elemAlign = elemSize;
+        }
+        m.byteSize = elemSize * (m.dim ?? 1);
+        if (elemAlign > maxAlign) maxAlign = elemAlign;
+        curOffset = Math.ceil(curOffset / elemAlign) * elemAlign;
+        m.offset = curOffset;
+        curOffset += m.byteSize;
+      }
+      size = Math.max(1, Math.ceil(curOffset / maxAlign) * maxAlign);
+    }
+
+    const def: AggDef = { kind: kw, members, size, alignment: maxAlign };
     const key = tag ? `${kw} ${tag}` : `${kw} <anon${this.anonSeq++}>`;
     this.structDefs.set(key, def);
     if (this.cur().t === 'id') {
@@ -829,10 +921,78 @@ export class CInterpreter {
   }
 
   /* struct/union 인스턴스 셀 생성 */
-  makeAggCell(tag: string, line: number): Cell {
+  makeAggCell(tag: string, line: number, existingBuffer?: Uint8Array, baseOffset = 0): Cell {
     const def = this.structDefs.get(tag);
     if (!def) throw new CError(line, `알려진 struct/union '${tag}'가 없습니다`);
     const fields = new Map<string, Cell>();
+
+    if (this.mode === 'precise') {
+      const buffer = existingBuffer ?? new Uint8Array(def.size);
+      const rawView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      const cell: Cell = {
+        kind: 'struct',
+        n: 0,
+        ptr: null,
+        arr: null,
+        isStr: false,
+        structDef: tag,
+        fields,
+        rawBuffer: buffer,
+        rawView,
+      };
+
+      for (const m of def.members) {
+        const mOffset = baseOffset + (m.offset ?? 0);
+        let mc: Cell;
+        if (m.dim !== null) {
+          if (m.aggTag) {
+            const subDef = this.structDefs.get(m.aggTag);
+            const elemSize = subDef?.size ?? 4;
+            mc = arrCell(
+              Array.from({ length: m.dim }, (_, i) =>
+                this.makeAggCell(m.aggTag!, line, buffer, mOffset + i * elemSize)
+              )
+            );
+          } else {
+            const st = m.scalarType ?? 'i32';
+            const stride = sizeofScalar(st);
+            const items = Array.from({ length: m.dim }, (_, i) => {
+              const c = numCell(0);
+              c.byteSlice = {
+                buffer,
+                view: rawView,
+                offset: mOffset + i * stride,
+                type: st,
+              };
+              return c;
+            });
+            mc = arrCell(items);
+            mc.byteSlice = {
+              buffer,
+              view: rawView,
+              offset: mOffset,
+              type: st,
+              dim: m.dim,
+              stride,
+            };
+          }
+        } else if (m.aggTag) {
+          mc = this.makeAggCell(m.aggTag, line, buffer, mOffset);
+        } else {
+          const st = m.scalarType ?? 'i32';
+          mc = numCell(0);
+          mc.byteSlice = {
+            buffer,
+            view: rawView,
+            offset: mOffset,
+            type: st,
+          };
+        }
+        fields.set(m.name, mc);
+      }
+      return cell;
+    }
+
     const cell: Cell = { kind: 'struct', n: 0, ptr: null, arr: null, isStr: false, structDef: tag, fields };
     /* union은 모든 스칼라 멤버가 같은 저장소를 공유한다 (근사 구현) */
     const shared = def.kind === 'union' ? numCell(0) : null;
@@ -878,7 +1038,11 @@ export class CInterpreter {
             if (isPtr(v)) target.ptr = v;
             else if (isArrCell(v)) target.ptr = { cell: v, idx: 0 };
             else if (isStructCell(v)) cell.fields!.set(def.members[i].name, v);
-            else target.n = v;
+            else {
+              const numVal = this.numOf(v);
+              if (target.byteSlice) writeByteSlice(target.byteSlice, numVal, 0);
+              target.n = numVal;
+            }
           }
         } else if (item.init?.kind === 'expr') {
           const v = this.evalExpr(item.init.expr!);
@@ -955,6 +1119,10 @@ export class CInterpreter {
 
   /* struct 값 복사 (얕은 대입 의미론: 멤버 단위 값 복사) */
   copyAggCell(src: Cell): Cell {
+    if (this.mode === 'precise' && src.rawBuffer && src.structDef) {
+      const newBuf = new Uint8Array(src.rawBuffer);
+      return this.makeAggCell(src.structDef, 0, newBuf, 0);
+    }
     const fields = new Map<string, Cell>();
     const out: Cell = {
       kind: 'struct', n: 0, ptr: null, arr: null, isStr: false,
@@ -1229,6 +1397,9 @@ export class CInterpreter {
   }
   readPtrVal(p: Ptr): Val {
     if (p.idx === -1) return readCell(p.cell);
+    if (p.cell.byteSlice && p.cell.byteSlice.dim !== undefined) {
+      return readByteSlice(p.cell.byteSlice, p.idx);
+    }
     const arr = p.cell.arr;
     if (!arr) return 0;
     const c = arr[p.idx];
@@ -1292,14 +1463,22 @@ export class CInterpreter {
     if (lv.idx === undefined) {
       const c = lv.cell;
       if (c.kind === 'arr') return 0;
+      if (c.byteSlice) return readByteSlice(c.byteSlice, 0);
       return c.ptr ? 0 : c.n;
+    }
+    if (lv.cell.byteSlice && lv.cell.byteSlice.dim !== undefined) {
+      return readByteSlice(lv.cell.byteSlice, lv.idx);
     }
     const c = lv.cell.arr?.[lv.idx];
     if (!c || c.kind !== 'num') return 0;
+    if (c.byteSlice) return readByteSlice(c.byteSlice, 0);
     return c.ptr ? 0 : c.n;
   }
   writeLValNum(lv: { cell: Cell; idx?: number }, v: number, line: number) {
     if (lv.idx === undefined) {
+      if (lv.cell.byteSlice) {
+        writeByteSlice(lv.cell.byteSlice, v, 0);
+      }
       lv.cell.n = v;
       lv.cell.ptr = null;
       return;
@@ -1310,6 +1489,11 @@ export class CInterpreter {
     if (lv.idx < 0 || lv.idx >= arr.length)
       throw new CError(line, `배열 인덱스 범위 초과: ${lv.idx} (배열 크기 ${arr.length})`);
     const c = arr[lv.idx];
+    if (c.byteSlice) {
+      writeByteSlice(c.byteSlice, v, 0);
+    } else if (lv.cell.byteSlice && lv.cell.byteSlice.dim !== undefined) {
+      writeByteSlice(lv.cell.byteSlice, v, lv.idx);
+    }
     c.n = v;
     c.ptr = null;
   }
@@ -1319,6 +1503,10 @@ export class CInterpreter {
     /* 구조체 값 대입: 멤버 단위 복사 */
     if (e.op === '=' && lv.idx === undefined && lv.cell.kind === 'struct') {
       if (!isStructCell(rv)) throw new CError(e.line, '구조체에는 구조체 값만 대입할 수 있습니다');
+      if (this.mode === 'precise' && lv.cell.rawBuffer && rv.rawBuffer) {
+        lv.cell.rawBuffer.set(rv.rawBuffer);
+        return lv.cell;
+      }
       const copy = this.copyAggCell(rv);
       lv.cell.fields = copy.fields;
       return lv.cell;
@@ -1430,15 +1618,17 @@ export class CInterpreter {
 }
 
 /* ---------- 공개 API ---------- */
-export function runC(source: string): OfflineResult {
+export function runC(source: string, options?: RunCOptions): OfflineResult {
   let interp: CInterpreter | null = null;
+  const mode = options?.mode ?? 'fast';
   try {
-    interp = new CInterpreter(source);
+    interp = new CInterpreter(source, options);
     interp.exec();
     return {
       ok: true,
       output: interp.output,
       steps: interp.steps,
+      engineMode: mode,
       ...(interp.warnings.length > 0 ? { warnings: [...interp.warnings] } : {}),
     };
   } catch (e) {
@@ -1448,6 +1638,7 @@ export function runC(source: string): OfflineResult {
         output: interp?.output ?? '',
         steps: interp?.steps ?? 0,
         error: { line: e.line, message: e.message },
+        engineMode: mode,
         ...(interp && interp.warnings.length > 0 ? { warnings: [...interp.warnings] } : {}),
       };
     }
@@ -1456,6 +1647,7 @@ export function runC(source: string): OfflineResult {
       output: interp?.output ?? '',
       steps: interp?.steps ?? 0,
       error: { line: 0, message: '내부 오류: ' + (e as Error).message },
+      engineMode: mode,
       ...(interp && interp.warnings.length > 0 ? { warnings: [...interp.warnings] } : {}),
     };
   }

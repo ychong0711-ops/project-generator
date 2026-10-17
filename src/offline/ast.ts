@@ -1,4 +1,6 @@
 /* ---------- AST ---------- */
+import type { ScalarType } from './values';
+
 export interface InitVal {
   kind: 'expr' | 'list' | 'str';
   expr?: ExprNode;
@@ -47,13 +49,20 @@ export type Stmt =
 export interface AggMember {
   name: string;
   type: string;
+  /* 스칼라 정밀 타입 */
+  scalarType?: ScalarType;
   /* 멤버가 배열이면 요소 개수 */
   dim: number | null;
   /* 멤버 자신이 struct/union 이면 그 정의 키 */
   aggTag: string | null;
+  /* 구조체/공용체 내 바이트 오프셋 */
+  offset?: number;
+  /* 멤버의 총 바이트 크기 */
+  byteSize?: number;
 }
 export interface AggDef {
   kind: 'struct' | 'union';
   members: AggMember[];
   size: number;
+  alignment?: number;
 }

@@ -1,6 +1,111 @@
 /* ---------- 런타임 값 ---------- */
 import { CError } from './errors';
 
+export type ScalarType =
+  | 'i8'
+  | 'u8'
+  | 'i16'
+  | 'u16'
+  | 'i32'
+  | 'u32'
+  | 'f32'
+  | 'f64'
+  | 'ptr';
+
+export function sizeofScalar(t: ScalarType): number {
+  switch (t) {
+    case 'i8':
+    case 'u8':
+      return 1;
+    case 'i16':
+    case 'u16':
+      return 2;
+    case 'i32':
+    case 'u32':
+    case 'f32':
+    case 'ptr':
+      return 4;
+    case 'f64':
+      return 8;
+  }
+}
+
+export interface ByteSlice {
+  buffer: Uint8Array;
+  view: DataView;
+  offset: number;
+  type: ScalarType;
+  dim?: number | null;
+  stride?: number;
+}
+
+export function readByteSlice(slice: ByteSlice, elemIdx = 0): number {
+  const byteOffset = slice.offset + elemIdx * (slice.stride ?? sizeofScalar(slice.type));
+  if (byteOffset < 0 || byteOffset >= slice.view.byteLength) return 0;
+  const v = slice.view;
+  switch (slice.type) {
+    case 'i8':
+      return v.getInt8(byteOffset);
+    case 'u8':
+      return v.getUint8(byteOffset);
+    case 'i16':
+      return v.getInt16(byteOffset, true);
+    case 'u16':
+      return v.getUint16(byteOffset, true);
+    case 'i32':
+      return v.getInt32(byteOffset, true);
+    case 'u32':
+      return v.getUint32(byteOffset, true);
+    case 'f32':
+      return v.getFloat32(byteOffset, true);
+    case 'f64':
+      return v.getFloat64(byteOffset, true);
+    case 'ptr':
+      return v.getUint32(byteOffset, true);
+    default:
+      return v.getInt32(byteOffset, true);
+  }
+}
+
+export function writeByteSlice(slice: ByteSlice, val: number, elemIdx = 0): void {
+  const stride = slice.stride ?? sizeofScalar(slice.type);
+  const byteOffset = slice.offset + elemIdx * stride;
+  if (byteOffset < 0 || byteOffset >= slice.view.byteLength) return;
+  const v = slice.view;
+  switch (slice.type) {
+    case 'i8':
+      v.setInt8(byteOffset, Math.trunc(val));
+      break;
+    case 'u8':
+      v.setUint8(byteOffset, Math.trunc(val) & 0xff);
+      break;
+    case 'i16':
+      v.setInt16(byteOffset, Math.trunc(val), true);
+      break;
+    case 'u16':
+      v.setUint16(byteOffset, Math.trunc(val) & 0xffff, true);
+      break;
+    case 'i32':
+      v.setInt32(byteOffset, Math.trunc(val), true);
+      break;
+    case 'u32':
+      v.setUint32(byteOffset, (Math.trunc(val) >>> 0), true);
+      break;
+    case 'f32':
+      v.setFloat32(byteOffset, val, true);
+      break;
+    case 'f64':
+      v.setFloat64(byteOffset, val, true);
+      break;
+    case 'ptr':
+      v.setUint32(byteOffset, (Math.trunc(val) >>> 0), true);
+      break;
+    default:
+      v.setInt32(byteOffset, Math.trunc(val), true);
+      break;
+  }
+}
+
 export interface Ptr {
   cell: Cell;
   idx: number; /* -1 이면 스칼라 셀 직접 */
@@ -13,6 +118,10 @@ export interface Cell {
   isStr: boolean;
   structDef?: string; /* struct/union 정의 키 참조 */
   fields?: Map<string, Cell>; /* struct/union 멤버 저장소 */
+  /* 정밀 바이트 메모리 모델용 필드 */
+  byteSlice?: ByteSlice;
+  rawBuffer?: Uint8Array;
+  rawView?: DataView;
 }
 export type Val = number | Ptr | Cell;
 
@@ -37,12 +146,21 @@ export function isStructCell(v: Val): v is Cell {
 export function readCell(cell: Cell): Val {
   if (cell.kind === 'arr') return { cell, idx: 0 };
   if (cell.kind === 'struct') return cell;
+  if (cell.byteSlice) return readByteSlice(cell.byteSlice, 0);
   return cell.ptr ?? cell.n;
 }
 export function derefNum(p: Ptr): number {
-  const c = p.idx === -1 ? p.cell : p.cell.arr ? p.cell.arr[p.idx] : null;
+  if (p.idx === -1) {
+    if (p.cell.byteSlice) return readByteSlice(p.cell.byteSlice, 0);
+    return p.cell.ptr ? 0 : p.cell.n;
+  }
+  if (p.cell.byteSlice && p.cell.byteSlice.dim !== undefined) {
+    return readByteSlice(p.cell.byteSlice, p.idx);
+  }
+  const c = p.cell.arr ? p.cell.arr[p.idx] : null;
   if (!c) return 0;
   if (c.kind === 'arr') return 0;
+  if (c.byteSlice) return readByteSlice(c.byteSlice, 0);
   return c.ptr ? 0 : c.n;
 }
 export function strFrom(v: Val): { cell: Cell; start: number } {

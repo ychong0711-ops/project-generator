@@ -4,7 +4,7 @@ import { samplesFor } from '../data/samples';
 import { compileWithCE, COMPILERS, type CompileResult } from '../compiler/ce';
 import { editorHtml } from '../mentor/highlight';
 import { INCLUDE_FIXES, type IncludeFixId } from '../mentor/analyzer';
-import { runC, type OfflineResult } from '../offline/interpreter';
+import { runC, type OfflineResult, type EngineMode } from '../offline/interpreter';
 import OfflineWarnings from './OfflineWarnings';
 import { recordActivity, recordEvent } from '../store/activity';
 import { findGccHelp } from '../data/gccHelp';
@@ -51,6 +51,7 @@ export default function CodeLab({ project }: CodeLabProps) {
   const [result, setResult] = useState<CompileResult | null>(null);
   const [offlineResult, setOfflineResult] = useState<OfflineResult | null>(null);
   const [offlineBusy, setOfflineBusy] = useState(false);
+  const [offlineMode, setOfflineMode] = useState<EngineMode>('precise');
   const [copied, setCopied] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
@@ -151,7 +152,7 @@ export default function CodeLab({ project }: CodeLabProps) {
     setOfflineBusy(true);
     setOfflineResult(null);
     setTimeout(() => {
-      const r = runC(stored.code);
+      const r = runC(stored.code, { mode: offlineMode });
       setOfflineResult(r);
       setOfflineBusy(false);
       if (r.ok) {
@@ -351,6 +352,34 @@ export default function CodeLab({ project }: CodeLabProps) {
                 <>▶ 컴파일 & 빌드 (온라인)</>
               )}
             </button>
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-[#0d1119] p-0.5 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setOfflineMode('precise')}
+                className={cn(
+                  'rounded px-2 py-1 font-bold transition-colors',
+                  offlineMode === 'precise'
+                    ? 'bg-amber-400 text-black shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                )}
+                title="DataView 기반 Little-Endian 메모리 에뮬레이션 (union 폭 마스킹, CAN 패킷 바이트 오버레이 지원)"
+              >
+                🎯 정밀 바이트 모드
+              </button>
+              <button
+                type="button"
+                onClick={() => setOfflineMode('fast')}
+                className={cn(
+                  'rounded px-2 py-1 font-bold transition-colors',
+                  offlineMode === 'fast'
+                    ? 'bg-slate-700 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                )}
+                title="가벼운 AST 인터프리터 고속 실행"
+              >
+                ⚡ 표준 고속
+              </button>
+            </div>
             <button
               onClick={runOffline}
               disabled={offlineBusy || !stored.code.trim()}
@@ -367,7 +396,7 @@ export default function CodeLab({ project }: CodeLabProps) {
                   실행 중...
                 </>
               ) : (
-                <>⚡ 오프라인 실행 (내장 엔진)</>
+                <>⚡ 오프라인 실행 ({offlineMode === 'precise' ? '정밀 엔진' : '표준 엔진'})</>
               )}
             </button>
           </div>
@@ -377,6 +406,16 @@ export default function CodeLab({ project }: CodeLabProps) {
             <div className="border-t border-white/5 bg-black/70 px-4 py-4 font-mono text-xs animate-fade-in">
               <div className="flex flex-wrap items-center gap-2 text-[11px]">
                 <span className="text-amber-300 font-bold">⚡ 오프라인 실행 (내장 C 엔진)</span>
+                <span
+                  className={cn(
+                    'rounded px-2 py-0.5 font-bold',
+                    offlineResult.engineMode === 'precise'
+                      ? 'border border-emerald-400/30 bg-emerald-500/15 text-emerald-300'
+                      : 'border border-slate-700 bg-slate-800 text-slate-400'
+                  )}
+                >
+                  {offlineResult.engineMode === 'precise' ? '🎯 정밀 바이트 엔진 (ARM/x86 LE)' : '⚡ 표준 고속 엔진'}
+                </span>
                 <span className="ml-auto text-slate-600">
                   {offlineResult.steps.toLocaleString()} 스텝 · 네트워크 불필요
                 </span>
@@ -397,6 +436,11 @@ export default function CodeLab({ project }: CodeLabProps) {
                         △ 기대와 다른 출력입니다 — 확인할 항목: {offlineMissing.map((x) => `"${x}"`).join(', ')}
                       </p>
                     ))}
+                  <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
+                    {offlineResult.engineMode === 'precise'
+                      ? '🎯 정밀 바이트 엔진: DataView 가상 메모리를 통해 Little-Endian 바이트 레이아웃, CAN 패킷 바이트 오버레이, union Type Punning이 실제 하드웨어와 동일하게 에뮬레이션됩니다.'
+                      : 'ℹ️ 표준 고속 엔진: C 서브셋을 즉시 실행합니다. 정밀 바이트 연산은 상단의 [🎯 정밀 바이트 모드]를 선택하세요.'}
+                  </p>
                 </>
               ) : (
                 <>
