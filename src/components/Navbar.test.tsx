@@ -23,11 +23,11 @@ beforeEach(() => {
 });
 
 describe('Navbar', () => {
-  it('phase 별로 노출 탭 개수가 다르다 (apply 8 / study 4 / thesis 3)', () => {
+  it('phase 별로 노출 탭 개수가 다르다 (apply 8 / study 5 / thesis 4)', () => {
     const cases: { phase: Phase; count: number }[] = [
       { phase: 'apply', count: 8 },
-      { phase: 'study', count: 4 },
-      { phase: 'thesis', count: 3 },
+      { phase: 'study', count: 5 },
+      { phase: 'thesis', count: 4 },
     ];
     for (const { phase, count } of cases) {
       const { unmount } = renderNavbar({ phase });
@@ -47,6 +47,32 @@ describe('Navbar', () => {
     renderNavbar({ phase: 'study', onChange });
     await user.click(screen.getByRole('button', { name: '실습 예제' }));
     expect(onChange).toHaveBeenCalledWith('labs');
+  });
+
+  it('학기 플래너 탭은 study 단계에서만 렌더링된다', () => {
+    const { unmount } = renderNavbar({ phase: 'study' });
+    expect(screen.getByRole('button', { name: '학기 플래너' })).toBeInTheDocument();
+    unmount();
+
+    const apply = renderNavbar({ phase: 'apply' });
+    expect(screen.queryByRole('button', { name: '학기 플래너' })).toBeNull();
+    apply.unmount();
+
+    renderNavbar({ phase: 'thesis' });
+    expect(screen.queryByRole('button', { name: '학기 플래너' })).toBeNull();
+  });
+
+  it('논문 트래커 탭은 thesis 단계에서만 렌더링된다', () => {
+    const { unmount } = renderNavbar({ phase: 'thesis' });
+    expect(screen.getByRole('button', { name: '논문 트래커' })).toBeInTheDocument();
+    unmount();
+
+    const apply = renderNavbar({ phase: 'apply' });
+    expect(screen.queryByRole('button', { name: '논문 트래커' })).toBeNull();
+    apply.unmount();
+
+    renderNavbar({ phase: 'study' });
+    expect(screen.queryByRole('button', { name: '논문 트래커' })).toBeNull();
   });
 
   it('활성 탭에 aria-current="page" 가 붙는다', () => {

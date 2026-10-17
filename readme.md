@@ -106,7 +106,7 @@ npm run dev
 # 타입 체크
 npm run typecheck
 
-# 테스트 (215개)
+# 테스트 (562개)
 npm test
 
 # 감시 모드
@@ -124,8 +124,8 @@ npm run preview
 ### 로컬에서 동작 확인 체크리스트
 
 - 상단 네비게이션 탭 전환 및 활성 탭 표시 확인
-- 상단 단계(Phase) 스위치: 단계 변경 시 탭 목록이 필터링되고, 논문 단계에서는 "준비 중" 안내가 표시되는지 확인
-- 탭 전환 (홈 / 생성기 / 대학 / 로드맵 / 포트폴리오 / 경쟁력 / 실습 / 가이드) — Suspense + ErrorBoundary 동작
+- 상단 단계(Phase) 스위치: 단계 변경 시 탭 목록이 필터링되는지 확인 (지원 준비 8 / 재학 중 5 / 논문 단계 4)
+- 탭 전환 (홈 / 생성기 / 대학 / 로드맵 / 포트폴리오 / 경쟁력 / 실습 / 가이드 / 데모 / 학기 플래너 / 논문 트래커) — Suspense + ErrorBoundary 동작
 - CodeLab 오프라인 실행: `float x = 2.5;` 동작 확인
 - union 경고 확인:
   ```c
@@ -155,6 +155,9 @@ src/
     Dashboard.tsx         # (구) 대시보드
     Universities.tsx      # 대학 정보
     Roadmap.tsx / Portfolio.tsx / Competitiveness.tsx / LabExercises.tsx
+    SemesterPlanner.tsx   # 재학 단계 — 학기·과목·ECTS·Klausur 플래너
+    ThesisTracker.tsx     # 논문 단계 — 마일스톤·Exposé·LaTeX/BibTeX export
+    ProjectDetailOverlay.tsx # 단계 무관 프로젝트 상세 오버레이(드로어)
     CodeLab.tsx           # 오프라인/온라인 C 실행기
     OfflineWarnings.tsx   # union 근사 경고 공용 UI
     GitHubDeploy.tsx      # GitHub 배포
@@ -162,6 +165,9 @@ src/
     Navbar.tsx / Footer.tsx / Hero.tsx / ProjectCard.tsx ...
   data/
     projects.ts           # 17개 프로젝트 정의 + CATEGORIES
+    phases.ts             # 단계 정의·탭 매핑·clampTab/canVisit 단일 출처
+    study.ts              # 재학 단계 데이터 모델 + 학기/ECTS/프리셋
+    thesis.ts             # 논문 단계 마일스톤·Exposé·.tex/.bib 생성기
     samples-a.ts / samples-b.ts / labs.ts / competition.ts ...
     gccHelp.ts / german.ts / guide.ts / curatedRepos.ts
   offline/
@@ -214,7 +220,7 @@ docs/        # 인수인계, 할일, CI 패치
 
 ```bash
 npm test
-# 351 tests (29 test files: interpreter-precise + components + data 등)
+# 562 tests (42 test files: interpreter-precise + components + data 등)
 ```
 
 - `vitest.config.ts`: `jsdom` 환경, `src/**/*.test.{ts,tsx}` 포함, `vitest.setup.ts`에서 `@testing-library/jest-dom` 로드

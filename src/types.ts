@@ -65,7 +65,7 @@ export interface University {
   pros: string;
 }
 
-export type TabId = 'home' | 'generator' | 'universities' | 'roadmap' | 'portfolio' | 'compete' | 'guide' | 'labs' | 'demo';
+export type TabId = 'home' | 'generator' | 'universities' | 'roadmap' | 'portfolio' | 'compete' | 'guide' | 'labs' | 'demo' | 'semester' | 'thesis';
 
 /** 사용자 진행 단계. 지원 준비 → 재학 중 → 논문 단계 순서. */
 export type Phase = 'apply' | 'study' | 'thesis';

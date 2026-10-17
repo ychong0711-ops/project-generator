@@ -30,19 +30,21 @@ export const TAB_LABELS: Record<TabId, string> = {
   labs: '실습 예제',
   guide: '사용 가이드',
   demo: '데모 스튜디오',
+  semester: '학기 플래너',
+  thesis: '논문 트래커',
 };
 
 /**
  * 단계별 노출 탭 (순서 포함).
  * - 공통: home / portfolio / guide
  * - apply 추가: generator / universities / roadmap / compete / demo
- * - study 추가: labs
- * - thesis 추가: 없음(공통 3개만)
+ * - study 추가: labs / semester
+ * - thesis 추가: thesis
  */
 export const TABS_BY_PHASE: Record<Phase, TabId[]> = {
   apply: ['home', 'generator', 'universities', 'roadmap', 'portfolio', 'compete', 'guide', 'demo'],
-  study: ['home', 'portfolio', 'labs', 'guide'],
-  thesis: ['home', 'portfolio', 'guide'],
+  study: ['home', 'portfolio', 'labs', 'semester', 'guide'],
+  thesis: ['home', 'portfolio', 'thesis', 'guide'],
 };
 
 /** 해당 단계에서 노출할 탭 목록 */
@@ -62,9 +64,4 @@ export function clampTab(phase: Phase, tab: TabId): TabId {
  */
 export function canVisit(phase: Phase, tab: TabId): boolean {
   return TABS_BY_PHASE[phase].includes(tab);
-}
-
-/** 단계 전용 기능이 있는지 여부. 논문 단계(thesis)는 아직 없다. */
-export function hasDedicatedFeatures(phase: Phase): boolean {
-  return phase !== 'thesis';
 }

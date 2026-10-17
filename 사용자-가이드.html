@@ -220,6 +220,8 @@
     <li><a href="#codelab">코드 랩 (C 인터프리터)</a></li>
     <li><a href="#serial">실측 랩</a></li>
     <li><a href="#labs">실습 예제 · 저장소 · 교재</a></li>
+    <li><a href="#semester">학기 플래너 (재학 단계)</a></li>
+    <li><a href="#thesis">논문 트래커 (논문 단계)</a></li>
     <li><a href="#strategy">지원 전략 (GPA 환산·매칭)</a></li>
     <li><a href="#documents">지원 서류 생성</a></li>
     <li><a href="#starterpack">스타터팩 ZIP 구성</a></li>
@@ -235,7 +237,7 @@
   <p>AutoEmbed LAB은 <strong>독일 자동차 임베디드 석사 과정 지원</strong>을 목표로 하는 사람을 위해 설계된 웹 애플리케이션입니다. 차량용 임베디드(CAN, LIN, AUTOSAR, FreeRTOS, 모터 제어 등) 프로젝트를 만들고, 독일 대학 정보를 조사하고, 지원 서류와 면접을 준비하는 전체 과정을 하나의 화면에서 관리할 수 있습니다.</p>
   <div class="grid2">
     <div class="card"><b>포트폴리오 빌더</b><span>17개 프로젝트 + 코드 랩 + 스타터팩 ZIP 생성</span></div>
-    <div class="card"><b>대학 정보</b><span>10개 독일 대학 프로그램·연구소·산업 연계 데이터</span></div>
+    <div class="card"><b>대학 정보</b><span>3개 독일 대학 프로그램·연구소·산업 연계 데이터</span></div>
     <div class="card"><b>지원 전략</b><span>바이에른 GPA 환산, 대학 요구사항 매칭, 경쟁력 진단</span></div>
     <div class="card"><b>서류·면접</b><span>자기소개서·이력서·Lebenslauf 생성, 모의 면접 40+ 질문</span></div>
     <div class="card"><b>실습 환경</b><span>브라우저 C 컴파일러(Compiler Explorer), 오프라인 인터프리터, 시리얼 통신</span></div>
@@ -254,7 +256,7 @@ npm run dev        # 개발 서버 실행 (http://localhost:5173)</code></pre>
     <tr><th>명령</th><th>동작</th></tr>
     <tr><td><code>npm run dev</code></td><td>Vite 개발 서버 실행 (핫 리로드)</td></tr>
     <tr><td><code>npm run build</code></td><td>프로덕션 빌드 생성 (단일 HTML 파일 번들)</td></tr>
-    <tr><td><code>npm run test</code></td><td>Vitest 테스트 실행 (120+ 테스트 케이스)</td></tr>
+    <tr><td><code>npm run test</code></td><td>Vitest 테스트 실행 (560+ 테스트 케이스)</td></tr>
   </table>
   <div class="callout tip"><b>안정성</b>에러 바운더리(Error Boundary)가 적용되어 렌더링 중 예외가 발생해도 앱 전체가 크래시되지 않고 안전하게 복구됩니다.</div>
 </section>
@@ -266,8 +268,8 @@ npm run dev        # 개발 서버 실행 (http://localhost:5173)</code></pre>
   <table>
     <tr><th>단계</th><th>노출 탭</th></tr>
     <tr><td>지원 준비 (apply)</td><td>홈 · 프로젝트 생성기 · 대학 정보 · 입학 로드맵 · 내 포트폴리오 · 경쟁력 센터 · 사용 가이드 · 데모 스튜디오 (8개)</td></tr>
-    <tr><td>재학 중 (study)</td><td>홈 · 내 포트폴리오 · 실습 예제 · 사용 가이드 (4개)</td></tr>
-    <tr><td>논문 단계 (thesis)</td><td>홈 · 내 포트폴리오 · 사용 가이드 (3개)</td></tr>
+    <tr><td>재학 중 (study)</td><td>홈 · 내 포트폴리오 · 실습 예제 · 학기 플래너 · 사용 가이드 (5개)</td></tr>
+    <tr><td>논문 단계 (thesis)</td><td>홈 · 내 포트폴리오 · 논문 트래커 · 사용 가이드 (4개)</td></tr>
   </table>
   <ul>
     <li>기본 단계는 <code>지원 준비</code>이며, 선택한 단계는 브라우저에 저장되어 다음 방문 시 그대로 복원됩니다.</li>
@@ -275,7 +277,7 @@ npm run dev        # 개발 서버 실행 (http://localhost:5173)</code></pre>
     <li>홈 · 내 포트폴리오 · 사용 가이드는 모든 단계에서 공통으로 제공됩니다.</li>
     <li>저장한 프로젝트의 <strong>상세는 어느 단계에서든 열립니다.</strong> 상세는 단계와 무관한 오버레이(드로어)로 표시되며, <kbd class="kbd">Esc</kbd> 키나 배경 클릭으로 닫을 수 있습니다.</li>
   </ul>
-  <div class="callout warn"><b>논문 단계 안내</b>논문 단계는 아직 전용 기능이 없어, 해당 단계를 선택하면 화면 상단에 "논문 단계 전용 기능은 준비 중입니다"라는 안내가 표시됩니다. 사용할 수 있는 탭은 홈 · 내 포트폴리오 · 사용 가이드 세 개입니다.</div>
+  <div class="callout info"><b>단계별 전용 탭</b>재학 중 단계에는 <a href="#semester"><strong>학기 플래너</strong></a>(과목·ECTS·Klausur 관리), 논문 단계에는 <a href="#thesis"><strong>논문 트래커</strong></a>(마일스톤·Exposé·LaTeX/BibTeX 내보내기)가 제공됩니다. 단계를 바꾸면 현재 탭이 사라질 경우 해당 단계의 첫 탭으로 자동 이동합니다.</div>
 </section>
 
 <!-- 4. 다국어 및 접근성 -->
@@ -356,9 +358,34 @@ matchProjectsForUni('dortmund', projects)</code></pre>
   </ul>
 </section>
 
-<!-- 18. FAQ -->
+<!-- 19. 학기 플래너 (재학 단계) -->
+<section id="semester">
+  <h2 class="sec"><span class="num">19</span>학기 플래너 (재학 단계)</h2>
+  <p><strong>재학 중</strong> 단계를 선택하면 <strong>학기 플래너</strong> 탭이 나타납니다. 입학 후 학기별 과목과 학점(ECTS)을 직접 관리하는 도구입니다.</p>
+  <ul>
+    <li><strong>학기 구성</strong> — 1~4학기 탭에 과목을 추가하고 유형(Vorlesung · Übung · Praktikum · Seminar), ECTS, 성적(1.0~4.0), 이수 여부를 기록합니다.</li>
+    <li><strong>ECTS 진행률</strong> — '이수 완료'로 표시한 과목의 ECTS 합계를 총 120 ECTS 기준으로 집계합니다. (Bologna 기준 4학기 · 학기당 30 ECTS)</li>
+    <li><strong>Klausur 관리</strong> — 과목별 Klausur(시험) 여부를 표시하고, 아직 치르지 않은 시험만 모아 봅니다.</li>
+    <li><strong>예시 프리셋</strong> — RPTU(CVT · ECE), TU 켐니츠(Embedded Systems), TU 도르트문트(Automation and Robotics)의 <em>예시</em> 모듈명을 불러올 수 있습니다. 공식 교육과정이 아니므로 학과 <code>Modulhandbuch</code>에서 확인하세요.</li>
+  </ul>
+  <div class="callout info"><b>저장 위치</b>모든 입력은 <code>autoembed-semester</code> 키에 저장되며, <a href="#backup">백업/복원</a>에 함께 포함됩니다.</div>
+</section>
+
+<!-- 20. 논문 트래커 (논문 단계) -->
+<section id="thesis">
+  <h2 class="sec"><span class="num">20</span>논문 트래커 (논문 단계)</h2>
+  <p><strong>논문 단계</strong>를 선택하면 <strong>논문 트래커</strong> 탭이 나타납니다. 석사논문(Masterarbeit) 진행을 마일스톤으로 관리하고 Exposé와 LaTeX/BibTeX 산출물을 만듭니다.</p>
+  <ul>
+    <li><strong>마일스톤 트래커</strong> — 주제 선정 → Exposé 작성 → Betreuer 확정 → Anmeldung(등록) → 중간발표 → 제출(Abgabe) → Verteidigung(Kolloquium) 7단계를 완료 체크 · 목표일 · 메모와 함께 관리합니다.</li>
+    <li><strong>Exposé 생성기</strong> — 제목 · 연구 질문 · 동기 · 방법론 · 일정 · 참고문헌을 입력하면 구조화된 개요 문서를 만들어 복사하거나 내려받을 수 있습니다.</li>
+    <li><strong>LaTeX / BibTeX 내보내기</strong> — 논문 뼈대 <code>.tex</code> 파일과 참고문헌 <code>.bib</code> 파일을 생성해 내려받습니다.</li>
+  </ul>
+  <div class="callout warn"><b>대학별 규정 확인</b>논문 기간 · 학점(ECTS) · 분량 · 중간발표 필요 여부 · 구두시험(Verteidigung) 평가 방식은 <strong>대학과 학과마다 다릅니다.</strong> 이 앱은 일반적인 진행 순서만 안내하므로 반드시 소속 학과의 시험 규정(Prüfungsordnung)을 확인하세요.</div>
+</section>
+
+<!-- 21. FAQ -->
 <section id="faq">
-  <h2 class="sec"><span class="num">18</span>자주 묻는 질문</h2>
+  <h2 class="sec"><span class="num">21</span>자주 묻는 질문</h2>
   <h4>Q. 폰트가 왜 평소와 다른가요?</h4>
   <p>외부 CDN 의존도를 낮추기 위해 폰트 셀프 호스팅을 적용했습니다. <code>Pretendard</code>와 <code>JetBrains Mono</code>를 로컬에서 서빙하며, 로드 실패 시 시스템 폰트(Windows/Mac/iOS/Android 최적화)로 자동 전환됩니다.</p>
   <h4>Q. GitHub 배포 시 토큰이 안전한가요?</h4>

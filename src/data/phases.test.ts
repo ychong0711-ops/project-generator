@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import type { Phase, TabId } from '../types';
-import { PHASES, TAB_LABELS, TABS_BY_PHASE, canVisit, clampTab, hasDedicatedFeatures, visibleTabs } from './phases';
+import { PHASES, TAB_LABELS, TABS_BY_PHASE, canVisit, clampTab, visibleTabs } from './phases';
 
 const ALL_PHASES: Phase[] = ['apply', 'study', 'thesis'];
 const ALL_TABS: TabId[] = [
   'home', 'generator', 'universities', 'roadmap', 'portfolio',
-  'compete', 'guide', 'labs', 'demo',
+  'compete', 'guide', 'labs', 'demo', 'semester', 'thesis',
 ];
 
 describe('PHASES — 단계 정의', () => {
@@ -26,8 +26,8 @@ describe('TABS_BY_PHASE — 단계별 탭 매핑', () => {
     expect(TABS_BY_PHASE.apply).toEqual([
       'home', 'generator', 'universities', 'roadmap', 'portfolio', 'compete', 'guide', 'demo',
     ]);
-    expect(TABS_BY_PHASE.study).toEqual(['home', 'portfolio', 'labs', 'guide']);
-    expect(TABS_BY_PHASE.thesis).toEqual(['home', 'portfolio', 'guide']);
+    expect(TABS_BY_PHASE.study).toEqual(['home', 'portfolio', 'labs', 'semester', 'guide']);
+    expect(TABS_BY_PHASE.thesis).toEqual(['home', 'portfolio', 'thesis', 'guide']);
   });
 
   it('공통 3개(home/portfolio/guide)를 모든 단계가 포함한다', () => {
@@ -101,16 +101,8 @@ describe('clampTab', () => {
   });
 });
 
-describe('hasDedicatedFeatures', () => {
-  it('thesis 만 false 이다', () => {
-    expect(hasDedicatedFeatures('apply')).toBe(true);
-    expect(hasDedicatedFeatures('study')).toBe(true);
-    expect(hasDedicatedFeatures('thesis')).toBe(false);
-  });
-});
-
 describe('canVisit — 단계별 방문 가능 탭', () => {
-  it('3단계 × 9탭 전부에서 TABS_BY_PHASE / visibleTabs 와 일치한다', () => {
+  it('3단계 × 모든 탭에서 TABS_BY_PHASE / visibleTabs 와 일치한다', () => {
     for (const phase of ALL_PHASES) {
       for (const tab of ALL_TABS) {
         const expected = TABS_BY_PHASE[phase].includes(tab);
@@ -133,6 +125,18 @@ describe('canVisit — 단계별 방문 가능 탭', () => {
     expect(canVisit('apply', 'labs')).toBe(false);
     expect(canVisit('study', 'labs')).toBe(true);
     expect(canVisit('thesis', 'labs')).toBe(false);
+  });
+
+  it('semester 는 study 에서만 방문할 수 있다', () => {
+    expect(canVisit('apply', 'semester')).toBe(false);
+    expect(canVisit('study', 'semester')).toBe(true);
+    expect(canVisit('thesis', 'semester')).toBe(false);
+  });
+
+  it('thesis 탭은 thesis 단계에서만 방문할 수 있다', () => {
+    expect(canVisit('apply', 'thesis')).toBe(false);
+    expect(canVisit('study', 'thesis')).toBe(false);
+    expect(canVisit('thesis', 'thesis')).toBe(true);
   });
 
   it('공통 탭(home/portfolio/guide)은 모든 단계에서 방문할 수 있다', () => {

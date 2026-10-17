@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState, Suspense, lazy, Component } from 'react';
-import type { Phase, TabId } from './types';
+import type { TabId } from './types';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { useSavedProjects } from './hooks/useSavedProjects';
 import { usePhase } from './hooks/usePhase';
-import { clampTab, hasDedicatedFeatures, TAB_LABELS, visibleTabs } from './data/phases';
+import { clampTab, visibleTabs } from './data/phases';
 import { projectById } from './data/projects';
 
 // Lazy-loaded tab components for code splitting
@@ -19,6 +19,8 @@ const Hero = lazy(() => import('./components/Hero'));
 const Generator = lazy(() => import('./components/Generator'));
 const DemoStudio = lazy(() => import('./components/DemoStudio'));
 const ProjectDetailOverlay = lazy(() => import('./components/ProjectDetailOverlay'));
+const SemesterPlanner = lazy(() => import('./components/SemesterPlanner'));
+const ThesisTracker = lazy(() => import('./components/ThesisTracker'));
 
 // ✅ 추가: Error Boundary 컴포넌트 정의
 class ErrorBoundary extends Component<
@@ -63,28 +65,6 @@ function TabFallback() {
   return (
     <div className="grid min-h-[300px] place-items-center p-8" role="status" aria-live="polite">
       <p className="text-sm text-slate-500">로딩 중...</p>
-    </div>
-  );
-}
-
-/* 논문 단계 전용 기능이 아직 없음을 알리는 안내 배너 */
-function PhaseNotice({ phase }: { phase: Phase }) {
-  const tabs = visibleTabs(phase);
-  return (
-    <div className="pt-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-6">
-        <div
-          role="status"
-          aria-live="polite"
-          className="rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-400/10 to-orange-500/5 px-5 py-4"
-        >
-          <p className="text-sm font-bold text-amber-300">논문 단계 전용 기능은 준비 중입니다</p>
-          <p className="mt-1 text-sm text-slate-400">
-            지금은 공통 기능만 제공됩니다. 사용 가능한 탭:{' '}
-            {tabs.map((id) => TAB_LABELS[id]).join(' · ')}
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
@@ -153,8 +133,6 @@ export default function App() {
       />
 
       <main>
-        {!hasDedicatedFeatures(phase) && <PhaseNotice phase={phase} />}
-
         {/* 탭이 바뀌면 ErrorBoundary를 리셋해 이전 탭의 오류가 남지 않게 한다 */}
         <ErrorBoundary key={tab}>
           <Suspense fallback={<TabFallback />}>
@@ -183,6 +161,8 @@ export default function App() {
             {tab === 'labs' && <LabExercises savedProjects={savedProjects} />}
             {tab === 'guide' && <GuideTab savedProjects={savedProjects} />}
             {tab === 'demo' && <DemoStudio />}
+            {tab === 'semester' && <SemesterPlanner />}
+            {tab === 'thesis' && <ThesisTracker />}
           </Suspense>
         </ErrorBoundary>
       </main>

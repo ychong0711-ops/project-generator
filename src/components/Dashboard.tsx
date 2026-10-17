@@ -6,7 +6,7 @@ import { useActivity, calcStreak, recentActivity, ymdOf } from '../store/activit
 import { computeDiagnosis, type DiagKey } from '../data/competition';
 import { CHECKLIST } from '../data/guide';
 import { UNIVERSITIES } from '../data/universities';
-import { canVisit } from '../data/phases';
+import { canVisit, TAB_LABELS } from '../data/phases';
 import { DicesIcon, EyeIcon, ArrowRightIcon } from './icons';
 import Badges from './Badges';
 import WeeklyPlan from './WeeklyPlan';
@@ -65,18 +65,6 @@ interface Mission {
   tab: TabId;
   projectId?: string;
 }
-
-const TAB_NAMES: Record<TabId, string> = {
-  home: '홈',
-  generator: '프로젝트 생성기',
-  universities: '대학 정보',
-  roadmap: '입학 로드맵',
-  portfolio: '내 포트폴리오',
-  compete: '경쟁력 센터',
-  guide: '사용 가이드',
-  labs: '실습 예제',
-  demo: '데모 스튜디오',
-};
 
 function tabForWeak(key: string): TabId {
   if (key === 'projects') return 'generator';
@@ -269,7 +257,7 @@ export default function Dashboard({ savedProjects, onNavigate, onView, phase }: 
                       <span className="min-w-0 flex-1">
                         <span className="block text-[13px] font-semibold leading-snug text-slate-200">{m.text}</span>
                         <span className="mt-0.5 block text-[10px] text-slate-500">
-                          {m.projectId ? '프로젝트 상세에서 진행' : `${TAB_NAMES[m.tab]}에서 진행`}
+                          {m.projectId ? '프로젝트 상세에서 진행' : `${TAB_LABELS[m.tab]}에서 진행`}
                         </span>
                       </span>
                       <ArrowRightIcon className="h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-1 group-hover:text-amber-300" />
@@ -359,7 +347,7 @@ export default function Dashboard({ savedProjects, onNavigate, onView, phase }: 
                 {recommendation.icon} {recommendation.text}
               </p>
               <p className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-amber-300">
-                {TAB_NAMES[recommendation.tab]}에서 진행
+                {TAB_LABELS[recommendation.tab]}에서 진행
                 <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </p>
             </button>
