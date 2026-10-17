@@ -69,12 +69,10 @@ function langCls(lang: string): string {
   return 'border-sky-400/30 bg-sky-400/10 text-sky-300';
 }
 
-/** "Technische Universität München" → "TU München" 같은 짧은 이름 */
+/** "Technische Universität Chemnitz" → "TU Chemnitz" 같은 짧은 이름 */
 function compactUniName(name: string): string {
   const lower = name.toLowerCase();
-  if (lower.startsWith('rwth')) return 'RWTH';
-  if (lower.startsWith('fau')) return 'FAU';
-  if (lower.includes('karlsruhe')) return 'KIT';
+  if (lower.startsWith('rptu')) return 'RPTU';
   if (lower.startsWith('technische universität') || lower.startsWith('technische universitaet')) {
     return `TU ${name.split(' ').pop() ?? ''}`;
   }
@@ -290,7 +288,7 @@ export default function StrategyTab({ savedProjects }: StrategyTabProps) {
               {/* 목표 평점 비교 */}
               <div className="mt-5 border-t border-white/5 pt-4">
                 <p className="text-[11px] font-bold text-slate-400">
-                  💡 TUM / RWTH / KIT 목표 평점과 비교
+                  💡 지원 대학 목표 평점과 비교
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {UNIVERSITY_REQS.map((u) => {

@@ -73,24 +73,24 @@ describe('APPLY_STATUS / nextStatus — 지원 트래커 상태', () => {
 
 describe('computeMatch — 프로그램 매칭 스코어', () => {
   it('스킬이 키워드와 대소문자 무관 매칭되어 점수가 나온다', () => {
-    // kit 키워드: pid, foc, bms, 제어 — abs-sim 은 'PID 제어' 스킬 보유
-    const absSim = PROJECTS.find((p) => p.id === 'abs-sim');
-    expect(absSim).toBeDefined();
+    // rptu 키워드: can, uds, autosar, foc, 제어, 차량 — bldc-foc 은 'FOC'·'PI 제어' 스킬 보유
+    const bldc = PROJECTS.find((p) => p.id === 'bldc-foc');
+    expect(bldc).toBeDefined();
 
-    const r = computeMatch('kit', [absSim!]);
-    expect(r.matched).toContain('pid');
+    const r = computeMatch('rptu', [bldc!]);
+    expect(r.matched).toContain('foc');
     expect(r.matched).toContain('제어');
-    expect(r.missing).toEqual(expect.arrayContaining(['foc', 'bms']));
-    expect(r.score).toBe(Math.round((r.matched.length / 4) * 100));
-    expect(r.matched.length + r.missing.length).toBe(4);
+    expect(r.missing).toEqual(expect.arrayContaining(['can', 'uds']));
+    expect(r.score).toBe(Math.round((r.matched.length / 6) * 100));
+    expect(r.matched.length + r.missing.length).toBe(6);
   });
 
   it('매칭되는 스킬이 없으면 0점이다', () => {
     const p = makeProject({ skills: ['Zig'] });
-    const r = computeMatch('rwth', [p]);
+    const r = computeMatch('rptu', [p]);
     expect(r.score).toBe(0);
     expect(r.matched).toEqual([]);
-    expect(r.missing.length).toBe(MATCH_KEYWORDS.rwth.length);
+    expect(r.missing.length).toBe(MATCH_KEYWORDS.rptu.length);
   });
 
   it('알 수 없는 대학 id 는 키워드가 없어 0점/빈 배열이다', () => {
@@ -98,7 +98,7 @@ describe('computeMatch — 프로그램 매칭 스코어', () => {
   });
 
   it('프로젝트가 없으면 0점이다', () => {
-    expect(computeMatch('tum', []).score).toBe(0);
+    expect(computeMatch('dortmund', []).score).toBe(0);
   });
 });
 
@@ -137,21 +137,21 @@ describe('professorEmail — 교수 컨택 이메일 생성', () => {
   });
 
   it('대학/연구실/프로젝트 정보가 반영된 이메일을 만든다', () => {
-    const mail = professorEmail('tum', p, '홍길동');
+    const mail = professorEmail('dortmund', p, '홍길동');
     expect(mail).toContain('Subject:');
-    expect(mail).toContain('Technische Universität München');
+    expect(mail).toContain('Technische Universität Dortmund');
     expect(mail).toContain('"CAN-UDS 스캐너" (P-CAN)');
     expect(mail).toContain('C, CAN 2.0B, UDS');
     expect(mail).toContain('Best regards,\n홍길동');
   });
 
   it('프로젝트 미선택 시 플레이스홀더 문구를 넣는다', () => {
-    const mail = professorEmail('tum', null, '홍길동');
+    const mail = professorEmail('dortmund', null, '홍길동');
     expect(mail).toContain('[프로젝트 한 줄 — 포트폴리오에서 선택하면 자동 삽입됩니다]');
   });
 
   it('이름이 공백이면 [Your Name] 으로 폴백한다', () => {
-    const mail = professorEmail('tum', null, '   ');
+    const mail = professorEmail('dortmund', null, '   ');
     expect(mail).toContain('[Your Name]');
   });
 });

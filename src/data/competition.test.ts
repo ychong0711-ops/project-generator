@@ -178,8 +178,8 @@ describe('computeDiagnosis — 경쟁력 진단 계산', () => {
 describe('generateLetter — Letter of Motivation 생성', () => {
   const baseInput = {
     name: '홍길동',
-    universityId: 'tum',
-    programName: 'Automotive Engineering (M.Sc.)',
+    universityId: 'dortmund',
+    programName: 'Automation and Robotics (M.Sc.)',
     projectIds: [],
     undergrad: 'B.Sc. Electronic Engineering',
     extras: '',
@@ -187,8 +187,8 @@ describe('generateLetter — Letter of Motivation 생성', () => {
 
   it('대학 id 로 대학명/연구 분야를 찾아 본문에 반영한다', () => {
     const letter = generateLetter(baseInput, []);
-    expect(letter).toContain('Technische Universität München');
-    expect(letter).toContain('Automotive Engineering (M.Sc.)');
+    expect(letter).toContain('Technische Universität Dortmund');
+    expect(letter).toContain('Automation and Robotics (M.Sc.)');
     expect(letter).toContain('Dear Selection Committee');
     expect(letter).toContain('홍길동');
   });

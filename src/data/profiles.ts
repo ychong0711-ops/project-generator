@@ -12,75 +12,18 @@ export interface UniProfile {
 }
 
 export const UNI_PROFILES: Record<string, UniProfile> = {
-  rwth: {
+  rptu: {
     modules: [
+      'Commercial Vehicle Technology (상용차 기술)',
       'Vehicle Electronics and Communication (차량 전장·통신)',
-      'Power Electronics — Control, Synthesis and Applications',
-      'Embedded Systems for Automotive Applications',
-      'Electric Drive Systems and Motor Control',
+      'Drive Train Systems and Vehicle Dynamics (구동계·동역학)',
+      'Electrical and Computer Engineering (전기·컴퓨터공학)',
     ],
-    labs: ['ISEA (전력전자·구동계)', 'IKA (자동차공학연구소)', 'Chair of Integrated Digital Systems (IDS)'],
-    cities: ['Aachen', 'Aachen campus'],
-  },
-  tum: {
-    modules: [
-      'Automotive Software Engineering',
-      'Vehicle Perception and Sensor Fusion',
-      'Embedded & Cyber-Physical Systems',
-      'Electric Vehicle Powertrain Design',
+    labs: [
+      'Graduate School Commercial Vehicle Technology (CVT)',
+      'Chair of Electronic Systems / EIT (전기·컴퓨터공학)',
     ],
-    labs: ['Institute of Automotive Technology (FTM)', 'Chair of Embedded Systems (EDI)'],
-    cities: ['Munich', 'Garching campus'],
-  },
-  tub: {
-    modules: [
-      'Automotive Systems Engineering',
-      'Embedded Systems and Real-Time Computing',
-      'Vehicle Dynamics and Control',
-      'E/E Architecture and Functional Safety',
-    ],
-    labs: ['Institut für Elektrotechnik und Informationstechnik', 'Automotive Software Engineering group'],
-    cities: ['Berlin', 'Charlottenburg campus'],
-  },
-  kit: {
-    modules: [
-      'Elektrische Antriebe und Leistungselektronik',
-      'Embedded Systems und Echtzeitsysteme',
-      'Fahrzeugtechnik',
-      'Automatisierungstechnik',
-    ],
-    labs: ['Elektrotechnisches Institut (ETI)', 'Institut für Fahrzeugsystemtechnik (FAST)'],
-    cities: ['Karlsruhe'],
-  },
-  stuttgart: {
-    modules: [
-      'Antriebsstrangtechnik für Elektrofahrzeuge',
-      'Elektromagnetische Energiewandler',
-      'Fahrzeugbordnetze und Energiemanagement',
-      'Leistungselektronik in der Elektromobilität',
-    ],
-    labs: ['Institut für Leistungselektronik und Elektrische Antriebe (ILEA)', 'FKFS (자동차연구소)'],
-    cities: ['Stuttgart'],
-  },
-  fau: {
-    modules: [
-      'Autonomous Systems and Perception',
-      'Sensor Fusion and State Estimation',
-      'Vehicle Communication and Networking',
-      'Machine Learning for Robotics',
-    ],
-    labs: ['Fraunhofer IIS (Audi 산학)', 'Lehrstuhl für Informatik 5 (패턴인식)'],
-    cities: ['Erlangen', 'Nürnberg'],
-  },
-  darmstadt: {
-    modules: [
-      'Elektrotechnik und Informationstechnik (전장 특화)',
-      'Embedded Systems Design',
-      'Fahrzeugelektronik',
-      'Regelungstechnik',
-    ],
-    labs: ['Continental 본사 산학 프로그램', 'Institut für Automatisierungstechnik'],
-    cities: ['Darmstadt'],
+    cities: ['Kaiserslautern', 'Landau'],
   },
   chemnitz: {
     modules: [
@@ -92,25 +35,15 @@ export const UNI_PROFILES: Record<string, UniProfile> = {
     labs: ['Center for Microtechnologies (ZfM)', 'Professorship Embedded Systems'],
     cities: ['Chemnitz'],
   },
-  freiburg: {
+  dortmund: {
     modules: [
-      'Embedded Systems Design',
-      'Microsystems Engineering',
-      'Real-Time Operating Systems',
-      'Signal Processing',
+      'Automation and Robotics (자동화·로보틱스)',
+      'Control Theory and Cyber-Physical Systems',
+      'Sensor Fusion and State Estimation',
+      'Software Engineering and Programming',
     ],
-    labs: ['IMTEK (마이크로시스템공학연구소)', 'Fraunhofer IAF 인접'],
-    cities: ['Freiburg'],
-  },
-  braunschweig: {
-    modules: [
-      'Elektromobilität Gesamtsystem',
-      'Fahrzeugbatterien und Energiemanagement',
-      'Fahrzeugelektronik',
-      'Regelung elektrischer Antriebe',
-    ],
-    labs: ['Institut für Hochspannungstechnik und Elektrische Energieanlagen (elenia)', 'NFF (차량기술연구센터)'],
-    cities: ['Braunschweig', 'Wolfsburg (VW 본사)'],
+    labs: ['Institute of Robotics Research (IRF)', 'Fraunhofer IML (물류·자동화)'],
+    cities: ['Dortmund'],
   },
 };
 

@@ -24,8 +24,8 @@ describe('UNI_PROFILES — 대학 프로필 무결성', () => {
 
 describe('profileFor — 대학별 프로필 조회', () => {
   it('알려진 id 는 해당 프로필 객체를 반환한다', () => {
-    expect(profileFor('rwth')).toBe(UNI_PROFILES.rwth);
-    expect(profileFor('tum').modules.length).toBeGreaterThan(0);
+    expect(profileFor('rptu')).toBe(UNI_PROFILES.rptu);
+    expect(profileFor('chemnitz').modules.length).toBeGreaterThan(0);
   });
 
   it('알 수 없는 id 는 기본 폴백 프로필을 반환한다 (경계)', () => {

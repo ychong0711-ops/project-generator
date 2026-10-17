@@ -19,16 +19,15 @@ export interface DeadlineInfo {
 }
 
 export const DEADLINES: Record<string, DeadlineInfo> = {
-  rwth: { winter: '10월 15일 (수시)', winterISO: '2026-10-15', semester: '2026/27 겨울', note: 'RWTHonline 자체 지원' },
-  tum: { winter: '11월 30일', winterISO: '2026-11-30', semester: '2026/27 겨울', note: '자체 지원 포털' },
-  tub: { winter: '11월 15일', winterISO: '2026-11-15', semester: '2026/27 겨울', note: 'uni-assist' },
-  kit: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: '자체 지원' },
-  stuttgart: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: '프로그램별 상이' },
-  fau: { winter: '12월 15일', winterISO: '2026-12-15', semester: '2026/27 겨울', note: '자체 지원' },
-  darmstadt: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: '자체 지원' },
-  chemnitz: { winter: '1월 15일 (비제한 2월)', winterISO: '2027-01-15', semester: '2026/27 겨울', note: 'uni-assist' },
-  freiburg: { winter: '12월 31일', winterISO: '2026-12-31', semester: '2026/27 겨울', note: '자체 지원' },
-  braunschweig: { winter: '1월 15일', winterISO: '2027-01-15', semester: '2026/27 겨울', note: 'uni-assist' },
+  rptu: {
+    winter: '4월 30일 (해외·비자 필요) / 7월 15일 (EU·비자 보유)',
+    summer: '10월 31일 (ECE, 여름 학기)',
+    winterISO: '2027-04-30',
+    semester: '2027/28 겨울',
+    note: 'CVT(영어)·ECE(독일어) — RPTU 자체 포털',
+  },
+  chemnitz: { winter: '7월 15일', summer: '1월 15일', winterISO: '2027-07-15', semester: '2027/28 겨울', note: 'uni-assist 경유' },
+  dortmund: { winter: '5월 15일', summer: '1월 15일', winterISO: '2027-05-15', semester: '2027/28 겨울', note: 'uni-assist 경유 · admission-free' },
 };
 
 export function daysUntil(iso?: string): number | null {
@@ -93,16 +92,9 @@ export function nextStatus(s: ApplyStatus): ApplyStatus {
 
 /* ---------- 3) 프로그램 매칭 스코어 ---------- */
 export const MATCH_KEYWORDS: Record<string, string[]> = {
-  rwth: ['can', 'uds', 'autosar', 'foc', '전력'],
-  tum: ['can', 'python', 'opencv', 'adas', 'kalman', 'some/ip'],
-  tub: ['can', 'autosar', 'freertos', 'adas', 'embedded'],
-  kit: ['pid', 'foc', 'bms', '제어'],
-  stuttgart: ['foc', 'bms', 'motor', '전력', 'pid'],
-  fau: ['kalman', 'sensor', 'opencv', 'adas', 'some/ip'],
-  darmstadt: ['can', 'autosar', 'embedded', 'pid'],
-  chemnitz: ['embedded', 'freertos', 'sensor', 'can', 'linux'],
-  freiburg: ['embedded', 'sensor', '저전력', 'rf'],
-  braunschweig: ['bms', 'foc', 'can', 'motor'],
+  rptu: ['can', 'uds', 'autosar', 'foc', '제어', '차량'],
+  chemnitz: ['embedded', 'freertos', 'linux', '플래시', '인터럽트', '상태머신'],
+  dortmund: ['pid', '제어', '칼만', 'opencv', '영상', 'some/ip'],
 };
 
 export interface MatchResult {

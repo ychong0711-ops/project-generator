@@ -41,9 +41,9 @@ describe('bavarianGpa — Modified Bavarian Formula', () => {
 });
 
 describe('UNIVERSITY_REQS — 대학별 요구사항', () => {
-  it('9개 대학 포함 (rwth/tum/tub/kit/stuttgart/fau/darmstadt/chemnitz/freiburg)', () => {
+  it('3개 대학 포함 (rptu/chemnitz/dortmund)', () => {
     const ids = UNIVERSITY_REQS.map((u) => u.id).sort();
-    expect(ids).toEqual(['chemnitz', 'darmstadt', 'fau', 'freiburg', 'kit', 'rwth', 'stuttgart', 'tub', 'tum']);
+    expect(ids).toEqual(['chemnitz', 'dortmund', 'rptu']);
   });
 
   it('모든 대학이 필수 필드 보유', () => {
@@ -70,7 +70,7 @@ describe('UNIVERSITY_REQS — 대학별 요구사항', () => {
 
 describe('matchProjectsForUni — 선택 대학 기준 프로젝트 추천', () => {
   it('score 내림차순 + 모든 필드 존재', () => {
-    const matches = matchProjectsForUni('tum', PROJECTS);
+    const matches = matchProjectsForUni('dortmund', PROJECTS);
     expect(matches.length).toBeGreaterThan(0);
     for (let i = 1; i < matches.length; i++) {
       expect(matches[i - 1].score).toBeGreaterThanOrEqual(matches[i].score);
@@ -85,9 +85,9 @@ describe('matchProjectsForUni — 선택 대학 기준 프로젝트 추천', () 
   });
 
   it('uniIds 직접 매칭 프로젝트가 상위권에 온다', () => {
-    const matches = matchProjectsForUni('kit', PROJECTS);
+    const matches = matchProjectsForUni('rptu', PROJECTS);
     const top = matches.slice(0, 5);
-    const directHit = top.some((m) => PROJECTS.find((p) => p.id === m.projectId)?.uniIds.includes('kit'));
+    const directHit = top.some((m) => PROJECTS.find((p) => p.id === m.projectId)?.uniIds.includes('rptu'));
     expect(directHit).toBe(true);
   });
 });

@@ -82,7 +82,7 @@ export const FAQS = [
   },
   {
     q: '독일어를 못 해도 지원 가능한가요?',
-    a: '가능합니다. TUM Automotive Engineering, TU Berlin Automotive Systems, TU Chemnitz·Freiburg의 Embedded Systems Engineering, FAU Autonomy Technologies 등은 영어로 지원할 수 있습니다. 단, 독일어가 있으면 현지 인턴·정착에 큰 이점입니다.',
+    a: '가능합니다. TU Chemnitz Embedded Systems, TU Dortmund Automation and Robotics, RPTU Commercial Vehicle Technology(CVT) 등은 영어로 지원할 수 있습니다. 단, 독일어가 있으면 현지 인턴·정착에 큰 이점입니다.',
   },
   {
     q: '학부 성적(GPA)이 낮으면 어떻게 하나요?',

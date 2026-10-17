@@ -33,7 +33,7 @@ export const PROJECTS_1: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리 (드라이버 + 문서)', 'PC 진단 GUI + 스크린샷', '통신 시퀀스 다이어그램(README)', '데모 영상 (유튜브/파일)'],
     skills: ['C', 'CAN 2.0B', 'ISO-TP', 'UDS (ISO 14229)', 'SPI', 'Python', '오실로스코프'],
-    uniIds: ['rwth', 'tum', 'tub', 'chemnitz'],
+    uniIds: ['chemnitz', 'rptu'],
     interviewQs: [
       'CAN 버스에서 두 노드가 동시에 송신하면 어떤 일이 일어나나요?',
       'ISO-TP가 필요한 이유는 무엇인가요?',
@@ -72,7 +72,7 @@ export const PROJECTS_1: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '태스크/자원 배치 다이어그램', '우선순위 역전 실험 보고서', '데모 영상'],
     skills: ['C', 'FreeRTOS', '실시간 스케줄링', '워치독', 'PWM', '인터럽트 처리'],
-    uniIds: ['rwth', 'tub', 'chemnitz', 'freiburg'],
+    uniIds: ['chemnitz', 'dortmund'],
     interviewQs: [
       '우선순위 역전(Priority Inversion)이란 무엇인가요?',
       '뮤텍스와 세마포어의 차이를 설명해 보세요.',
@@ -108,7 +108,7 @@ export const PROJECTS_1: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', 'LIN 프레임 캡처 화면(로직 분석기)', '상태머신 다이어그램', '동작 데모 영상'],
     skills: ['C', 'LIN 2.x', 'UART', '상태머신 설계', '전류 감지'],
-    uniIds: ['rwth', 'kit', 'stuttgart'],
+    uniIds: ['rptu', 'chemnitz'],
     interviewQs: [
       'LIN 버스는 왜 CAN보다 저렴한가요?',
       'LIN 헤더의 Sync Break 필드는 어떤 역할을 하나요?',
@@ -144,7 +144,7 @@ export const PROJECTS_1: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '제어 블록 다이어그램 + 전달함수', '전류/속도 응답 측정 그래프', '데모 영상'],
     skills: ['C', 'FOC', 'SVPWM', 'PI 제어', '고정소수점', 'ADC/PWM 타이머'],
-    uniIds: ['rwth', 'tum', 'stuttgart', 'braunschweig'],
+    uniIds: ['rptu', 'dortmund'],
     interviewQs: [
       'Clarke 변환을 하는 이유는 무엇인가요?',
       'SVPWM이 SPWM보다 전압 활용률이 높은 이유는?',
@@ -182,7 +182,7 @@ export const PROJECTS_1: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', 'EKF 유도 과정 문서(수식 정리)', '오차 비교 그래프', '실주행 로그 데이터'],
     skills: ['C', '칼만 필터', '쿼터니언', 'GNSS/IMU', '신호 처리'],
-    uniIds: ['tum', 'tub', 'fau', 'kit'],
+    uniIds: ['dortmund', 'rptu'],
     interviewQs: [
       '칼만 필터와 상보 필터의 차이는 무엇인가요?',
       'EKF에서 공분산 행렬의 의미를 설명해 보세요.',
@@ -220,7 +220,7 @@ export const PROJECTS_1: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', 'SoC 추정 vs 실제(적분 기준) 비교 그래프', 'OCV-SoC 커브 문서', '보호 로직 테스트 리포트'],
     skills: ['C', 'ADC/신호 조건', 'I2C', '칼만 필터', '배터리 모델링'],
-    uniIds: ['rwth', 'tum', 'stuttgart', 'braunschweig'],
+    uniIds: ['rptu', 'dortmund'],
     interviewQs: [
       '쿨롱 카운팅의 단점은 무엇이고 어떻게 보완하나요?',
       'OCV-SoC 곡선에서 히스테리시스가 생기는 이유는?',

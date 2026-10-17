@@ -30,7 +30,7 @@ export const PROJECTS_2: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '메모리맵 다이어그램', 'UDS 시퀀스 다이어그램', '업데이트 성공/실패(롤백) 데모 영상'],
     skills: ['C', 'UDS (ISO 14229)', '링커 스크립트', '플래시 메모리', 'CRC', '보안 기본기'],
-    uniIds: ['rwth', 'tub', 'chemnitz', 'kit'],
+    uniIds: ['chemnitz', 'rptu'],
     interviewQs: [
       '부트로더와 애플리케이션 영역을 분리하는 이유는?',
       '플래시 쓰기 도중 전원이 차단되면 어떻게 대처하나요?',
@@ -67,7 +67,7 @@ export const PROJECTS_2: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '소프트웨어 아키텍처 다이어그램', '동작 데모 영상', '부팅 시간 최적화 리포트(선택)'],
     skills: ['Linux', 'SocketCAN', 'Qt/QML', 'systemd', 'C/C++', '(Yocto)'],
-    uniIds: ['tum', 'tub', 'fau', 'chemnitz'],
+    uniIds: ['chemnitz', 'dortmund'],
     interviewQs: [
       'SocketCAN은 무엇이며 왜 네트워크 스택으로 처리하나요?',
       '부팅 시간을 단축하는 방법에는 무엇이 있나요?',
@@ -103,7 +103,7 @@ export const PROJECTS_2: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '처리 파이프라인 다이어그램', '다양한 환경(밤/비) 결과 스크린샷', 'FPS 측정 리포트'],
     skills: ['C++/Python', 'OpenCV', '영상 처리', '칼만 필터', '실시간 최적화'],
-    uniIds: ['tum', 'tub', 'fau', 'kit'],
+    uniIds: ['dortmund', 'rptu'],
     interviewQs: [
       '차선 곡률은 어떻게 계산하나요?',
       '밤이나 비 오는 날 성능이 떨어지는 이유와 대책은?',
@@ -140,7 +140,7 @@ export const PROJECTS_2: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', 'Wireshark 캡처 분석 문서', 'SOME/IP 시퀀스 다이어그램', '데모 영상'],
     skills: ['C++', 'SOME/IP', '차량용 이더넷', 'Wireshark', 'Linux'],
-    uniIds: ['tum', 'rwth', 'fau', 'tub'],
+    uniIds: ['rptu', 'dortmund'],
     interviewQs: [
       'SOME/IP가 CAN 기반 통신과 근본적으로 다른 점은?',
       '서비스 디스커버리(SD)의 역할은 무엇인가요?',
@@ -176,7 +176,7 @@ export const PROJECTS_2: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '제어 응답 비교 그래프', '튜닝 과정 기록', '데모 영상'],
     skills: ['C', 'PID 제어', '엔코더 측정', 'PWM', '시스템 모델링'],
-    uniIds: ['rwth', 'kit', 'stuttgart', 'braunschweig'],
+    uniIds: ['rptu', 'dortmund', 'chemnitz'],
     interviewQs: [
       'PID 게인은 어떤 순서로 튜닝하나요?',
       '적분 와인드업은 언제 발생하고 어떻게 해결하나요?',
@@ -210,7 +210,7 @@ export const PROJECTS_2: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '상태 다이어그램 + 전이 테이블', '테스트 결과 표', '데모 영상'],
     skills: ['C', 'HAL/GPIO', '상태머신', '인터럽트', '타이머'],
-    uniIds: ['chemnitz', 'freiburg', 'kit'],
+    uniIds: ['chemnitz', 'dortmund'],
     interviewQs: [
       '버튼 디바운싱은 왜 필요하고 어떤 방법이 있나요?',
       '상태 전이 테이블(State Transition Table)이란 무엇인가요?',

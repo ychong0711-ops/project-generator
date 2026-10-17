@@ -65,7 +65,7 @@ export function scoreDocument(text: string): DocScores {
   const words = text.trim().split(/\s+/).length;
   const numbers = (text.match(/\d+(?:\.\d+)?(?:%|ms|mA|V|m|us|kHz)?/g) ?? []).length;
   const projects = (text.match(/DE-EMB-\d{4}/g) ?? []).length;
-  const uniMentions = (text.match(/Aachen|Munich|München|Berlin|Karlsruhe|Stuttgart|Erlangen|Darmstadt|Chemnitz|Freiburg|Braunschweig|Wolfsburg/g) ?? []).length;
+  const uniMentions = (text.match(/Kaiserslautern|Landau|Chemnitz|Dortmund/g) ?? []).length;
   const specificRatio = Math.round((numbers + projects + uniMentions) / Math.max(words, 1) * 100);
   const total = Math.min(100, Math.round(specificRatio * 12 + Math.min(words / 650, 1) * 40));
   const verdict =

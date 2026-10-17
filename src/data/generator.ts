@@ -8,7 +8,7 @@ import { UNIVERSITIES } from './universities';
  * ============================================================ */
 
 export interface SopInput {
-  uniId: string; // universities.ts의 University.id (예: 'rwth')
+  uniId: string; // universities.ts의 University.id (예: 'rptu')
   projectIds: string[]; // projects.ts의 Project.id 목록
   applicantName?: string; // 미지정 시 '[이름]' 플레이스홀더
 }
@@ -19,7 +19,7 @@ export interface SopSection {
 }
 
 export interface SopResult {
-  title: string; // 예: 'Motivationsschreiben — RWTH Aachen University'
+  title: string; // 예: 'Motivationsschreiben — RPTU Kaiserslautern-Landau'
   sections: SopSection[]; // 서론 / 왜 이 대학인가 / 프로젝트 경험 / 결론 4개 섹션
   plainText: string; // sections를 하나의 텍스트로 합친 전체 본문 (복사용)
   matchedFocus: string[]; // 대학 focus 키워드 중 프로젝트 skills와 교차된 것

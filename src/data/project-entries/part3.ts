@@ -29,7 +29,7 @@ export const PROJECTS_3: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', 'AUTOSAR 계층 다이어그램', '코드 생성기 + 설정 예제', 'SWC 재사용 데모 영상'],
     skills: ['C', 'AUTOSAR Classic', '소프트웨어 아키텍처', 'Python', '코드 생성기'],
-    uniIds: ['rwth', 'tum', 'chemnitz', 'kit'],
+    uniIds: ['rptu', 'chemnitz'],
     interviewQs: [
       'AUTOSAR에서 RTE의 역할은 무엇인가요?',
       'ASW(애플리케이션)와 BSW(베이직)를 분리하는 이유는?',
@@ -65,7 +65,7 @@ export const PROJECTS_3: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리', '전류 측정 그래프(슬립 유/무 비교)', '전력 예산 계산표', '데모 영상'],
     skills: ['C', 'RF 통신(2.4GHz)', '저전력 설계', '센서 인터페이스', '전류 측정'],
-    uniIds: ['chemnitz', 'freiburg', 'tub'],
+    uniIds: ['chemnitz', 'rptu'],
     interviewQs: [
       '저전력 설계를 위해 어떤 기법들을 사용했나요?',
       '무선 통신의 패킷 손실을 어떻게 처리하나요?',
@@ -102,7 +102,7 @@ export const PROJECTS_3: Project[] = [
     ],
     deliverables: ['FMEA 분석 엑셀/마크다운', 'Fault Injection 테스트 결과 리포트', '안전 메커니즘 소스코드', '기능안전 검증 영상'],
     skills: ['ISO 26262', 'FMEA', 'Fault Injection', 'Watchdog Timer', 'C', 'Autosar', 'Embedded Safety'],
-    uniIds: ['tum', 'rwth', 'kit', 'tub', 'stuttgart'],
+    uniIds: ['dortmund', 'chemnitz'],
     interviewQs: [
       '기능안전에서 ASIL 레벨은 어떻게 결정하며, 프로젝트에서 어떤 ASIL을 목표로 했나요?',
       'FMEA에서 RPN(Risk Priority Number)은 어떻게 계산하며, 어떤 기준으로 개선 우선순위를 정하나요?',
@@ -140,7 +140,7 @@ export const PROJECTS_3: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리 (ara::com / ara::exec C++ 소스)', 'Zonal E/E 아키텍처 다이어그램', 'SOME/IP-SD Wireshark 캡처 리포트', '서비스 동적 등록 및 모드 전환 데모 영상'],
     skills: ['C++14/17', 'AUTOSAR Adaptive', 'SOME/IP', 'Linux POSIX', 'SOA (서비스 지향)', 'Docker', 'Wireshark'],
-    uniIds: ['tum', 'rwth', 'stuttgart', 'kit', 'fau'],
+    uniIds: ['dortmund', 'rptu'],
     interviewQs: [
       'Classic AUTOSAR와 Adaptive AUTOSAR의 가장 결정적인 아키텍처 차이는 무엇인가요?',
       'Zonal 아키텍처에서 SOME/IP 서비스 디스커버리가 필요한 이유는 무엇인가요?',
@@ -178,13 +178,13 @@ export const PROJECTS_3: Project[] = [
     ],
     deliverables: ['GitHub 리포지토리 (SecOC + CAN IDS 소스코드)', 'TARA 위협 분석서 (Markdown/Excel)', 'SecOC 통신 시퀀스 및 패킷 구조도', '사이버 공격(Replay/DoS) 방어 시연 영상'],
     skills: ['ISO/SAE 21434', 'AUTOSAR SecOC', 'AES-128 CMAC', 'CAN Bus', 'TARA', '침입 탐지(IDS)', '암호학'],
-    uniIds: ['tum', 'darmstadt', 'fau', 'kit', 'rwth'],
+    uniIds: ['dortmund', 'chemnitz'],
     interviewQs: [
       'AUTOSAR SecOC에서 Replay Attack을 방어하기 위해 Freshness Value를 어떻게 관리하나요?',
       'CAN 프레임의 8바이트 페이로드 한계에서 MAC(인증태그)를 전송하는 Truncation 기법은 무엇인가요?',
       '기능안전(ISO 26262)과 사이버보안(ISO 21434)의 목표 충돌 시 어떻게 조율해야 하나요?',
       '차량용 IDS에서 Rule-based 탐지와 Anomaly-based 탐지의 장단점은 무엇인가요?',
     ],
-    tip: 'TU Darmstadt의 CYSEC 연구소나 TUM의 사이버보안 랩 등 독일 유수 대학 연구실에서 매우 선호하는 주제입니다. TARA 위협 분석서와 공격 방어 로그를 깔끔한 표로 정리하면 면접관에게 강한 인상을 남길 수 있습니다.',
+    tip: 'TU Dortmund의 IRF(로봇공학연구소)나 TU Chemnitz의 임베디드·마이크로시스템 연구실 등 독일 유수 대학 연구실에서 매우 선호하는 주제입니다. TARA 위협 분석서와 공격 방어 로그를 깔끔한 표로 정리하면 면접관에게 강한 인상을 남길 수 있습니다.',
   },
 ];

@@ -155,7 +155,7 @@ const ADVICE: Record<string, AdviceSet> = {
   },
   german: {
     weak: [
-      '독일어가 없으면 영어 프로그램으로 범위를 한정하되, TUM·TU Berlin·Chemnitz 등 영어 프로그램을 우선 조사하세요.',
+      '독일어가 없으면 영어 프로그램으로 범위를 한정하되, TU Chemnitz·TU Dortmund·RPTU CVT 등 영어 프로그램을 우선 조사하세요.',
       'A2 수준만이라도 시작하면 비자·정착·인턴 경쟁력이 크게 올라갑니다.',
     ],
     medium: ['TestDaF 4×4까지 가면 독일어 프로그램도 문이 열립니다. 지원 마감 기준 D-15개월에 시작하는 것이 안전합니다.'],
